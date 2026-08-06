@@ -1,0 +1,71 @@
+{
+  "manifest_version": 3,
+  "name": "Skillgrowth - Web to Skill",
+  "version": "2.0.0",
+  "description": "Cattura pagine web, video YouTube e thread social e salvali come Skill AI direttamente nei tuoi bucket Skillgrowth.",
+  "icons": {
+    "16": "skillgrowth.png",
+    "48": "skillgrowth.png",
+    "128": "skillgrowth.png"
+  },
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "downloads",
+    "storage",
+    "sidePanel",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://skillgrowth.app/*",
+    "http://localhost:3000/*",
+    "https://www.youtube.com/*"
+  ],
+  "externally_connectable": {
+    "matches": [
+      "https://skillgrowth.app/*",
+      "http://localhost:3000/*"
+    ]
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://skillgrowth.app/*",
+        "http://localhost:3000/*",
+        "http://localhost:3001/*"
+      ],
+      "js": ["content-auth.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["theme.js", "content.js"],
+      "run_at": "document_idle",
+      "exclude_matches": [
+        "https://skillgrowth.app/*",
+        "http://localhost:3000/*"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["skillgrowth.png"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_title": "Skillgrowth",
+    "default_icon": {
+      "16": "skillgrowth.png",
+      "48": "skillgrowth.png",
+      "128": "skillgrowth.png"
+    }
+  }
+}

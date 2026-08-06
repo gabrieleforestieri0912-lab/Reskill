@@ -1,0 +1,36 @@
+/* Skillgrowth design tokens — allineati a app/globals.css */
+:root {
+  --color-white: oklch(98.5% .002 260);
+  --color-cyan: oklch(72% .06 240);
+  --color-dark: oklch(13% .006 260);
+  --color-gray: oklch(60% .01 260);
+  --color-black: oklch(0% 0 0);
+  --color-nav: oklch(8% 0.004 260);
+
+  --background: var(--color-dark);
+  --foreground: var(--color-gray);
+  --color-muted-cyan: oklch(62% .05 240);
+  --color-muted-cyan-dark: oklch(20% .01 240);
+  --color-muted-cyan-light: oklch(78% .05 240);
+  --color-surface: oklch(16% .005 260);
+  --color-surface-raised: oklch(19% .006 260);
+  --color-border: oklch(72% .06 240 / 0.12);
+
+  --cyan-06: oklch(72% .06 240 / 0.06);
+  --cyan-08: oklch(72% .06 240 / 0.08);
+  --cyan-10: oklch(72% .06 240 / 0.1);
+  --cyan-12: oklch(72% .06 240 / 0.12);
+  --cyan-15: oklch(72% .06 240 / 0.15);
+  --cyan-18: oklch(72% .06 240 / 0.18);
+  --cyan-20: oklch(72% .06 240 / 0.2);
+  --cyan-25: oklch(72% .06 240 / 0.25);
+  --cyan-30: oklch(72% .06 240 / 0.3);
+  --cyan-35: oklch(72% .06 240 / 0.35);
+  --cyan-40: oklch(72% .06 240 / 0.4);
+
+  --white-06: oklch(98.5% .002 260 / 0.06);
+  --white-10: oklch(98.5% .002 260 / 0.1);
+
+  /* Per SVG inline / data URI (chevron select) */
+  --color-cyan-hex: #88a9b5;
+}

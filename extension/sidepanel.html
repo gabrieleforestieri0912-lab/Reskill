@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Skillgrowth</title>
+  <link rel="stylesheet" href="theme.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--background);
+      color: var(--foreground);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      height: 100vh;
+      overflow: hidden;
+      font-size: 13px;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: oklch(13% .006 260); }
+    ::-webkit-scrollbar-thumb { background: var(--color-muted-cyan); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--color-muted-cyan-light); }
+
+    /* ─── Layout ─── */
+    .app-layout {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* ─── Sidebar Icon Nav ─── */
+    .sidebar {
+      width: 48px;
+      background: var(--color-nav);
+      border-right: 1px solid var(--cyan-10);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 0;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      color: oklch(60% .01 260);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      transition: all 0.15s;
+      position: relative;
+    }
+
+    .nav-btn:hover {
+      background: oklch(72% .06 240 / 0.1);
+      color: oklch(72% .06 240);
+    }
+
+    .nav-btn.active {
+      background: oklch(72% .06 240 / 0.15);
+      color: oklch(72% .06 240);
+    }
+
+    .nav-btn.active::before {
+      content: '';
+      position: absolute;
+      left: -8px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 18px;
+      background: oklch(72% .06 240);
+    }
+
+    .sidebar-bottom {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      position: relative;
+    }
+
+    #authenticated-ui {
+      display: none;
+      flex: 1;
+      overflow: hidden;
+    }
+    #authenticated-ui.active {
+      display: flex;
+    }
+
+    /* ─── Main Content Area ─── */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    #auth-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .content-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid oklch(72% .06 240 / 0.1);
+      flex-shrink: 0;
+    }
+
+    .content-header h2 {
+      font-size: 14px;
+      font-weight: 700;
+      color: oklch(98.5% 0.002 260);
+      letter-spacing: -0.3px;
+    }
+
+    .content-header .sub {
+      font-size: 10px;
+      color: oklch(60% .01 260);
+    }
+
+    .content-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ─── Sections ─── */
+    .section-panel {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+    }
+    .section-panel.active {
+      display: flex;
+    }
+
+    /* ─── Auth Steps (same as before) ─── */
+    .step {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      padding: 16px;
+    }
+.step.active { display: flex; }
+
+    .login-card {
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .login-title { font-size: 15px; font-weight: 700; color: oklch(98.5% 0.002 260); }
+    .login-desc { font-size: 11px; color: oklch(60% .01 260); line-height: 1.5; }
+
+    .input {
+      width: 100%;
+      padding: 9px 12px;
+      background: var(--color-surface);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+
+      color: oklch(98.5% 0.002 260);
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+    }
+    .input:focus { border-color: oklch(72% .06 240); }
+    .input::placeholder { color: oklch(60% 0.01 260); }
+
+.code-inputs {
+       display: flex;
+       gap: 6px;
+       justify-content: center;
+     }
+     .code-digit {
+       width: 38px;
+       height: 44px;
+       padding: 0;
+       background: var(--color-surface);
+       border: 1px solid oklch(72% .06 240 / 0.2);
+       color: oklch(98.5% 0.002 260);
+       font-size: 18px;
+       font-family: 'JetBrains Mono', ui-monospace, monospace;
+       text-align: center;
+       outline: none;
+       transition: all 0.15s;
+     }
+     .code-digit:focus {
+       border-color: oklch(72% .06 240);
+       background: var(--color-surface-raised);
+     }
+     .code-digit::-webkit-outer-spin-button,
+     .code-digit::-webkit-inner-spin-button {
+       -webkit-appearance: none;
+       margin: 0;
+     }
+     .code-timer {
+       font-size: 10px;
+       color: oklch(60% .01 260);
+       text-align: center;
+       margin-top: 2px;
+     }
+     #timer-display {
+       color: oklch(72% .06 240);
+       font-weight: 600;
+     }
+
+     .btn {
+       width: 100%;
+       padding: 9px 14px;
+       background: var(--color-dark);
+       border: 1px solid oklch(72% .06 240 / 0.2);
+       color: oklch(98.5% 0.002 260);
+       font-size: 12px;
+       font-weight: 600;
+       font-family: inherit;
+       cursor: pointer;
+       transition: background 0.15s ease;
+     }
+
+     .btn:hover {
+       background: var(--color-cyan);
+     }
+
+     .btn-primary {
+       background: var(--color-cyan);
+       border: 1px solid var(--color-cyan);
+       color: var(--color-black);
+     }
+
+     .btn-primary:hover { filter: brightness(1.1); }
+      .btn:active { transform: scale(0.98); }
+      .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+      #verify-btn { background: var(--color-dark); color: oklch(98.5% 0.002 260); }
+      #verify-btn:hover { background: var(--color-cyan); color: oklch(98.5% 0.002 260); }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid oklch(72% .06 240 / 0.12);
+      color: oklch(60% .01 260);
+    }
+
+    .btn-ghost:hover { background: oklch(72% .06 240 / 0.06); color: oklch(60% .01 260); }
+
+    .btn-site {
+      background: transparent;
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      color: oklch(72% .06 240);
+      font-size: 11px;
+      padding: 7px 12px;
+    }
+
+    .btn-site:hover { background: oklch(72% .06 240 / 0.08); }
+
+    .error {
+      font-size: 10px;
+      color: oklch(72% .06 240);
+      display: none;
+      padding: 6px 8px;
+      background: oklch(72% .06 240 / 0.08);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+    }
+    .error.show { display: block; }
+
+    /* ─── Shared Components ─── */
+    .section-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: oklch(60% .01 260);
+      margin-bottom: 4px;
+    }
+
+    .status-text {
+      font-size: 10px;
+      color: oklch(60% .01 260);
+      min-height: 14px;
+      text-align: center;
+    }
+    .status-text.success { color: oklch(72% .06 240); }
+    .status-text.error-msg { color: oklch(72% .06 240); }
+
+    .divider {
+      height: 1px;
+      background: oklch(72% .06 240 / 0.08);
+      margin: 2px 0;
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 10px 12px;
+      background: oklch(13% .006 260);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+      color: oklch(72% .06 240);
+
+      font-size: 11px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .action-btn:hover {
+      background: oklch(13% 0.006 260);
+      border-color: oklch(72% .06 240 / 0.3);
+      color: oklch(72% .06 240);
+    }
+    .action-btn:active { transform: scale(0.98); }
+    .action-icon { font-size: 14px; flex-shrink: 0; }
+
+    .btn-dashboard {
+      background: var(--color-surface);
+      border-color: oklch(72% .06 240 / 0.25);
+      color: oklch(72% .06 240);
+    }
+    .btn-dashboard:hover { background: var(--color-surface-raised); }
+
+    .btn-logout {
+      background: transparent;
+      border: 1px solid oklch(72% .06 240 / 0.15);
+      color: oklch(72% .06 240);
+      font-size: 10px;
+      padding: 7px 12px;
+    }
+    .btn-logout:hover { background: oklch(72% .06 240 / 0.06); border-color: oklch(72% .06 240 / 0.3); }
+
+    /* ─── MCP Banner ─── */
+    .mcp-banner {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+
+      position: relative;
+      overflow: hidden;
+    }
+    .mcp-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, oklch(72% .06 240 / 0.4), transparent);
+    }
+    .mcp-banner.visible { display: flex; }
+    .mcp-banner-close {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 20px; height: 20px;
+      border: none;
+      background: transparent;
+      color: oklch(60% .01 260);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      transition: color 0.15s;
+    }
+    .mcp-banner-close:hover { color: oklch(72% .06 240); }
+    .mcp-banner-header { display: flex; align-items: center; gap: 6px; }
+    .mcp-banner-dot {
+      width: 6px; height: 6px;
+      background: oklch(72% .06 240);
+
+      box-shadow: 0 0 5px oklch(72% .06 240 / 0.7);
+      animation: pulse-dot 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; box-shadow: 0 0 5px oklch(72% .06 240 / 0.7); }
+      50% { opacity: 0.4; box-shadow: 0 0 2px oklch(72% .06 240 / 0.3); }
+    }
+    .mcp-banner-title { font-size: 11px; font-weight: 700; color: oklch(72% .06 240); flex: 1; }
+    .mcp-banner-desc { font-size: 10px; color: oklch(60% .01 260); line-height: 1.5; }
+    .mcp-input-row { display: flex; gap: 6px; align-items: center; }
+    .mcp-input {
+      flex: 1;
+      padding: 6px 8px;
+      background: var(--color-surface);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+      color: oklch(72% .06 240);
+      font-size: 10px;
+      font-family: 'Courier New', monospace;
+      outline: none;
+    }
+    .mcp-input:focus { border-color: oklch(72% .06 240); color: oklch(72% .06 240); }
+    .mcp-input::placeholder { color: oklch(60% .01 260); }
+    .mcp-save-btn {
+      background: oklch(72% .06 240 / 0.15);
+      border: 1px solid oklch(72% .06 240 / 0.25);
+      color: oklch(72% .06 240);
+
+      cursor: pointer;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .mcp-save-btn:hover { background: oklch(72% .06 240 / 0.3); color: oklch(72% .06 240); }
+    .mcp-docs-link {
+      font-size: 10px;
+      color: oklch(60% .01 260);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: color 0.15s;
+    }
+    .mcp-docs-link:hover { color: oklch(72% .06 240); }
+
+    /* ─── Feed: Resource Cards ─── */
+    .feed-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .resource-card {
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.12);
+    }
+
+    .resource-header {
+      font-size: 11px;
+      font-weight: 600;
+      color: oklch(98.5% 0.002 260);
+      padding: 10px 12px 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .resource-body {
+      padding: 0 12px 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .resource-icon {
+      width: 32px;
+      height: 32px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .res-icon-text { font-size: 9px; font-weight: 700; line-height: 1; }
+    .resource-icon .res-icon-text { color: inherit; }
+    .resource-icon.youtube { background: rgba(255,0,0,0.15); color: oklch(72% 0.06 240); }
+    .resource-icon.webpage { background: oklch(72% .06 240 / 0.15); color: oklch(72% .06 240); }
+    .resource-icon.twitter { background: rgba(29,161,242,0.15); color: oklch(72% 0.06 240); }
+    .resource-icon.reddit { background: rgba(255,69,0,0.15); color: oklch(72% 0.06 240); }
+    .resource-icon.pdf { background: rgba(245,158,11,0.15); color: oklch(72% 0.06 240); }
+
+    .resource-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .resource-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .resource-meta {
+      font-size: 9px;
+      color: oklch(60% .01 260);
+      margin-top: 2px;
+    }
+
+    .resource-download-btn {
+      background: oklch(72% .06 240 / 0.1);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+      color: oklch(72% .06 240);
+
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 10px;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .resource-download-btn:hover {
+      background: oklch(72% .06 240 / 0.2);
+      color: oklch(72% .06 240);
+    }
+
+    .feed-empty {
+      text-align: center;
+      padding: 30px 16px;
+      color: oklch(60% .01 260);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+    .feed-empty .big-icon {
+      font-size: 32px;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* ─── Feed Toolbar: Search + Folders ─── */
+    .feed-toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .feed-search-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .feed-search-icon {
+      position: absolute;
+      left: 10px;
+      color: oklch(60% .01 260);
+      pointer-events: none;
+    }
+    .feed-search-input {
+      width: 100%;
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.12);
+      color: oklch(72% .06 240);
+      font-family: inherit;
+      font-size: 11px;
+      padding: 8px 10px 8px 30px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .feed-search-input:focus {
+      border-color: oklch(72% .06 240 / 0.35);
+    }
+    .feed-search-input::placeholder {
+      color: oklch(60% .01 260);
+    }
+    .feed-folders {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .folder-tab {
+      background: transparent;
+      border: 1px solid oklch(72% .06 240 / 0.1);
+      color: oklch(60% .01 260);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 10px;
+      padding: 4px 10px;
+      transition: all 0.15s;
+    }
+    .folder-tab:hover {
+      border-color: oklch(72% .06 240 / 0.3);
+      color: oklch(72% .06 240);
+    }
+    .folder-tab.active {
+      background: oklch(72% .06 240 / 0.15);
+      border-color: oklch(72% .06 240 / 0.25);
+      color: oklch(72% .06 240);
+    }
+    .folder-add-btn {
+      background: transparent;
+      border: 1px dashed oklch(72% .06 240 / 0.15);
+      color: oklch(60% .01 260);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 10px;
+      padding: 4px 10px;
+      transition: all 0.15s;
+    }
+    .folder-add-btn:hover {
+      border-color: oklch(72% .06 240 / 0.3);
+      color: oklch(72% .06 240);
+    }
+    .folder-create-row {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+    .folder-create-input {
+      flex: 1;
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      color: oklch(72% .06 240);
+      font-family: inherit;
+      font-size: 11px;
+      padding: 6px 8px;
+      outline: none;
+    }
+    .folder-create-input:focus {
+      border-color: oklch(72% .06 240 / 0.4);
+    }
+    .folder-create-btn {
+      background: oklch(72% .06 240 / 0.15);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      color: oklch(72% .06 240);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 10px;
+      padding: 6px 12px;
+      transition: all 0.15s;
+    }
+    .folder-create-btn:hover {
+      background: oklch(72% .06 240 / 0.25);
+    }
+    .folder-create-cancel {
+      background: transparent;
+      border: none;
+      color: oklch(60% .01 260);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 10px;
+      padding: 6px 8px;
+    }
+    .folder-create-cancel:hover {
+      color: oklch(72% .06 240);
+    }
+
+    .resource-card .folder-assign-btn {
+      background: transparent;
+      border: none;
+      color: oklch(60% .01 260);
+      cursor: pointer;
+      padding: 2px;
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.15s, color 0.15s;
+    }
+    .resource-card:hover .folder-assign-btn {
+      opacity: 1;
+    }
+    .resource-card .folder-assign-btn:hover {
+      color: oklch(72% .06 240);
+    }
+
+    /* ─── Folder assignment popup ─── */
+    .folder-popup {
+      position: fixed;
+      background: oklch(13% .006 260);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      padding: 4px 0;
+      min-width: 140px;
+      z-index: 1000;
+    }
+    .folder-popup-item {
+      display: block;
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: oklch(72% .06 240);
+      font-family: inherit;
+      font-size: 11px;
+      padding: 6px 14px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .folder-popup-item:hover {
+      background: oklch(72% .06 240 / 0.1);
+    }
+    .folder-popup-item.active-folder {
+      color: oklch(72% .06 240);
+    }
+    .folder-popup-divider {
+      height: 1px;
+      background: oklch(72% .06 240 / 0.1);
+      margin: 4px 0;
+    }
+
+    /* ─── Link to Markdown ─── */
+    .convert-card {
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .convert-input-row {
+      display: flex;
+      gap: 6px;
+    }
+    .convert-input-row input {
+      flex: 1;
+    }
+
+    .convert-output {
+      display: none;
+      background: var(--color-surface);
+      border: 1px solid oklch(72% .06 240 / 0.12);
+
+      padding: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 10px;
+      color: oklch(72% .06 240);
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+    .convert-output.visible { display: block; }
+
+    .convert-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .convert-actions .btn { font-size: 11px; }
+
+    .convert-spinner {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      color: oklch(60% .01 260);
+      font-size: 11px;
+    }
+    .convert-spinner.active { display: flex; }
+    .convert-spinner .mini-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid oklch(72% .06 240 / 0.2);
+      border-top-color: oklch(72% .06 240);
+
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* ─── Usage / Credits ─── */
+    .usage-card {
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+
+      padding: 16px;
+    }
+
+    .usage-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid oklch(72% .06 240 / 0.06);
+    }
+    .usage-row:last-child { border-bottom: none; }
+
+    .usage-label {
+      font-size: 11px;
+      color: oklch(60% .01 260);
+    }
+    .usage-value {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--color-white);
+    }
+
+    .plan-card {
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .plan-card-badge {
+      font-size: 20px;
+    }
+    .plan-card-info {
+      flex: 1;
+    }
+    .plan-card-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: oklch(98.5% 0.002 260);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .plan-card-desc {
+      font-size: 10px;
+      color: oklch(60% .01 260);
+      margin-top: 2px;
+    }
+
+    /* ─── Credit Progress Bar ─── */
+    .credit-bar-wrap {
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+
+      padding: 14px;
+    }
+    .credit-bar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+    .credit-bar-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-white);
+    }
+    .credit-bar-numbers {
+      font-size: 11px;
+      color: oklch(60% .01 260);
+    }
+    .credit-bar-numbers strong {
+      color: oklch(72% .06 240);
+    }
+    .credit-bar-track {
+      height: 6px;
+      background: var(--color-surface);
+
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .credit-bar-fill {
+      height: 100%;
+
+      transition: width 0.4s ease;
+    }
+    .credit-bar-fill.low { background: var(--color-cyan); }
+    .credit-bar-fill.medium { background: var(--color-cyan); }
+    .credit-bar-fill.high { background: var(--color-cyan); }
+
+    .credit-breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px 12px;
+      margin-top: 4px;
+    }
+    .credit-breakdown-item {
+      font-size: 9px;
+      color: oklch(60% .01 260);
+    }
+    .credit-breakdown-item strong {
+      color: oklch(72% .06 240);
+    }
+
+    /* ─── Auto-Recharge ─── */
+    .recharge-card {
+      background: var(--color-surface);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      padding: 14px;
+    }
+    .recharge-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: oklch(72% .06 240);
+      margin-bottom: 4px;
+    }
+    .recharge-desc {
+      font-size: 10px;
+      color: oklch(60% .01 260);
+      line-height: 1.4;
+      margin-bottom: 10px;
+    }
+    .recharge-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .recharge-row select {
+      flex: 1;
+      padding: 8px 10px;
+      background: var(--color-surface);
+      border: 1px solid oklch(72% .06 240 / 0.18);
+
+      color: oklch(72% .06 240);
+      font-size: 11px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2388a9b5'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 14px;
+      padding-right: 28px;
+    }
+    .recharge-row select:focus { border-color: oklch(72% .06 240); }
+    .recharge-btn {
+      background: var(--color-surface);
+      border: 1px solid oklch(72% .06 240 / 0.35);
+      color: oklch(72% .06 240);
+      cursor: pointer;
+      padding: 8px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .recharge-btn:hover { background: var(--color-surface-raised); }
+    .recharge-btn:active { transform: scale(0.98); }
+
+    /* ─── User Card ─── */
+    .user-card {
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      background: var(--color-surface-raised);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: oklch(72% .06 240);
+      flex-shrink: 0;
+    }
+    .user-details { flex: 1; min-width: 0; }
+    .user-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: oklch(98.5% 0.002 260);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .plan-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+    .plan-free { background: var(--cyan-15); color: var(--color-cyan); border: 1px solid var(--cyan-20); }
+    .plan-starter { background: var(--cyan-15); color: var(--color-cyan); border: 1px solid var(--cyan-20); }
+    .plan-pro { background: var(--cyan-25); color: var(--color-cyan); border: 1px solid var(--cyan-30); }
+    .plan-business { background: var(--cyan-15); color: var(--color-cyan); border: 1px solid var(--cyan-20); }
+    .plan-enterprise { background: var(--cyan-25); color: var(--color-cyan); border: 1px solid var(--cyan-30); }
+
+    .conn-logout-btn {
+      background: transparent;
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      color: oklch(72% .06 240);
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .conn-logout-btn:hover { background: oklch(72% .06 240 / 0.08); border-color: oklch(72% .06 240 / 0.4); }
+
+    .bucket-select-wrap { display: flex; flex-direction: column; gap: 4px; }
+    select.sg-select {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--color-surface);
+      border: 1px solid oklch(72% .06 240 / 0.18);
+      color: oklch(72% .06 240);
+      font-size: 11px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%2388a9b5'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 14px;
+      padding-right: 28px;
+    }
+    select.sg-select:focus { border-color: oklch(72% .06 240); }
+
+    /* ─── Connection Cards ─── */
+    .conn-card {
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.1);
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .conn-card + .conn-card {
+      border-top: none;
+    }
+
+    .conn-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .conn-icon.codex { color: oklch(72% .06 240); }
+    .conn-icon.claude { color: oklch(72% 0.06 240); }
+    .conn-icon.cursor { color: oklch(72% 0.06 240); }
+    .conn-icon.mcp { color: oklch(72% .06 240); }
+
+    .conn-info { flex: 1; min-width: 0; }
+    .conn-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--color-white);
+    }
+    .conn-desc {
+      font-size: 9px;
+      color: oklch(60% .01 260);
+      margin-top: 1px;
+    }
+
+    .conn-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 0;
+    }
+    .status-dot.active { background: oklch(72% .06 240); box-shadow: 0 0 4px oklch(72% .06 240 / 0.6); }
+    .status-dot.inactive { background: oklch(60% .01 260); }
+    .status-label {
+      font-size: 9px;
+      color: oklch(60% .01 260);
+    }
+
+    .conn-copy-btn {
+      background: oklch(72% .06 240 / 0.12);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      color: oklch(72% .06 240);
+      font-family: inherit;
+      font-size: 9px;
+      padding: 4px 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .conn-copy-btn:hover { background: oklch(72% .06 240 / 0.25); }
+    .conn-copy-btn.copied { background: oklch(72% .06 240 / 0.3); }
+
+    /* ─── Account Dropdown ─── */
+    .account-dropdown {
+      display: none;
+      position: absolute;
+      left: 52px;
+      bottom: 0;
+      width: 220px;
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      padding: 10px;
+      z-index: 100;
+      box-shadow: 4px 4px 20px oklch(13% 0.006 260);
+    }
+    .account-dropdown.open { display: block; }
+    .acct-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .acct-avatar {
+      width: 30px;
+      height: 30px;
+      background: var(--color-surface-raised);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: oklch(72% .06 240);
+      flex-shrink: 0;
+    }
+    .acct-info { flex: 1; min-width: 0; }
+    .acct-name {
+      font-size: 11px;
+      font-weight: 600;
+      color: oklch(98.5% 0.002 260);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .acct-plan {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: oklch(72% .06 240);
+      margin-top: 1px;
+    }
+    .acct-credits {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      margin-bottom: 4px;
+      border-bottom: 1px solid oklch(72% .06 240 / 0.08);
+    }
+    .acct-credits-label { font-size: 10px; color: oklch(60% .01 260); }
+    .acct-credits-value { font-size: 10px; font-weight: 700; color: oklch(72% .06 240); }
+    .acct-divider { height: 1px; background: oklch(72% .06 240 / 0.08); margin: 4px 0; }
+    .acct-menu-item {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: oklch(72% .06 240);
+      padding: 7px 4px;
+      font-size: 11px;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .acct-menu-item:hover { background: oklch(72% .06 240 / 0.08); color: oklch(72% .06 240); }
+    .acct-menu-item svg { flex-shrink: 0; }
+    .acct-logout { color: oklch(72% .06 240); }
+    .acct-logout:hover { background: oklch(72% .06 240 / 0.06); color: oklch(72% .06 240); }
+
+    /* ─── Tour ─── */
+    .tour-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: oklch(0% 0 0 / 0.6);
+      z-index: 200;
+    }
+    .tour-overlay.active { display: block; }
+
+    .tour-popup {
+      display: none;
+      position: fixed;
+      z-index: 210;
+      background: var(--color-surface-raised);
+      border: 1px solid oklch(72% .06 240 / 0.3);
+      padding: 16px;
+      width: 260px;
+      box-shadow: 0 8px 32px oklch(0% 0 0 / 0.5);
+    }
+    .tour-popup.active { display: block; }
+
+    .tour-step-num {
+      font-size: 9px;
+      font-weight: 700;
+      color: oklch(72% .06 240);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+    .tour-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: oklch(98.5% 0.002 260);
+      margin-bottom: 6px;
+    }
+    .tour-desc {
+      font-size: 10px;
+      color: oklch(60% .01 260);
+      line-height: 1.5;
+      margin-bottom: 14px;
+    }
+    .tour-actions {
+      display: flex;
+      gap: 6px;
+    }
+    .tour-btn {
+      flex: 1;
+      padding: 7px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      background: transparent;
+      color: oklch(72% .06 240);
+    }
+    .tour-btn:hover { background: oklch(72% .06 240 / 0.1); color: oklch(72% .06 240); }
+    .tour-btn-next { background: oklch(72% .06 240 / 0.15); border-color: oklch(72% .06 240 / 0.35); }
+    .tour-btn-next:hover { background: oklch(72% .06 240 / 0.25); }
+
+    .tour-dots {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .tour-dot {
+      width: 5px;
+      height: 5px;
+      background: oklch(60% .01 260 / 0.3);
+    }
+    .tour-dot.active { background: oklch(72% .06 240); }
+
+    /* Highlight per l'elemento attivo del tour */
+    .tour-highlight {
+      outline: 2px solid oklch(72% .06 240);
+      outline-offset: 2px;
+      position: relative;
+      z-index: 205;
+    }
+
+    .settings-panel {
+      display: none;
+      padding: 10px;
+      background: var(--color-surface);
+      border: 1px solid oklch(72% .06 240 / 0.12);
+      gap: 6px;
+      flex-direction: column;
+    }
+    .settings-panel.open { display: flex; }
+    .settings-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .settings-row input {
+      flex: 1;
+      padding: 6px 8px;
+      background: oklch(13% .006 260);
+      border: 1px solid oklch(72% .06 240 / 0.15);
+      color: oklch(72% .06 240);
+      font-size: 10px;
+      font-family: 'Courier New', monospace;
+      outline: none;
+    }
+    .settings-row input:focus { border-color: oklch(72% .06 240); color: oklch(98.5% 0.002 260); }
+    .settings-save-btn {
+      background: oklch(72% .06 240 / 0.15);
+      border: 1px solid oklch(72% .06 240 / 0.2);
+      color: oklch(72% .06 240);
+      cursor: pointer;
+      padding: 5px 10px;
+      font-size: 10px;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .settings-save-btn:hover { background: oklch(72% .06 240 / 0.25); color: oklch(72% .06 240); }
+  </style>
+</head>
+<body>
+
+<div class="app-layout" id="app">
+
+  <!-- ═══ UNAUTHENTICATED (auth screen) ═══ -->
+  <div id="auth-screen">
+
+    <!-- ─── Step 1: Email ─── -->
+    <div class="step active" id="step-email">
+      <div class="login-card">
+        <div>
+          <div class="login-title">Accedi all'estensione</div>
+          <div class="login-desc" style="margin-top:4px;">Inserisci la tua email per ricevere un codice di verifica</div>
+        </div>
+        <input type="email" class="input" id="email-input" placeholder="tua@email.com" autocomplete="off" />
+        <button class="btn" id="send-code-btn">Invia Codice</button>
+        <div class="error" id="email-error"></div>
+        <div class="status-text" id="email-status"></div>
+        <div class="divider"></div>
+        <button class="btn btn-site" id="login-on-site-btn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Accedi sul sito Skillgrowth
+        </button>
+      </div>
+    </div>
+
+    <!-- ─── Step 2: Code ─── -->
+    <div class="step" id="step-code">
+      <div class="login-card">
+        <div>
+          <div class="login-title">Inserisci il codice</div>
+          <div class="login-desc" id="code-subtitle" style="margin-top:4px;">Codice inviato a <span id="code-email-display"></span></div>
+        </div>
+        <div class="code-inputs" id="code-inputs">
+          <input type="text" class="code-digit" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input type="text" class="code-digit" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input type="text" class="code-digit" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input type="text" class="code-digit" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input type="text" class="code-digit" maxlength="1" inputmode="numeric" autocomplete="off" />
+          <input type="text" class="code-digit" maxlength="1" inputmode="numeric" autocomplete="off" />
+        </div>
+        <div class="code-timer" id="code-timer">Scade tra: <span id="timer-display">10:00</span></div>
+        <button class="btn btn-primary" id="verify-btn">Verifica ✓</button>
+        <button class="btn btn-ghost" id="back-btn">← Cambia email</button>
+        <div class="error" id="code-error"></div>
+        <div class="status-text" id="code-status"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══ AUTHENTICATED UI ═══ -->
+  <div id="authenticated-ui">
+
+    <!-- ═══ SIDEBAR ICON NAV ═══ -->
+    <nav class="sidebar" id="sidebar-nav">
+      
+      <button class="nav-btn active" data-section="feed" title="Feed">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </button>
+
+      <button class="nav-btn" data-section="usage" title="Usage">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </button>
+
+      <button class="nav-btn" data-section="connections" title="Connessioni">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </button>
+
+      <div class="sidebar-bottom" id="account-btn-wrap">
+        <button class="nav-btn" id="account-menu-btn" title="Account">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </button>
+
+        <!-- Account Dropdown Menu -->
+        <div class="account-dropdown" id="account-dropdown">
+          <div class="acct-header">
+            <div class="acct-avatar" id="acct-dropdown-avatar">S</div>
+            <div class="acct-info">
+              <div class="acct-name" id="acct-dropdown-name">Utente</div>
+              <div class="acct-plan" id="acct-dropdown-plan">FREE</div>
+            </div>
+          </div>
+          <div class="acct-credits">
+            <span class="acct-credits-label">Crediti</span>
+            <span class="acct-credits-value" id="acct-dropdown-credits">0 / 0</span>
+          </div>
+          <div class="acct-divider"></div>
+          <button class="acct-menu-item" id="acct-buy-credits">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Compra crediti
+          </button>
+          <button class="acct-menu-item" id="acct-how-to-use">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Come si usa
+          </button>
+          <div class="acct-divider"></div>
+          <button class="acct-menu-item acct-logout" id="acct-logout-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ═══ CONTENT ═══ -->
+    <div class="content">
+
+    <div class="section-panel active" id="section-feed">
+      <div class="content-header">
+        <h2>Feed</h2>
+        <span class="sub">Risorse salvate</span>
+      </div>
+      <div class="content-body">
+
+        <!-- MCP Banner -->
+        <div class="mcp-banner" id="mcp-banner">
+          <button class="mcp-banner-close" id="mcp-banner-close" title="Nascondi">✕</button>
+          <div class="mcp-banner-header">
+            <div class="mcp-banner-dot"></div>
+            <div class="mcp-banner-title">Configura il server MCP</div>
+          </div>
+          <div class="mcp-banner-desc">Connetti Skillgrowth al tuo client AI (Claude, Cursor, ecc.) tramite il server MCP per usarlo come tool.</div>
+          <div class="mcp-input-row">
+            <input class="mcp-input" id="mcp-url-input" type="text" placeholder="http://localhost:3001" />
+            <button class="mcp-save-btn" id="mcp-save-btn">Salva</button>
+          </div>
+          <a class="mcp-docs-link" id="mcp-docs-link" href="#" target="_blank">
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M7 2H3a1 1 0 00-1 1v10a1 1 0 001 1h10a1 1 0 001-1V9" stroke="oklch(72% .06 240)" stroke-width="1.5" stroke-linecap="round"/><path d="M10 1h5v5M8 8l7-7" stroke="oklch(72% .06 240)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Come funziona? Leggi la guida
+          </a>
+        </div>
+
+        <!-- Link to Markdown -->
+        <div class="convert-card">
+          <div class="section-label">Link → Markdown</div>
+          <div class="convert-input-row">
+            <input type="url" class="input" id="convert-url-input" placeholder="https://esempio.com/articolo" />
+            <button class="btn" id="convert-extract-btn" style="width:auto;white-space:nowrap;flex-shrink:0;">Estrai →</button>
+          </div>
+          <div class="convert-spinner" id="convert-spinner">
+            <div class="mini-spinner"></div>
+            <span>Estrazione in corso...</span>
+          </div>
+          <div class="convert-output" id="convert-output"></div>
+          <div class="convert-actions" id="convert-actions" style="display:none;">
+            <button class="action-btn" id="convert-copy-btn" style="width:auto;">
+              <span class="action-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </span> Copia
+            </button>
+            <button class="action-btn" id="convert-download-btn" style="width:auto;">
+              <span class="action-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </span> Scarica .md
+            </button>
+          </div>
+          <div class="error" id="convert-error"></div>
+          <div class="status-text" id="convert-status"></div>
+        </div>
+
+        <div class="section-label" style="margin-top:4px;">Risorse Salvate</div>
+
+        <!-- Search + Folders -->
+        <div class="feed-toolbar" id="feed-toolbar" style="display:none;">
+          <div class="feed-search-row">
+            <svg class="feed-search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input class="feed-search-input" id="feed-search-input" type="text" placeholder="Cerca per titolo, tipo, URL..." />
+          </div>
+          <div class="feed-folders" id="feed-folders">
+            <button class="folder-tab active" data-folder-id="">Tutti</button>
+          </div>
+          <div class="folder-create-row" id="folder-create-row" style="display:none;">
+            <input class="folder-create-input" id="folder-create-input" type="text" placeholder="Nome cartella..." />
+            <button class="folder-create-btn" id="folder-create-btn">Crea</button>
+            <button class="folder-create-cancel" id="folder-create-cancel">Annulla</button>
+          </div>
+        </div>
+
+        <div class="status-text" id="feed-status"></div>
+
+        <div class="feed-list" id="feed-list">
+          <div class="feed-empty" id="feed-empty">
+            <span class="big-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="oklch(60% .01 260)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </span>
+            Nessuna risorsa salvata.<br/>
+            Usa l'estensione per salvare pagine web e trascrizioni YouTube.
+          </div>
+        </div>
+
+        <!-- Folder assignment popup -->
+        <div class="folder-popup" id="folder-popup" style="display:none;">
+          <div class="folder-popup-arrow"></div>
+          <div class="folder-popup-list" id="folder-popup-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Section: Usage ─── -->
+    <div class="section-panel" id="section-usage">
+      <div class="content-header">
+        <h2>Usage</h2>
+        <span class="sub">Crediti e statistiche</span>
+      </div>
+      <div class="content-body">
+
+        <div class="plan-card" id="usage-plan-card">
+          <div class="plan-card-badge">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="oklch(72% 0.06 240)" stroke="oklch(72% 0.06 240)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div class="plan-card-info">
+            <div class="plan-card-name" id="usage-plan-name">FREE</div>
+            <div class="plan-card-desc" id="usage-plan-desc">Piano gratuito</div>
+          </div>
+        </div>
+
+        <!-- Credit Progress Bar -->
+        <div class="credit-bar-wrap">
+          <div class="credit-bar-header">
+            <span class="credit-bar-label">Crediti</span>
+            <span class="credit-bar-numbers"><strong id="credits-used">0</strong> / <span id="credits-total">0</span></span>
+          </div>
+          <div class="credit-bar-track">
+            <div class="credit-bar-fill high" id="credit-bar-fill" style="width:0%"></div>
+          </div>
+          <div class="credit-breakdown" id="credit-breakdown"></div>
+        </div>
+
+        <!-- Stats -->
+        <div class="usage-card" id="usage-stats-card">
+          <div class="usage-row">
+            <span class="usage-label">Bucket</span>
+            <span class="usage-value" id="usage-buckets">—</span>
+          </div>
+          <div class="usage-row">
+            <span class="usage-label">Risorse salvate</span>
+            <span class="usage-value" id="usage-sources">—</span>
+          </div>
+          <div class="usage-row">
+            <span class="usage-label">Trascrizioni YouTube</span>
+            <span class="usage-value" id="usage-youtube">—</span>
+          </div>
+          <div class="usage-row">
+            <span class="usage-label">Pagine Web</span>
+            <span class="usage-value" id="usage-webpages">—</span>
+          </div>
+          <div class="usage-row">
+            <span class="usage-label">Skill generate</span>
+            <span class="usage-value" id="usage-skills">—</span>
+          </div>
+        </div>
+
+
+
+        <!-- Auto-Recharge -->
+        <div class="recharge-card">
+          <div class="recharge-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="oklch(72% 0.06 240)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Ricarica Automatica
+          </div>
+          <div class="recharge-desc">Ricarica i tuoi crediti scegliendo un piano. Verrai reindirizzato alla pagina di pagamento.</div>
+          <div class="recharge-row">
+            <select id="recharge-plan-select">
+              <option value="starter">Starter — €5/mese (250 crediti)</option>
+              <option value="pro" selected>Pro — €12/mese (500 crediti)</option>
+              <option value="business">Business — €39/mese (1000 crediti)</option>
+              <option value="enterprise">Enterprise — €69/mese (2000 crediti)</option>
+            </select>
+            <button class="recharge-btn" id="recharge-buy-btn">Acquista</button>
+          </div>
+        </div>
+
+        <div class="status-text" id="usage-status"></div>
+      </div>
+    </div>
+
+    <!-- ─── Section: Connessioni ─── -->
+    <div class="section-panel" id="section-connections">
+      <div class="content-header">
+        <h2>Connessioni</h2>
+        <span class="sub">Tutti i tuoi collegamenti</span>
+      </div>
+      <div class="content-body">
+
+        <div class="section-label">Piattaforme</div>
+
+        <div class="conn-card" data-conn="codex" data-url="/mcp">
+          <div class="conn-icon codex">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.086.457a6.105 6.105 0 013.046-.415c1.333.153 2.521.72 3.564 1.7a.117.117 0 00.107.029c1.408-.346 2.762-.224 4.061.366l.063.03.154.076c1.357.703 2.33 1.77 2.918 3.198.278.679.418 1.388.421 2.126a5.655 5.655 0 01-.18 1.631.167.167 0 00.04.155 5.982 5.982 0 011.578 2.891c.385 1.901-.01 3.615-1.183 5.14l-.182.22a6.063 6.063 0 01-2.934 1.851.162.162 0 00-.108.102c-.255.736-.511 1.364-.987 1.992-1.199 1.582-2.962 2.462-4.948 2.451-1.583-.008-2.986-.587-4.21-1.736a.145.145 0 00-.14-.032c-.518.167-1.04.191-1.604.185a5.924 5.924 0 01-2.595-.622 6.058 6.058 0 01-2.146-1.781c-.203-.269-.404-.522-.551-.821a7.74 7.74 0 01-.495-1.283 6.11 6.11 0 01-.017-3.064.166.166 0 00.008-.074.115.115 0 00-.037-.064 5.958 5.958 0 01-1.38-2.202 5.196 5.196 0 01-.333-1.589 6.915 6.915 0 01.188-2.132c.45-1.484 1.309-2.648 2.577-3.493.282-.188.55-.334.802-.438.286-.12.573-.22.861-.304a.129.129 0 00.087-.087A6.016 6.016 0 015.635 2.31C6.315 1.464 7.132.846 8.086.457zm-.804 7.85a.848.848 0 00-1.473.842l1.694 2.965-1.688 2.848a.849.849 0 001.46.864l1.94-3.272a.849.849 0 00.007-.854l-1.94-3.393zm5.446 6.24a.849.849 0 000 1.695h4.848a.849.849 0 000-1.696h-4.848z"/></svg>
+          </div>
+          <div class="conn-info">
+            <div class="conn-name">Codex</div>
+            <div class="conn-desc" id="conn-desc-codex">npm @skillgrowth/mcp</div>
+          </div>
+          <button class="conn-copy-btn" data-cmd="npx @skillgrowth/mcp">Copia comando</button>
+        </div>
+
+        <div class="conn-card" data-conn="claude" data-url="/mcp">
+          <div class="conn-icon claude">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-4-4 1.41-1.41L11 14.17l6.59-6.59L19 9l-8 8z"/></svg>
+          </div>
+          <div class="conn-info">
+            <div class="conn-name">Claude</div>
+            <div class="conn-desc" id="conn-desc-claude">npm @skillgrowth/mcp</div>
+          </div>
+          <button class="conn-copy-btn" data-cmd="npx @skillgrowth/mcp">Copia comando</button>
+        </div>
+
+        <div class="conn-card" data-conn="cursor" data-url="/mcp">
+          <div class="conn-icon cursor">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"/></svg>
+          </div>
+          <div class="conn-info">
+            <div class="conn-name">Cursor</div>
+            <div class="conn-desc" id="conn-desc-cursor">npm @skillgrowth/mcp</div>
+          </div>
+          <button class="conn-copy-btn" data-cmd="npx @skillgrowth/mcp">Copia comando</button>
+        </div>
+
+        <div class="section-label" style="margin-top:8px;">Strumenti</div>
+
+        <div class="conn-card" data-conn="mcp">
+          <div class="conn-icon mcp">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/></svg>
+          </div>
+          <div class="conn-info">
+            <div class="conn-name">MCP Server</div>
+            <div class="conn-desc" id="conn-desc-mcp">Model Context Protocol</div>
+          </div>
+          <div class="conn-status" id="conn-status-mcp">
+            <span class="status-dot inactive"></span>
+            <span class="status-label">Non configurato</span>
+          </div>
+        </div>
+
+
+
+        <div class="status-text" id="main-status"></div>
+      </div>
+    </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ─── Tour Overlay ─── -->
+<div class="tour-overlay" id="tour-overlay"></div>
+<div class="tour-popup" id="tour-popup">
+  <div class="tour-step-num" id="tour-step-num">1/5</div>
+  <div class="tour-title" id="tour-title">Benvenuto</div>
+  <div class="tour-desc" id="tour-desc">Descrizione del tour.</div>
+  <div class="tour-actions">
+    <button class="tour-btn tour-btn-back" id="tour-back-btn">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Indietro
+    </button>
+    <button class="tour-btn tour-btn-next" id="tour-next-btn">
+      Avanti
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+  </div>
+  <div class="tour-dots" id="tour-dots"></div>
+</div>
+
+<script src="theme.js"></script>
+<script src="shared.js"></script>
+<script src="sidepanel.js"></script>
+</body>
+</html>
+
+
