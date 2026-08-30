@@ -1,4 +1,4 @@
-﻿/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable react/no-unescaped-entities */
 "use client"
 
 import { useState, type ReactNode } from "react"
@@ -87,7 +87,7 @@ export default function ValueSection() {
  </div>
  <div className="flex gap-2">
  <span className="text-cyan">2.</span>
- <span>Trascina il file <code className="bg-[oklch(13%_0.006_260)] px-1 py-0.5 rounded text-white">mcp-setup-guide.md</code> salvato da Skillgrowth.</span>
+ <span>Trascina il file <code className="bg-[oklch(13%_0.006_260)] px-1 py-0.5 rounded text-white">mcp-setup-guide.md</code> salvato da Reskill.</span>
  </div>
  <div className="flex gap-2">
  <span className="text-cyan">3.</span>

@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { NextResponse } from "next/server";
 import { getUserEmailOrNull } from "@/lib/auth-helper";
 import { getUserByEmail } from "@/models/User";

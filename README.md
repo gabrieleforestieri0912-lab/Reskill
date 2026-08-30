@@ -1,4 +1,4 @@
-# SkillGrowth
+# Reskill
 
 Piattaforma per generare Skill AI (file Markdown strutturati) da fonti web, YouTube, PDF e social media. Le Skill vengono usate come contesto da agenti AI come Cursor, Claude, ChatGPT, MCP, Windsurf e GitHub Copilot.
 
@@ -18,7 +18,7 @@ Piattaforma per generare Skill AI (file Markdown strutturati) da fonti web, YouT
 ## Struttura del progetto
 
 ```
-skillgrowth/
+Reskill/
 ├── app/                          # Next.js App Router
 │   ├── api/                      # API route handlers
 │   │   ├── auth/                 # NextAuth handler

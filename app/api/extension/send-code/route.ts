@@ -1,4 +1,5 @@
-﻿import { NextResponse } from "next/server";
+export const runtime = 'nodejs';
+import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { storeCode } from "@/lib/verify-codes";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -20,17 +21,17 @@ export async function POST(req: Request) {
     }
 
     const ip = req.headers.get("x-forwarded-for") || "unknown";
-    if (!checkRateLimit(`send-code:${ip}`, 5, 60_000)) {
+    if (!await checkRateLimit(`send-code:${ip}`, 5, 60_000)) {
       return NextResponse.json({ error: "Troppe richieste. Riprova tra un minuto." }, { status: 429 });
     }
-    if (!checkRateLimit(`send-code-email:${email.toLowerCase()}`, 3, 600_000)) {
+    if (!await checkRateLimit(`send-code-email:${email.toLowerCase()}`, 3, 600_000)) {
       return NextResponse.json({ error: "Troppi codici inviati a questa email. Riprova tra 10 minuti." }, { status: 429 });
     }
 
     const code = generateCode();
     await storeCode(email.trim(), code);
 
-    const from = process.env.SMTP_FROM || "Skillgrowth <noreply@skillgrowth.app>";
+    const from = process.env.SMTP_FROM || "Reskill <noreply@reskill.app>";
 
     console.log(`[EMAIL] Codice di verifica per ${email.trim()}: ${code}`);
 
@@ -38,11 +39,11 @@ export async function POST(req: Request) {
       await resend.emails.send({
         from,
         to: email.trim(),
-        subject: "Codice di verifica Skillgrowth",
-        text: `Il tuo codice di verifica Skillgrowth è: ${code}\n\nIl codice è valido per 1 minuto.\n\nSe non hai richiesto questo codice, ignora questa email.`,
+        subject: "Codice di verifica Reskill",
+        text: `Il tuo codice di verifica Reskill è: ${code}\n\nIl codice è valido per 1 minuto.\n\nSe non hai richiesto questo codice, ignora questa email.`,
         html: `
           <div style="font-family: 'JetBrains Mono', ui-monospace, monospace; background:oklch(13% 0.006 260); color:oklch(98.5% 0.002 260); padding:32px; max-width:480px; margin:0 auto; border-radius:12px; border:1px solid rgba(77,138,150,0.2);">
-            <h1 style="font-size:18px;color:oklch(98.5% 0.002 260);margin:0 0 4px;">Skillgrowth</h1>
+            <h1 style="font-size:18px;color:oklch(98.5% 0.002 260);margin:0 0 4px;">Reskill</h1>
             <p style="font-size:12px;color:oklch(60% 0.01 260);margin:0 0 20px;">Codice di verifica estensione browser</p>
             <div style="background:oklch(13% 0.006 260);border:1px solid rgba(77,138,150,0.25);border-radius:10px;padding:16px;text-align:center;">
               <p style="font-size:11px;color:oklch(60% 0.01 260);margin:0 0 8px;">Il tuo codice di verifica:</p>
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
           </div>
         `,
       });
-    } catch (emailErr) {
+    } catch {
       console.error("[EMAIL] Resend non disponibile, usa il codice stampato sopra.");
     }
 

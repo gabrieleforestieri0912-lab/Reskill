@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useSession, signOut } from "next-auth/react";
 import Image from "next/image";
@@ -31,14 +31,14 @@ export default function Navbar() {
         {/* Brand Logo - Left */}
         <Link href="/" className="flex items-center">
           <Image
-            src="/skillgrowth.png"
-            alt="Skillgrowth"
+            src="/reskill.png"
+            alt="Reskill"
             width={24}
             height={24}
             className=" transition-all group-hover:scale-105 group-hover:shadow-[0_0_12px_oklch(60%_0.01_260/0.3)]"
           />
           <span className="text-sm font-bold text-white tracking-tight">
-            Skillgrowth
+            Reskill
           </span>
         </Link>
 
@@ -73,6 +73,16 @@ export default function Navbar() {
             }`}
           >
             {t.nav.mcp}
+          </Link>
+          <Link
+            href="/faq"
+            className={`px-1.5 py-1 text-[14px] font-semibold transition-all ${
+              pathname === "/faq"
+                ? "text-white bg-white/10"
+                : "text-white/80 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            FAQ
           </Link>
           <Link
             href="/#piani"
@@ -246,6 +256,13 @@ export default function Navbar() {
                 className="block px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-all"
               >
                 {t.nav.mcp}
+              </Link>
+              <Link
+                href="/faq"
+                onClick={() => setMenuOpen(false)}
+                className="block px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-all"
+              >
+                FAQ
               </Link>
               <Link
                 href="/#piani"

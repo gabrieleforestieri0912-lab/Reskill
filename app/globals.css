@@ -1,4 +1,4 @@
-﻿@import "@fontsource/jetbrains-mono/400.css";
+@import "@fontsource/jetbrains-mono/400.css";
 @import "@fontsource/jetbrains-mono/700.css";
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
@@ -90,34 +90,6 @@ body {
 .scrollbar-rounded::-webkit-scrollbar-thumb:hover {
   background: oklch(72% .06 240);
   background-clip: padding-box;
-}
-
-/* Horizontal scroll animations - seamless infinite (GPU-accelerated, no stall at loop boundary) */
-@keyframes scroll-right {
- 0% { transform: translateX(0); }
- 100% { transform: translateX(-50%); }
-}
-
-@keyframes scroll-left {
- 0% { transform: translateX(-50%); }
- 100% { transform: translateX(0); }
-}
-
-.scroll-track {
-  display: flex;
-  width: max-content;
-  animation-duration: 30s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  will-change: transform;
-}
-
-.scroll-track-right {
-  animation-name: scroll-right;
-}
-
-.scroll-track-left {
-  animation-name: scroll-left;
 }
 
 @keyframes blink {

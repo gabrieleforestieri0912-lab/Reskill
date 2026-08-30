@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -14,14 +14,14 @@ export default function Footer() {
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
               <Image
-                src="/skillgrowth.png"
-                alt="Skillgrowth"
+                src="/reskill.png"
+                alt="Reskill"
                 width={32}
                 height={32}
                 className=""
               />
               <span className="font-semibold text-base text-white/90">
-                Skillgrowth
+                Reskill
               </span>
             </div>
             <p className="text-xs text-gray leading-relaxed max-w-xs">
@@ -76,6 +76,14 @@ export default function Footer() {
               </li>
               <li>
                 <Link
+                  href="/faq"
+                  className="text-gray hover:text-cyan transition-colors"
+                >
+                  FAQ
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/changelog"
                   className="text-gray hover:text-cyan transition-colors"
                 >
@@ -119,7 +127,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-12 pt-6 border-t border-white/6 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray">
-          <p>© 2026 Skillgrowth. {t.footer.copyright}</p>
+          <p>© 2026 Reskill. {t.footer.copyright}</p>
         </div>
       </div>
     </footer>

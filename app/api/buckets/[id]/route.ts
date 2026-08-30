@@ -1,4 +1,5 @@
-import { getUserEmail } from "@/lib/auth-helper";
+export const runtime = 'nodejs';
+import { getUserEmailOrNull } from "@/lib/auth-helper";
 import { getBucketById, updateBucket, deleteBucket, bucketToJSON } from "@/models/Bucket";
 import { NextResponse } from "next/server";
 
@@ -6,7 +7,10 @@ export async function PUT(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const userEmail = await getUserEmail(req);
+  const userEmail = await getUserEmailOrNull(req);
+  if (!userEmail) {
+    return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
+  }
   const { id } = await params;
 
   try {
@@ -25,8 +29,9 @@ export async function PUT(
 
     const updated = await updateBucket(id, updateData);
     return NextResponse.json(bucketToJSON(updated!));
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Errore sconosciuto";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
@@ -34,7 +39,10 @@ export async function DELETE(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const userEmail = await getUserEmail(req);
+  const userEmail = await getUserEmailOrNull(req);
+  if (!userEmail) {
+    return NextResponse.json({ error: "Non autenticato" }, { status: 401 });
+  }
   const { id } = await params;
 
   try {
@@ -47,7 +55,8 @@ export async function DELETE(
     await deleteBucket(id);
 
     return NextResponse.json({ success: true });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Errore sconosciuto";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

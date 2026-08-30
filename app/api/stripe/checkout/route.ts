@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { getUserEmailOrNull } from "@/lib/auth-helper";
 import { getSubscriptionByUserId } from "@/models/UserSubscription";
 import { getUserByEmail } from "@/models/User";
@@ -50,7 +51,7 @@ export async function POST(req: Request) {
           price_data: {
             currency: "eur",
             product_data: {
-              name: `Skillgrowth ${plan.name}`,
+              name: `Reskill ${plan.name}`,
               description: `Piano ${plan.name} — ${plan.features.maxBuckets === -1 ? "bucket illimitati" : `${plan.features.maxBuckets} bucket`}, ${plan.features.maxSources === -1 ? "fonti illimitate" : `${plan.features.maxSources} fonti`}`,
             },
             unit_amount: plan.price * 100,

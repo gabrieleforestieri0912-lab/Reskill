@@ -41,7 +41,7 @@ const changelog: ChangelogEntry[] = [
     title: "Beta pubblica",
     items: [
       "Estrazione contenuti da YouTube (trascrizioni + metadati), X / Twitter, Reddit, PDF e pagine web",
-      "Generazione Skill AI con modelli multipli (Auto, Claude, OpenAI, Ollama locale)",
+      "Generazione Skill AI con modelli OpenAI multipli (GPT-4o-mini, GPT-4o, GPT-4.1)",
       "Trigger YAML nel frontmatter per indicare all'AI quando attivare la conoscenza",
       "Riduzione rumore token fino al 60% rispetto all'invio di HTML grezzo",
       "Pulizia automatica HTML (rimozione banner cookie, script, menu, ads)",

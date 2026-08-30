@@ -30,7 +30,7 @@ export default async function PublicSkillPage({ params }: { params: Promise<{ id
             <div className="w-8 h-8 rounded-sm bg-[oklch(13%_0.006_260)] border border-[oklch(60%_0.01_260)] flex items-center justify-center shadow-[0_0_10px_oklch(60%_0.01_260/0.3)]">
               <Sparkles size={18} className="text-[oklch(98.5%_0.002_260)]" />
             </div>
-            Skillgrowth
+            Reskill
           </Link>
           <div className="flex items-center gap-4">
             <div className="text-xs text-[oklch(60%_0.06_240)] hidden sm:block">

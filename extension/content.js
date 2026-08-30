@@ -1,4 +1,4 @@
-﻿// Skillgrowth Content Script - Multi-User Cloud Clipper with Visual Element Picker
+// Reskill Content Script - Multi-User Cloud Clipper with Visual Element Picker
 
 async function getServerUrl() {
   const result = await chrome.storage.local.get(["sg_server_url"]);
@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       showClipperHub();
       sendResponse({ success: true });
     } catch (error) {
-      console.error("Skillgrowth Clipper error:", error);
+      console.error("Reskill Clipper error:", error);
       sendResponse({ success: false, error: error.message });
     }
   } else if (request.action === "extractYoutubeTranscript") {
@@ -134,11 +134,11 @@ if (/youtube\.com\/(watch|playlist)/.test(window.location.href)) {
 // Create and show the premium clipper floating interface
 async function showClipperHub() {
   // Remove existing hub if any
-  const existing = document.getElementById("skillgrowth-clipper-hub");
+  const existing = document.getElementById("reskill-clipper-hub");
   if (existing) existing.remove();
 
   const hub = document.createElement("div");
-  hub.id = "skillgrowth-clipper-hub";
+  hub.id = "reskill-clipper-hub";
 
   // Clean, matte dark theme aligned with web app
   hub.style.position = "fixed";
@@ -160,8 +160,8 @@ async function showClipperHub() {
   hub.innerHTML = `
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid oklch(72% 0.06 240); padding-bottom:8px; margin-bottom:12px;">
       <div style="font-weight:bold; color:oklch(98.5% 0.002 260); display:flex; align-items:center; gap:6px;">
-        <img src="${chrome.runtime.getURL('skillgrowth.png')}" style="width:18px;height:18px;border-radius:4px;">
-        Skillgrowth Clipper
+        <img src="${chrome.runtime.getURL('reskill.png')}" style="width:18px;height:18px;border-radius:4px;">
+        Reskill Clipper
       </div>
       <button id="sg-close-btn" style="background:none; border:none; color:oklch(72% 0.06 240); font-weight:bold; cursor:pointer; font-size:14px; margin-left:auto;">x</button>
     </div>
@@ -187,7 +187,7 @@ async function showClipperHub() {
 
     <div style="display:flex; flex-direction:column; gap:8px;">
       <button id="sg-save-cloud" style="width:100%; padding:10px; background-color:oklch(13% 0.006 260); border:1px solid oklch(72% 0.06 240); color:oklch(72% 0.06 240); font-weight:bold; border-radius:10px; cursor:pointer; font-size:11px;">
-        > Invia a Skillgrowth Cloud
+        > Invia a Reskill Cloud
       </button>
       <button id="sg-download-md" style="width:100%; padding:8px; background-color:transparent; border:1px solid oklch(72% 0.06 240); color:oklch(98.5% 0.002 260); font-weight:semibold; border-radius:10px; cursor:pointer; font-size:10px;">
         v Scarica come file .md locale
@@ -225,7 +225,7 @@ async function showClipperHub() {
   } catch (e) {
     const select = document.getElementById("sg-bucket-select");
     if (select) {
-      select.innerHTML = `<option value="">Errore: accedi prima a Skillgrowth</option>`;
+      select.innerHTML = `<option value="">Errore: accedi prima a Reskill</option>`;
     }
   }
 
@@ -296,7 +296,7 @@ async function showClipperHub() {
         throw new Error(data.error || "Salvataggio fallito");
       }
     } catch (err) {
-      if (status) status.textContent = `Errore: ${err.message || "Accedi prima a Skillgrowth"}`;
+      if (status) status.textContent = `Errore: ${err.message || "Accedi prima a Reskill"}`;
     }
   });
 }
@@ -326,7 +326,7 @@ function handlePickerMouseOver(e) {
   e.stopPropagation();
   const el = e.target;
 
-  if (el.closest("#skillgrowth-clipper-hub")) return;
+  if (el.closest("#reskill-clipper-hub")) return;
 
   if (hoveredElement) {
     hoveredElement.style.outline = "";
@@ -346,10 +346,9 @@ function handlePickerClick(e) {
   e.stopPropagation();
 
   const el = e.target;
-  if (el.closest("#skillgrowth-clipper-hub")) return;
+  if (el.closest("#reskill-clipper-hub")) return;
 
-  let markdown = "";
-  traverse(el, markdown);
+  let markdown = traverse(el);
   selectedContentMarkdown = cleanUpMarkdown(markdown);
 
   const status = document.getElementById("sg-status");
@@ -389,9 +388,7 @@ function convertPageToMarkdown() {
     throw new Error("No content found on page");
   }
 
-  let markdown = '';
-  traverse(mainContent, markdown);
-  return cleanUpMarkdown(markdown);
+  return cleanUpMarkdown(traverse(mainContent));
 }
 
 function traverse(node, markdown) {
@@ -636,11 +633,11 @@ function extractYoutubeId() {
 }
 
 function showStatusMessage(msg) {
-  const existing = document.getElementById("skillgrowth-status-toast");
+  const existing = document.getElementById("reskill-status-toast");
   if (existing) existing.remove();
 
   const toast = document.createElement("div");
-  toast.id = "skillgrowth-status-toast";
+  toast.id = "reskill-status-toast";
   toast.textContent = msg;
   toast.style.position = "fixed";
   toast.style.bottom = "20px";
@@ -659,7 +656,7 @@ function showStatusMessage(msg) {
 }
 
 function downloadMarkdown(markdown) {
-  const pageTitle = document.title.trim() || 'skillgrowth-page';
+  const pageTitle = document.title.trim() || 'reskill-page';
   const safeTitle = pageTitle.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
   const filename = `${safeTitle}.md`;
 

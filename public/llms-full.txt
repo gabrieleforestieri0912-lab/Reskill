@@ -1,0 +1,119 @@
+# Reskill — Complete Documentation for AI Agents
+
+## Overview
+
+Reskill is a SaaS platform (Next.js 16 + Supabase + Stripe + OpenAI) that:
+1. Extracts content from web sources (YouTube, X/Twitter, Reddit, PDF, web pages)
+2. Converts content to clean Markdown
+3. Uses AI to generate structured "Skill" files with YAML frontmatter
+4. Skills are used as context by AI coding assistants (Cursor, Claude, ChatGPT, MCP)
+
+## How It Works
+
+### Step 1: Collect Sources
+Users create "buckets" (knowledge collections) and add URLs from supported platforms:
+- **YouTube**: Extracts transcript via youtube-transcript API + oEmbed metadata
+- **X/Twitter**: Uses fxtwitter API (no auth needed) + fallback to Open Graph
+- **Reddit**: Uses Reddit JSON API for post + top 10 comments
+- **PDF**: Downloads and parses with pdf-parse library
+- **Web Pages**: Uses @mozilla/readability + turndown for HTML-to-Markdown
+
+### Step 2: Generate Skill
+AI combines all sources in a bucket into a single structured Markdown file:
+- YAML frontmatter: name, description, trigger conditions, tags, source URL, version
+- Sections: Fundamental Principles, Rules & Best Practices, Patterns & Implementation, What NOT to Do, Practical Examples
+- Model options: GPT-4o-mini (default), GPT-4o, GPT-4.1-nano, GPT-4.1-mini, GPT-4.1
+
+### Step 3: Use with AI Agents
+Skills can be used with:
+- **Cursor**: Copy to `.cursorrules` file
+- **Claude Projects**: Upload as project knowledge
+- **Custom GPTs**: Upload as knowledge file
+- **MCP Server**: Point filesystem server to skill directory
+- **Any LLM**: Skills are standard Markdown files
+
+## Skill File Format
+
+```yaml
+---
+name: example-skill
+description: Skill for [topic]
+trigger: "Activate when user asks about [topic]"
+tags: [tag1, tag2, tag3]
+source: https://original-source-url.com
+version: 1.0.0
+---
+
+## Fundamental Principles
+
+Key concepts to internalize.
+
+## Rules and Best Practice
+
+Concrete, actionable rules with examples.
+
+## Pattern and Implementation
+
+Code patterns, configurations, templates.
+
+## What NOT to Do
+
+Negative constraints, anti-patterns to avoid.
+
+## Practical Examples
+
+Concrete input/output examples or use cases.
+```
+
+## Credit System
+
+Each source type costs credits:
+- YouTube: 10 credits
+- Web page: 3 credits
+- PDF: 8 credits
+- X/Twitter: 5 credits
+- Reddit: 5 credits
+
+Plans:
+- Free: 10 credits/month
+- Pro (€12): 500 credits/month
+- Business (€29): 1,500 credits/month
+- Enterprise (€59): 5,000 credits/month
+
+## API Endpoints
+
+- `POST /api/extract` — Extract content from URL (auth required)
+- `POST /api/generate-skill` — Generate AI skill from sources (auth required)
+- `GET/POST /api/buckets` — List/create buckets
+- `GET/POST /api/buckets/:id/sources` — List/add sources to bucket
+- `DELETE /api/sources/:id` — Delete source (refunds credits)
+- `GET /api/subscription` — Get current subscription
+- `GET /api/stats` — Get dashboard statistics
+
+## Browser Extension
+
+Chrome/Edge/Firefox extension that:
+- Adds context menu "Trasforma in Markdown" on any page
+- Captures page content, converts to Markdown
+- Saves directly to user's bucket via API
+- Auth via email verification code flow
+
+## Technology Stack
+
+- **Frontend**: Next.js 16 (App Router), React 19, Tailwind CSS 4, Framer Motion
+- **Backend**: Next.js API Routes, Supabase (PostgreSQL), NextAuth v5
+- **AI**: Vercel AI SDK + OpenAI (GPT-4o-mini, GPT-4.1)
+- **Payments**: Stripe (checkout, webhooks, customer portal)
+- **Email**: Resend
+- **Extension**: Chrome Manifest V3
+
+## Links
+
+- Website: https://reskill.app
+- Dashboard: https://reskill.app/dashboard
+- Login: https://reskill.app/login
+- MCP Integration: https://reskill.app/mcp
+- Changelog: https://reskill.app/changelog
+- Privacy Policy: https://reskill.app/privacy
+- Terms of Service: https://reskill.app/terms
+- API: https://reskill.app/api

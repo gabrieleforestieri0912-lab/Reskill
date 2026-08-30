@@ -1,25 +1,28 @@
-import { NextResponse } from "next/server";
+import { auth } from "@/app/auth"
+import { NextResponse } from "next/server"
 
-export function proxy(request: Request) {
-  // Gestione preflight CORS (richieste OPTIONS) per tutte le rotte API
-  if (request.method === "OPTIONS") {
-    const url = new URL(request.url);
-    if (url.pathname.startsWith("/api/")) {
-      return new NextResponse(null, {
-        status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization, x-extension-token",
-          "Access-Control-Allow-Credentials": "true",
-        },
-      });
-    }
+const protectedPages = ["/dashboard", "/feed", "/account", "/connections", "/feedback"]
+const authPages = ["/login"]
+
+export default auth((req) => {
+  const { pathname } = req.nextUrl
+  const isLoggedIn = !!req.auth
+
+  // Redirect logged-in users away from auth pages
+  if (authPages.some((r) => pathname.startsWith(r)) && isLoggedIn) {
+    return NextResponse.redirect(new URL("/dashboard", req.url))
   }
 
-  return NextResponse.next();
-}
+  // Protect authenticated pages
+  if (protectedPages.some((r) => pathname.startsWith(r)) && !isLoggedIn) {
+    const loginUrl = new URL("/login", req.url)
+    loginUrl.searchParams.set("callbackUrl", pathname)
+    return NextResponse.redirect(loginUrl)
+  }
+
+  return NextResponse.next()
+})
 
 export const config = {
-  matcher: "/api/:path*",
-};
+  matcher: ["/dashboard/:path*", "/feed/:path*", "/account/:path*", "/connections/:path*", "/feedback/:path*", "/login"],
+}

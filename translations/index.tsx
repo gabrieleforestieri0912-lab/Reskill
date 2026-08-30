@@ -22,8 +22,8 @@ export function LanguageProvider({ children, initialLocale }: { children: ReactN
 
     const setLocale = (l: Locale) => {
         setLocaleState(l);
-        localStorage.setItem("skillgrowth-locale", l);
-        document.cookie = `skillgrowth-locale=${l};path=/;max-age=31536000`;
+        localStorage.setItem("reskill-locale", l);
+        document.cookie = `reskill-locale=${l};path=/;max-age=31536000`;
     };
 
     return (

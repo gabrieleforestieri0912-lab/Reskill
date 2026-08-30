@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { getEmailFromToken } from "@/lib/verify-codes";
 import { getUserByEmail } from "@/models/User";
 import { getSubscriptionByUserId } from "@/models/UserSubscription";

@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 import { supabase } from "@/lib/supabase";
 
 const devCodes = new Map<string, { code: string; expiresAt: number }>();
-const devTokens = new Map<string, { email: string }>();
+const devTokens = new Map<string, { email: string; expiresAt: number }>();
+
+const TOKEN_EXPIRY_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 export async function storeCode(email: string, code: string) {
   const key = email.toLowerCase();
@@ -14,7 +16,7 @@ export async function storeCode(email: string, code: string) {
       code,
       expires_at: new Date(Date.now() + 60 * 1000).toISOString(),
     });
-  } catch (e) {
+  } catch {
     // fallback: in-memory store works
   }
 }
@@ -56,15 +58,17 @@ export async function verifyCode(email: string, code: string): Promise<boolean> 
 export async function createExtensionToken(email: string): Promise<string> {
   const token = randomUUID();
   const key = email.toLowerCase();
+  const expiresAt = Date.now() + TOKEN_EXPIRY_MS;
 
-  devTokens.set(token, { email: key });
+  devTokens.set(token, { email: key, expiresAt });
 
   try {
     await supabase.from("extension_tokens").insert({
       token,
       email: key,
+      expires_at: new Date(expiresAt).toISOString(),
     });
-  } catch (e) {
+  } catch {
     // fallback: in-memory store works
   }
 
@@ -73,15 +77,29 @@ export async function createExtensionToken(email: string): Promise<string> {
 
 export async function getEmailFromToken(token: string): Promise<string | null> {
   const dev = devTokens.get(token);
-  if (dev) return dev.email;
+  if (dev) {
+    if (Date.now() > dev.expiresAt) {
+      devTokens.delete(token);
+      return null;
+    }
+    return dev.email;
+  }
 
   try {
     const { data } = await supabase
       .from("extension_tokens")
-      .select("email")
+      .select("email, expires_at")
       .eq("token", token)
       .maybeSingle();
-    return data?.email || null;
+
+    if (!data?.email) return null;
+
+    if (data.expires_at && new Date(data.expires_at) < new Date()) {
+      await supabase.from("extension_tokens").delete().eq("token", token);
+      return null;
+    }
+
+    return data.email;
   } catch {
     return null;
   }

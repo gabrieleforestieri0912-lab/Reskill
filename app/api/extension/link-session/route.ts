@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { auth } from "@/app/auth";
 import { createExtensionToken } from "@/lib/verify-codes";
 import { supabase } from "@/lib/supabase";
@@ -16,7 +17,7 @@ export async function OPTIONS() {
 }
 
 /**
- * GET — chiamato dal content script iniettato su skillgrowth.app.
+ * GET — chiamato dal content script iniettato su reskill.app.
  * Il content script ha accesso ai cookie di sessione, quindi può
  * recuperare la sessione Next-Auth e creare un token per l'estensione.
  */

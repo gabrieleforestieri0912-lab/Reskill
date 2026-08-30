@@ -129,7 +129,7 @@ triggers:
 **Editor**: Cursor with Vim keybindings
 **Theme**: Catppuccin Mocha (cyan accent)
 **Terminal**: Warp with AI suggestions
-**LLM Integration**: Local Ollama + Claude API hybrid
+**LLM Integration**: OpenAI API (GPT-4o-mini / GPT-4.1)
 
 ## Extension Stack
 
@@ -321,19 +321,19 @@ export const ais = [
   { icon: FaComments, name: "ChatGPT" },
   { icon: FaServer, name: "MCP Server" },
   { icon: FaWind, name: "Windsurf" },
-  { icon: FaBrain, name: "Ollama" },
+  { icon: FaBrain, name: "OpenAI" },
   { icon: FaGithub, name: "Copilot" },
   { icon: FaPlug, name: "API" },
 ];
 
 export const faqs = [
   { q: "Cos'è una Skill per AI agent?", a: "Una Skill è un file Markdown con frontmatter YAML che contiene regole, trigger e best practice strutturate. Gli agenti AI (Cursor, Claude, ChatGPT) la usano come contesto per rispondere in modo più preciso e contestuale." },
-  { q: "Come viene estratto il contenuto da YouTube?", a: "Skillgrowth utilizza la libreria youtube-transcript per scaricare la trascrizione automatica dei video. Se la trascrizione non è disponibile, estrae la descrizione e i metadati del video tramite l'API oEmbed di YouTube." },
+  { q: "Come viene estratto il contenuto da YouTube?", a: "Reskill utilizza la libreria youtube-transcript per scaricare la trascrizione automatica dei video. Se la trascrizione non è disponibile, estrae la descrizione e i metadati del video tramite l'API oEmbed di YouTube." },
   { q: "I miei dati sono al sicuro?", a: "Assolutamente sì. I dati vengono elaborati lato server e salvati in Supabase (PostgreSQL). Non condividiamo né vendiamo i tuoi contenuti. Puoi eliminare bucket e fonti in qualsiasi momento." },
   { q: "Quali formati di AI supportate?", a: "Supportiamo Cursor (.cursorrules), Claude AI Projects, Custom GPTs (ChatGPT), MCP Server (Model Context Protocol), Windsurf, GitHub Copilot e qualsiasi LLM che accetti file Markdown come contesto." },
-  { q: "Devo avere un account per usare Skillgrowth?", a: "Sì, è necessario un account gratuito con Google OAuth per salvare bucket, fonti e generare Skill. La registrazione richiede meno di 30 secondi." },
+  { q: "Devo avere un account per usare Reskill?", a: "Sì, è necessario un account gratuito con Google OAuth per salvare bucket, fonti e generare Skill. La registrazione richiede meno di 30 secondi." },
   { q: "Cosa succede se supero i limiti del piano Free?", a: "Il piano Free ti permette 1 bucket e 3 fonti totali. Se raggiungi il limite, ti invitiamo a fare upgrade al piano Pro (€12/mese) per 15 bucket e 100 fonti, o Business (€39/mese) per 50 bucket e 500 fonti." },
-  { q: "Posso usare il mio modello AI locale?", a: "Sì! Skillgrowth supporta Ollama per l'uso di modelli locali come Llama 3, Mistral e Gemma. Basta selezionare 'Modello Auto' o un modello locale dal dropdown nel workspace." },
+  { q: "Posso usare il mio modello AI locale?", a: "Al momento Reskill utilizza modelli OpenAI via API (GPT-4o-mini, GPT-4.1, ecc.) per generare le Skill. Seleziona il modello preferito dal dropdown nel workspace." },
   { q: "Come funziona l'estensione browser?", a: "L'estensione Chrome/Edge/Firefox aggiunge un pulsante contestuale. Cliccando 'Trasforma in Markdown' su qualsiasi pagina, il contenuto viene pulito da ads e rumore, convertito in Markdown e salvato direttamente nel tuo bucket." },
 ];
 
@@ -363,7 +363,7 @@ export const pricingPlans = [
     price: 12,
     name: "Pro",
     badge: "Più scelto",
-    desc: "Per chi usa Skillgrowth con regolarità",
+    desc: "Per chi usa Reskill con regolarità",
     features: [
       "15 Bucket",
       "100 Fonti",

@@ -1,5 +1,5 @@
 /**
- * background.js — Skillgrowth Extension Service Worker
+ * background.js — Reskill Extension Service Worker
  *
  * Responsabilità:
  * - Gestione del token di sessione in chrome.storage.local
@@ -52,8 +52,8 @@ function buildContextMenu(isYouTube, videoTitle, isPlaylist, playlistCount) {
   chrome.contextMenus.removeAll(() => {
     // Voce genitore
     chrome.contextMenus.create({
-      id: "skillgrowth-parent",
-      title: "Skillgrowth",
+      id: "reskill-parent",
+      title: "Reskill",
       contexts: ["all"],
     });
 
@@ -61,7 +61,7 @@ function buildContextMenu(isYouTube, videoTitle, isPlaylist, playlistCount) {
     if (isPlaylist && playlistCount > 0) {
       chrome.contextMenus.create({
         id: "action-primary",
-        parentId: "skillgrowth-parent",
+        parentId: "reskill-parent",
         title: `Estrai trascrizione: ${playlistCount} video`,
         contexts: ["all"],
       });
@@ -72,14 +72,14 @@ function buildContextMenu(isYouTube, videoTitle, isPlaylist, playlistCount) {
 
       chrome.contextMenus.create({
         id: "action-primary",
-        parentId: "skillgrowth-parent",
+        parentId: "reskill-parent",
         title: label,
         contexts: ["all"],
       });
     } else {
       chrome.contextMenus.create({
         id: "action-primary",
-        parentId: "skillgrowth-parent",
+        parentId: "reskill-parent",
         title: "Converti in markdown",
         contexts: ["all"],
       });
@@ -88,7 +88,7 @@ function buildContextMenu(isYouTube, videoTitle, isPlaylist, playlistCount) {
     // ── Voce 2: Prendi elementi ───────────────────────────────────────────────
     chrome.contextMenus.create({
       id: "action-grab",
-      parentId: "skillgrowth-parent",
+      parentId: "reskill-parent",
       title: "Prendi elementi",
       contexts: ["all"],
     });
@@ -96,7 +96,7 @@ function buildContextMenu(isYouTube, videoTitle, isPlaylist, playlistCount) {
     // ── Voce 3: Apri feed ─────────────────────────────────────────────────────
     chrome.contextMenus.create({
       id: "action-feed",
-      parentId: "skillgrowth-parent",
+      parentId: "reskill-parent",
       title: "Apri feed",
       contexts: ["all"],
     });
@@ -393,7 +393,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     case "sg_logout":
       clearSession().then(async () => {
         try {
-          const tabs = await getSkillgrowthTabs();
+          const tabs = await getReskillTabs();
           for (const tab of tabs) {
             chrome.tabs.sendMessage(tab.id, { action: "sg_logout_web" }, () => {
               chrome.runtime.lastError;
@@ -442,7 +442,7 @@ async function clearSession() {
   await chrome.storage.local.remove([VERIFIED_KEY, TOKEN_KEY, EMAIL_KEY, NAME_KEY, PLAN_KEY]);
 }
 
-async function getSkillgrowthTabs() {
+async function getReskillTabs() {
   const serverUrl = await getServerUrl();
   const origin = new URL(serverUrl).origin;
   const tabs    = await chrome.tabs.query({ url: `${origin}/*` });
@@ -457,7 +457,7 @@ async function syncSessionFromWebTabs() {
   if (now - lastSyncTime < 5000) return false;
   lastSyncTime = now;
 
-  const tabs = await getSkillgrowthTabs();
+  const tabs = await getReskillTabs();
   if (tabs.length === 0) return false;
 
   const tab = tabs[0];

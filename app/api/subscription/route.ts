@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { auth } from "@/app/auth";
 import { getSubscriptionByUserId } from "@/models/UserSubscription";
 import { PLANS, getPlanById } from "@/lib/plans";

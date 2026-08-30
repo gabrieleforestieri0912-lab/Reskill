@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useTranslation } from "@/translations";
@@ -7,55 +7,55 @@ import { useState } from "react";
 const codeExamples = {
   cursor: `{
   "mcpServers": {
-    "skillgrowth": {
+    "reskill": {
       "command": "npx",
       "args": [
         "-y",
-        "@skillgrowth/mcp-server",
+        "@reskill/mcp-server",
         "--token",
-        "YOUR_SKILLGROWTH_TOKEN"
+        "YOUR_RESKILL_TOKEN"
       ]
     }
   }
 }`,
   claude: `{
   "mcpServers": {
-    "skillgrowth": {
+    "reskill": {
       "command": "npx",
       "args": [
         "-y",
-        "@skillgrowth/mcp-server",
+        "@reskill/mcp-server",
         "--token",
-        "YOUR_SKILLGROWTH_TOKEN"
+        "YOUR_RESKILL_TOKEN"
       ]
     }
   }
 }`,
   windsurf: `{
   "mcpServers": {
-    "skillgrowth": {
+    "reskill": {
       "command": "npx",
       "args": [
         "-y",
-        "@skillgrowth/mcp-server",
+        "@reskill/mcp-server",
         "--token",
-        "YOUR_SKILLGROWTH_TOKEN"
+        "YOUR_RESKILL_TOKEN"
       ]
     }
   }
 }`,
   docker: `docker run \\
-  -e SKILLGROWTH_API_KEY=la_tua_chiave_api \\
-  skillgrowth/mcp-server`,
+  -e RESKILL_API_KEY=la_tua_chiave_api \\
+  reskill/mcp-server`,
   claude_code: `{
   "mcpServers": {
-    "skillgrowth": {
+    "reskill": {
       "command": "npx",
       "args": [
         "-y",
-        "@skillgrowth/mcp-server",
+        "@reskill/mcp-server",
         "--token",
-        "YOUR_SKILLGROWTH_TOKEN"
+        "YOUR_RESKILL_TOKEN"
       ]
     }
   }
@@ -65,7 +65,7 @@ const codeExamples = {
 const toolDefinitions = [
   {
     name: "list_buckets",
-    description: "Elenca tutti i tuoi bucket Skillgrowth con i relativi metadati (nome, descrizione, numero di fonti).",
+    description: "Elenca tutti i tuoi bucket Reskill con i relativi metadati (nome, descrizione, numero di fonti).",
     input: "Nessun parametro richiesto",
     output: "Array di oggetti Bucket con id, name, description, sourceCount, createdAt",
     example: "L'agente chiede 'Quali bucket ho disponibili?' e il server restituisce l'elenco completo.",
@@ -125,7 +125,7 @@ const troubleshootingItems = [
   {
     problem: "API Key vs Token: quale usare?",
     cause: "Confusione tra i due tipi di credenziali.",
-    solution: "Usa il flag `--token` per il token MCP (generato dalla pagina Connessioni). Usa `-e SKILLGROWTH_API_KEY` per l'API key (generata dalla sezione API Keys della stessa pagina).",
+    solution: "Usa il flag `--token` per il token MCP (generato dalla pagina Connessioni). Usa `-e RESKILL_API_KEY` per l'API key (generata dalla sezione API Keys della stessa pagina).",
   },
 ];
 
@@ -136,11 +136,11 @@ const faqItems = [
   },
   {
     q: "I dati dei miei bucket vengono inviati a server esterni?",
-    a: "No. Il server MCP di Skillgrowth viene eseguito localmente sul tuo computer tramite npx o Docker. I dati vengono scambiati direttamente tra il client MCP (il tuo IDE) e il server locale. Le chiamate API a Skillgrowth avvengono solo per autenticare il token e recuperare i dati dei bucket.",
+    a: "No. Il server MCP di Reskill viene eseguito localmente sul tuo computer tramite npx o Docker. I dati vengono scambiati direttamente tra il client MCP (il tuo IDE) e il server locale. Le chiamate API a Reskill avvengono solo per autenticare il token e recuperare i dati dei bucket.",
   },
   {
-    q: "Posso usare MCP senza un account Skillgrowth?",
-    a: "No. Devi avere un account Skillgrowth e almeno un bucket con delle fonti. Il server MCP autentica le richieste tramite il tuo token personale.",
+    q: "Posso usare MCP senza un account Reskill?",
+    a: "No. Devi avere un account Reskill e almeno un bucket con delle fonti. Il server MCP autentica le richieste tramite il tuo token personale.",
   },
   {
     q: "Quanto costa il server MCP?",
@@ -206,12 +206,12 @@ export default function McpPage() {
 │                                                               │
 │  ┌──────────────┐    ┌──────────────┐    ┌──────────────────┐ │
 │  │  AI Model     │───▶│  MCP Client  │───▶│  MCP Server      │ │
-│  │  (Claude/     │    │  (Cursor /   │    │  Skillgrowth     │ │
+│  │  (Claude/     │    │  (Cursor /   │    │  Reskill     │ │
 │  │   GPT / LLM)  │    │   Windsurf)  │    │  (locale npx)    │ │
 │  └──────────────┘    └──────────────┘    └────────┬─────────┘ │
 │                                                    │           │
 │                                          ┌─────────▼─────────┐ │
-│                                          │  API Skillgrowth  │ │
+│                                          │  API Reskill  │ │
 │                                          │  (Cloud HTTPS)    │ │
 │                                          └─────────┬─────────┘ │
 │                                                    │           │
@@ -230,10 +230,10 @@ export default function McpPage() {
               </div>
               <div className="p-4 bg-white/2 border border-white/6">
                 <h4 className="font-semibold text-white mb-1.5">2. Server MCP (Locale)</h4>
-                <p className="text-[oklch(60%_0.01_260)] leading-relaxed">npx esegue @skillgrowth/mcp-server in locale. Il server si autentica con il tuo token e interroga l'API Skillgrowth per conto tuo.</p>
+                <p className="text-[oklch(60%_0.01_260)] leading-relaxed">npx esegue @reskill/mcp-server in locale. Il server si autentica con il tuo token e interroga l'API Reskill per conto tuo.</p>
               </div>
               <div className="p-4 bg-white/2 border border-white/6">
-                <h4 className="font-semibold text-white mb-1.5">3. API Skillgrowth (Cloud)</h4>
+                <h4 className="font-semibold text-white mb-1.5">3. API Reskill (Cloud)</h4>
                 <p className="text-[oklch(60%_0.01_260)] leading-relaxed">L'API restituisce i dati dei tuoi bucket. Il server MCP li espone come tool strutturati con schemi tipizzati JSON Schema.</p>
               </div>
             </div>
@@ -248,8 +248,8 @@ export default function McpPage() {
               <div className="flex gap-4 items-start">
                 <span className="w-7 h-7 bg-[oklch(13%_0.006_260)]/60 text-[oklch(72%_0.06_240)] border border-[oklch(60%_0.01_260)]/20 flex items-center justify-center text-xs font-bold shrink-0">1</span>
                 <div>
-                  <h4 className="font-semibold text-sm text-white mb-0.5">Account Skillgrowth</h4>
-                  <p className="text-xs text-[oklch(60%_0.01_260)] leading-relaxed">Registrati su Skillgrowth e crea almeno un bucket con delle fonti. Il server MCP legge i tuoi bucket per esporli come tool.</p>
+                  <h4 className="font-semibold text-sm text-white mb-0.5">Account Reskill</h4>
+                  <p className="text-xs text-[oklch(60%_0.01_260)] leading-relaxed">Registrati su Reskill e crea almeno un bucket con delle fonti. Il server MCP legge i tuoi bucket per esporli come tool.</p>
                 </div>
               </div>
               <div className="flex gap-4 items-start">
@@ -286,7 +286,7 @@ export default function McpPage() {
               <h4 className="font-semibold text-sm text-white mb-2">{t.mcp.step1_title}</h4>
               <p className="text-xs text-[oklch(60%_0.01_260)] leading-relaxed mb-3">{t.mcp.step1_desc}</p>
               <div className="bg-black/30 p-2.5 font-mono text-[11px] text-[oklch(60%_0.01_260)]">
-                npx -y @skillgrowth/mcp-server --token YOUR_TOKEN
+                npx -y @reskill/mcp-server --token YOUR_TOKEN
               </div>
             </div>
             <div className="p-6 bg-white/2 border border-white/6">
@@ -315,10 +315,10 @@ export default function McpPage() {
           <div className="p-6 bg-[oklch(13% 0.006 260)] border border-white/6">
             <h3 className="text-base font-bold text-white mb-4">1. Genera il tuo <span className="text-[oklch(72%_0.06_240)]">Token</span> MCP</h3>
             <p className="text-xs text-[oklch(60%_0.01_260)] leading-relaxed mb-4">
-              Il token MCP è la tua chiave di autenticazione. Collega il tuo account Skillgrowth al server MCP locale.
+              Il token MCP è la tua chiave di autenticazione. Collega il tuo account Reskill al server MCP locale.
             </p>
             <ol className="space-y-2 text-xs text-[oklch(60%_0.01_260)] list-decimal list-inside leading-relaxed">
-              <li>Accedi a Skillgrowth e vai su <strong className="text-white">Account → Connessioni Agenti AI</strong></li>
+              <li>Accedi a Reskill e vai su <strong className="text-white">Account → Connessioni Agenti AI</strong></li>
               <li>Nella sezione <strong className="text-white">Server MCP</strong>, clicca su <strong className="text-white">Genera Token</strong></li>
               <li>Copia il token generato (inizia con <code className="bg-black/30 px-1 text-[oklch(72%_0.06_240)]">sg_mcp_</code>)</li>
               <li>Conservalo in un posto sicuro — non verrà mostrato di nuovo</li>
@@ -357,7 +357,7 @@ export default function McpPage() {
                   <li>Apri <strong className="text-white">Cursor</strong></li>
                   <li>Vai su <strong className="text-white">Cursor Settings → MCP</strong> (o <code className="bg-black/30 px-1">Cmd+Shift+P</code> → &quot;MCP: Add Server&quot;)</li>
                   <li>Incolla la configurazione qui sotto nel file <code className="bg-black/30 px-1">.cursor/mcp.json</code> della tua home</li>
-                  <li>Sostituisci <code className="bg-black/30 px-1 text-[oklch(72%_0.06_240)]">YOUR_SKILLGROWTH_TOKEN</code> con il tuo token</li>
+                  <li>Sostituisci <code className="bg-black/30 px-1 text-[oklch(72%_0.06_240)]">YOUR_RESKILL_TOKEN</code> con il tuo token</li>
                   <li>Riavvia Cursor per attivare il server MCP</li>
                 </ol>
                 <p className="mt-3"><strong className="text-[oklch(72%_0.06_240)]">Metodo 2 — Per progetto:</strong></p>
@@ -373,7 +373,7 @@ export default function McpPage() {
                   <li>Vai su <strong className="text-white">Settings → Developer → Edit Config</strong></li>
                   <li>Si aprirà il file <code className="bg-black/30 px-1">claude_desktop_config.json</code></li>
                   <li>Aggiungi la configurazione qui sotto nell&apos;oggetto <code className="bg-black/30 px-1">mcpServers</code></li>
-                  <li>Sostituisci <code className="bg-black/30 px-1 text-[oklch(72%_0.06_240)]">YOUR_SKILLGROWTH_TOKEN</code> con il tuo token</li>
+                  <li>Sostituisci <code className="bg-black/30 px-1 text-[oklch(72%_0.06_240)]">YOUR_RESKILL_TOKEN</code> con il tuo token</li>
                   <li>Salva il file e <strong className="text-white">riavvia completamente Claude Desktop</strong></li>
                 </ol>
                 <p className="mt-3">Vedrai l&apos;icona a forma di falce (<svg className="w-3.5 h-3.5 inline-block text-[oklch(72%_0.06_240)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>) nella finestra di chat quando i tool MCP sono attivi.</p>
@@ -386,9 +386,9 @@ export default function McpPage() {
                   <li>Apri <strong className="text-white">Windsurf</strong></li>
                   <li>Vai su <strong className="text-white">Settings → MCP Servers</strong></li>
                   <li>Clicca su <strong className="text-white">Add MCP Server</strong></li>
-                  <li>Imposta il <strong className="text-white">Name</strong>: <code className="bg-black/30 px-1">skillgrowth</code></li>
+                  <li>Imposta il <strong className="text-white">Name</strong>: <code className="bg-black/30 px-1">Reskill</code></li>
                   <li>Imposta il <strong className="text-white">Command</strong>: <code className="bg-black/30 px-1">npx</code></li>
-                  <li>Imposta gli <strong className="text-white">Arguments</strong>: <code className="bg-black/30 px-1">-y @skillgrowth/mcp-server --token YOUR_SKILLGROWTH_TOKEN</code></li>
+                  <li>Imposta gli <strong className="text-white">Arguments</strong>: <code className="bg-black/30 px-1">-y @reskill/mcp-server --token YOUR_RESKILL_TOKEN</code></li>
                   <li>Clicca su <strong className="text-white">Save</strong> e riavvia Windsurf</li>
                 </ol>
               </div>
@@ -400,7 +400,7 @@ export default function McpPage() {
                 <ol className="list-decimal list-inside space-y-1.5">
                   <li>Apri il file <code className="bg-black/30 px-1">~/.claude/settings.json</code> (crealo se non esiste)</li>
                   <li>Aggiungi la configurazione qui sotto nell&apos;oggetto <code className="bg-black/30 px-1">mcpServers</code></li>
-                  <li>Sostituisci <code className="bg-black/30 px-1 text-[oklch(72%_0.06_240)]">YOUR_SKILLGROWTH_TOKEN</code> con il tuo token</li>
+                  <li>Sostituisci <code className="bg-black/30 px-1 text-[oklch(72%_0.06_240)]">YOUR_RESKILL_TOKEN</code> con il tuo token</li>
                   <li>Riavvia il terminale e lancia <code className="bg-black/30 px-1">claude</code></li>
                 </ol>
                 <p className="mt-3">Claude Code caricherà automaticamente i tool all&apos;avvio. Puoi verificare con <code className="bg-black/30 px-1">/mcp</code> nella chat.</p>
@@ -417,7 +417,7 @@ export default function McpPage() {
                 </ol>
                 <div className="mt-3 p-3 bg-[oklch(20%_0.006_260)] border border-[oklch(60%_0.01_260)]/15 text-[11px]">
                   <p className="text-[oklch(72%_0.06_240)] font-semibold mb-1 flex items-center gap-1.5"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg> Differenza tra Token MCP e API Key</p>
-                  <p className="text-[oklch(60%_0.01_260)]">Il <strong className="text-white">Token MCP</strong> (flag <code className="bg-black/30 px-1">--token</code>) si genera dalla sezione Server MCP in Connessioni. L&apos;<strong className="text-white">API Key</strong> (env <code className="bg-black/30 px-1">SKILLGROWTH_API_KEY</code>) si genera dalla sezione API Key nella stessa pagina. Docker richiede l&apos;API Key.</p>
+                  <p className="text-[oklch(60%_0.01_260)]">Il <strong className="text-white">Token MCP</strong> (flag <code className="bg-black/30 px-1">--token</code>) si genera dalla sezione Server MCP in Connessioni. L&apos;<strong className="text-white">API Key</strong> (env <code className="bg-black/30 px-1">RESKILL_API_KEY</code>) si genera dalla sezione API Key nella stessa pagina. Docker richiede l&apos;API Key.</p>
                 </div>
               </div>
             )}

@@ -1,0 +1,44 @@
+# Reskill
+
+> Reskill is an AI-powered platform that converts web content (YouTube, Reddit, X/Twitter, PDF, web pages) into structured Markdown "Skill" files for AI agents like Cursor, Claude, ChatGPT, and MCP servers.
+
+Reskill extracts content from any web source, cleans it, and generates structured Markdown files with YAML frontmatter containing triggers, rules, and best practices. These Skills serve as optimized context for AI coding assistants and language models.
+
+## What Reskill Does
+
+- Extracts content from YouTube (transcripts), X/Twitter, Reddit (posts + comments), PDFs, and any web page
+- Converts raw web content into clean Markdown using Readability + Turndown
+- Generates structured "Skill" files using AI (GPT-4o-mini, GPT-4.1, etc.)
+- Skills include: YAML frontmatter, principles, rules, patterns, anti-patterns, examples
+- Works with Cursor (.cursorrules), Claude Projects, Custom GPTs, MCP servers, Windsurf, Copilot
+
+## Key Features
+
+- Browser extension (Chrome/Edge/Firefox) for one-click web-to-markdown conversion
+- AI-powered skill generation from multiple sources
+- Credit-based system with Free, Pro, Business, Enterprise plans
+- MCP server integration for programmatic access
+- API keys for external integrations
+
+## Pricing
+
+- Free: 1 bucket, 3 sources, 10 credits/month
+- Pro: €12/month — 15 buckets, 100 sources, 500 credits/month
+- Business: €29/month — 50 buckets, 500 sources, 1,500 credits/month
+- Enterprise: €59/month — unlimited buckets/sources, 5,000 credits/month
+
+## Links
+
+- Website: https://reskill.app
+- Dashboard: https://reskill.app/dashboard
+- Login: https://reskill.app/login
+- MCP Integration: https://reskill.app/mcp
+- Changelog: https://reskill.app/changelog
+- Privacy Policy: https://reskill.app/privacy
+- Terms of Service: https://reskill.app/terms
+
+## Contact
+
+- Email: support@reskill.app
+- Twitter: https://twitter.com/reskill_app
+- GitHub: https://github.com/reskill

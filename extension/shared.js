@@ -1,4 +1,4 @@
-﻿/**
+/**
  * shared.js — Logica condivisa tra popup.html e sidepanel.html
  *
  * Auth flow:
@@ -68,8 +68,13 @@ function showStep(step) {
   hideAllSections();
   const authScreen = document.getElementById("auth-screen");
   const authUi = document.getElementById("authenticated-ui");
+  const mainUi = document.getElementById("main-ui");
   if (authScreen) authScreen.style.display = "";
   if (authUi) authUi.classList.remove("active");
+  if (mainUi) {
+    mainUi.classList.remove("active");
+    mainUi.style.display = "none";
+  }
 }
 
 function hideAllSections() {
@@ -745,8 +750,65 @@ async function validateStoredToken(token) {
 }
 
 // ─── Flusso principale di verifica ──────────────────────────────────────────
+let verificationInProgress = false;
+
 async function checkVerification() {
-  showMainUI();
+  if (verificationInProgress) return;
+  verificationInProgress = true;
+
+  try {
+    // 1. Token già salvato → valida con il server
+    const result = await chrome.storage.local.get([VERIFIED_KEY, TOKEN_KEY, EMAIL_KEY, NAME_KEY, PLAN_KEY]);
+    const storedToken = result[TOKEN_KEY];
+
+    if (storedToken) {
+      const userData = await validateStoredToken(storedToken);
+      if (userData && userData.verified) {
+        currentToken = storedToken;
+        updateUserUI(userData.email, userData.name, userData.plan);
+        await chrome.storage.local.set({
+          [VERIFIED_KEY]: true,
+          [EMAIL_KEY]: userData.email,
+          [NAME_KEY]: userData.name || "",
+          [PLAN_KEY]: userData.plan || "free",
+        });
+        await loadQuickBuckets(storedToken);
+        showMainUI();
+        return;
+      }
+      // Token non valido o scaduto → pulisci lo storage
+      await chrome.storage.local.remove([VERIFIED_KEY, TOKEN_KEY, EMAIL_KEY, NAME_KEY, PLAN_KEY]);
+    }
+
+    // 2. Nessun token valido → prova a collegare una sessione web già aperta
+    try {
+      const found = await new Promise((resolve) => {
+        chrome.runtime.sendMessage({ action: "sg_sync_session" }, (response) => {
+          resolve(!!(response && response.found));
+        });
+      });
+
+      if (found) {
+        const synced = await chrome.storage.local.get([TOKEN_KEY, EMAIL_KEY, NAME_KEY, PLAN_KEY]);
+        if (synced[TOKEN_KEY]) {
+          currentToken = synced[TOKEN_KEY];
+          updateUserUI(synced[EMAIL_KEY] || "", synced[NAME_KEY] || "", synced[PLAN_KEY] || "free");
+          await loadQuickBuckets(synced[TOKEN_KEY]);
+          showMainUI();
+          return;
+        }
+      }
+    } catch {
+      // fallback al form di accesso
+    }
+
+    // 3. Nessuna sessione → richiedi l'accesso con il codice via email
+    showStep(stepEmail);
+  } catch {
+    showStep(stepEmail);
+  } finally {
+    verificationInProgress = false;
+  }
 }
 
 // ─── Utility: stato temporaneo ───────────────────────────────────────────────
@@ -965,7 +1027,7 @@ document.getElementById("acct-buy-credits")?.addEventListener("click", () => {
   loadUsage();
 });
 
-// ─── Tour / "Come si usa" ────────────────────────────────────────────────────
+// ─── Replay Tour ─────────────────────────────────────────────────────────────
 const tourSteps = [
   {
     selector: '.nav-btn[data-section="feed"]',
@@ -985,7 +1047,7 @@ const tourSteps = [
   {
     selector: '.nav-btn[data-section="connections"]',
     title: "Connessioni",
-    desc: "Collega Skillgrowth ai tuoi strumenti: Codex, Claude, Cursor (via MCP), API Key per sviluppatori, e CLI. Lo stato di ogni connessione viene verificato in tempo reale. Clicca su una connessione per configurarla.",
+    desc: "Collega Reskill ai tuoi strumenti: Codex, Claude, Cursor (via MCP), API Key per sviluppatori, e CLI. Lo stato di ogni connessione viene verificato in tempo reale. Clicca su una connessione per configurarla.",
   },
   {
     selector: "#account-menu-btn",
@@ -995,21 +1057,29 @@ const tourSteps = [
 ];
 
 let tourIndex = 0;
+let tourActive = false;
 
 function startTour() {
   tourIndex = 0;
-  showTourStep(tourIndex);
+  tourActive = true;
+  showTourStep(0);
+
+  // Segna il tour come visto
+  try { chrome.storage?.local?.set({ sg_tour_seen: true }); } catch {}
 }
 
 function showTourStep(index) {
   const overlay = document.getElementById("tour-overlay");
+  const spotlight = document.getElementById("tour-spotlight");
   const popup = document.getElementById("tour-popup");
-  const stepNum = document.getElementById("tour-step-num");
+  const label = document.getElementById("tour-step-label");
   const title = document.getElementById("tour-title");
   const desc = document.getElementById("tour-desc");
   const backBtn = document.getElementById("tour-back-btn");
   const nextBtn = document.getElementById("tour-next-btn");
+  const skipBtn = document.getElementById("tour-skip-btn");
   const dots = document.getElementById("tour-dots");
+  const progressFill = document.getElementById("tour-progress-fill");
 
   const step = tourSteps[index];
   if (!step) return;
@@ -1019,57 +1089,79 @@ function showTourStep(index) {
 
   // Rimuovi highlight precedenti
   document.querySelectorAll(".tour-highlight").forEach((el) => el.classList.remove("tour-highlight"));
-
-  // Aggiungi highlight
   target.classList.add("tour-highlight");
 
   // Overlay
   overlay.classList.add("active");
 
-  // Step number
-  stepNum.textContent = `${index + 1}/${tourSteps.length}`;
+  // Progress bar
+  const pct = ((index + 1) / tourSteps.length) * 100;
+  progressFill.style.width = pct + "%";
+
+  // Step label
+  label.textContent = `PASSO ${index + 1} DI ${tourSteps.length}`;
 
   // Title & desc
   title.textContent = step.title;
   desc.textContent = step.desc;
 
-  // Back / Next
+  // Back button
   backBtn.style.display = index === 0 ? "none" : "flex";
-  nextBtn.textContent = index === tourSteps.length - 1 ? "Fine" : "Avanti";
+
+  // Next button
+  const isLast = index === tourSteps.length - 1;
+  nextBtn.innerHTML = isLast
+    ? `Fine <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+    : `Avanti <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+  nextBtn.classList.toggle("tour-finish", isLast);
+
+  // Skip button text
+  skipBtn.textContent = isLast ? "Chiudi" : "Salta tour";
 
   // Dots
   dots.innerHTML = tourSteps
     .map((_, i) => `<span class="tour-dot${i === index ? " active" : ""}"></span>`)
     .join("");
 
-  // Posiziona il popup accanto al target
-  positionTourPopup(target, popup);
-
+  // Spotlight + positioning
+  positionTourElements(target, spotlight, popup);
   popup.classList.add("active");
 }
 
-function positionTourPopup(target, popup) {
-  const targetRect = target.getBoundingClientRect();
-  const popupWidth = 260;
+function positionTourElements(target, spotlight, popup) {
+  const rect = target.getBoundingClientRect();
+  const gap = 8;
+  const popupWidth = 280;
+  const popupHeight = 180;
 
-  // Posiziona a destra del target, centrato verticalmente
-  let left = targetRect.right + 10;
-  let top = targetRect.top + targetRect.height / 2 - 60;
+  // Spotlight: bordo attorno all'elemento
+  const pad = 4;
+  spotlight.style.left = (rect.left - pad) + "px";
+  spotlight.style.top = (rect.top - pad) + "px";
+  spotlight.style.width = (rect.width + pad * 2) + "px";
+  spotlight.style.height = (rect.height + pad * 2) + "px";
 
-  // Se non c'è spazio a destra, metti a sinistra
-  if (left + popupWidth > window.innerWidth - 10) {
-    left = targetRect.left - popupWidth - 10;
+  // Popup: posiziona a destra o sinistra del target
+  let left = rect.right + gap;
+  let top = rect.top + rect.height / 2 - popupHeight / 2;
+
+  if (left + popupWidth > window.innerWidth - 12) {
+    left = rect.left - popupWidth - gap;
   }
-
-  // Limita in verticale
-  if (top < 10) top = 10;
-  if (top + 160 > window.innerHeight) top = window.innerHeight - 170;
+  if (left < 12) {
+    // Se non c'è spazio né a destra né a sinistra, posiziona sotto
+    left = Math.max(12, Math.min(rect.left, window.innerWidth - popupWidth - 12));
+    top = rect.bottom + gap;
+  }
+  if (top < 12) top = 12;
+  if (top + popupHeight > window.innerHeight - 12) top = window.innerHeight - popupHeight - 12;
 
   popup.style.left = left + "px";
   popup.style.top = top + "px";
 }
 
 function endTour() {
+  tourActive = false;
   const overlay = document.getElementById("tour-overlay");
   const popup = document.getElementById("tour-popup");
   overlay.classList.remove("active");
@@ -1077,29 +1169,54 @@ function endTour() {
   document.querySelectorAll(".tour-highlight").forEach((el) => el.classList.remove("tour-highlight"));
 }
 
-document.getElementById("tour-back-btn")?.addEventListener("click", () => {
-  if (tourIndex > 0) {
-    tourIndex--;
-    showTourStep(tourIndex);
-  }
-});
-
-document.getElementById("tour-next-btn")?.addEventListener("click", () => {
+function tourNext() {
   if (tourIndex < tourSteps.length - 1) {
     tourIndex++;
     showTourStep(tourIndex);
   } else {
     endTour();
   }
+}
+
+function tourBack() {
+  if (tourIndex > 0) {
+    tourIndex--;
+    showTourStep(tourIndex);
+  }
+}
+
+document.getElementById("tour-next-btn")?.addEventListener("click", tourNext);
+document.getElementById("tour-back-btn")?.addEventListener("click", tourBack);
+document.getElementById("tour-skip-btn")?.addEventListener("click", endTour);
+
+// Click sul backdrop chiude il tour
+document.getElementById("tour-backdrop")?.addEventListener("click", endTour);
+
+// Navigazione da tastiera
+document.addEventListener("keydown", (e) => {
+  if (!tourActive) return;
+  if (e.key === "ArrowRight" || e.key === "Enter") { e.preventDefault(); tourNext(); }
+  else if (e.key === "ArrowLeft") { e.preventDefault(); tourBack(); }
+  else if (e.key === "Escape") { e.preventDefault(); endTour(); }
 });
 
-// Click overlay chiude il tour
-document.getElementById("tour-overlay")?.addEventListener("click", endTour);
-
+// Pulsante "Come si usa" nel menu Account
 document.getElementById("acct-how-to-use")?.addEventListener("click", () => {
   accountDropdown?.classList.remove("open");
   startTour();
 });
+
+// Auto-start al primo accesso (solo se non visto prima)
+setTimeout(() => {
+  try {
+    chrome.storage?.local?.get("sg_tour_seen", (res) => {
+      if (!res?.sg_tour_seen) {
+        // Attendi che il DOM sia pronto, poi avvia il tour
+        setTimeout(startTour, 600);
+      }
+    });
+  } catch {}
+}, 300);
 
 document.getElementById("acct-logout-btn")?.addEventListener("click", async () => {
   accountDropdown?.classList.remove("open");
@@ -1204,7 +1321,7 @@ document.getElementById("save-url-btn")?.addEventListener("click", async () => {
   try {
     new URL(url);
   } catch {
-    setStatus("URL non valido. Es: https://skillgrowth.app", 3000);
+    setStatus("URL non valido. Es: https://reskill.app", 3000);
     return;
   }
   await chrome.storage.local.set({ [SERVER_URL_KEY]: url });

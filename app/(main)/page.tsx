@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/no-unescaped-entities */
@@ -16,6 +16,7 @@ import { CursorIcon, CodexIcon, AntigravityIcon } from "@/components/ui/BrandIco
 import ReactMarkdown from "react-markdown";
 import { useTranslation } from "@/translations";
 import PricingSection from "@/components/sections/PricingSection";
+import Marquee from "@/components/Marquee";
 
 const demoItems = [
     {
@@ -100,7 +101,7 @@ triggers:
 **Editor**: Cursor with Vim keybindings
 **Theme**: Catppuccin Mocha (cyan accent)
 **Terminal**: Warp with AI suggestions
-**LLM Integration**: Local Ollama + Claude API hybrid
+**LLM Integration**: OpenAI API (GPT-4o-mini / GPT-4.1)
 
 ## Extension Stack
 
@@ -438,12 +439,12 @@ A new benchmark (AgentBench 2.0) evaluates agents on real-world coding tasks. To
 
 ### 3. Tool of the Week
 
-\`skillgrowth\` An open-source skill manager that syncs AI prompts across Cursor, Claude Code, and Windsurf. Supports MCP filesystem server for context-aware tool calls.
+\`Reskill\` An open-source skill manager that syncs AI prompts across Cursor, Claude Code, and Windsurf. Supports MCP filesystem server for context-aware tool calls.
 
 ## Quick Links
 
 - [MCP Specification v1.2 Released](https://modelcontextprotocol.io)
-- [Skillgrowth GitHub](https://github.com/skillgrowth)
+- [Reskill GitHub](https://github.com/Reskill)
 - [AgentBench 2.0 Results](https://agentbench.dev)`,
     },
 ];
@@ -472,10 +473,10 @@ const ais = [
 
 const faqs = [
     { q: "Cos'è una Skill per AI agent?", a: "Una Skill è un file Markdown con frontmatter YAML che contiene regole, trigger e best practice strutturate. Gli agenti AI (Cursor, Claude, ChatGPT) la usano come contesto per rispondere in modo più preciso e contestuale." },
-    { q: "Come viene estratto il contenuto da YouTube?", a: "Skillgrowth utilizza la libreria youtube-transcript per scaricare la trascrizione automatica dei video. Se la trascrizione non è disponibile, estrae la descrizione e i metadati del video tramite l'API oEmbed di YouTube." },
+    { q: "Come viene estratto il contenuto da YouTube?", a: "Reskill utilizza la libreria youtube-transcript per scaricare la trascrizione automatica dei video. Se la trascrizione non è disponibile, estrae la descrizione e i metadati del video tramite l'API oEmbed di YouTube." },
     { q: "I miei dati sono al sicuro?", a: "Assolutamente sì. I dati vengono elaborati lato server e salvati in MongoDB. Non condividiamo né vendiamo i tuoi contenuti. Puoi eliminare bucket e fonti in qualsiasi momento." },
     { q: "Quali formati di AI supportate?", a: "Supportiamo Cursor (.cursorrules), Claude AI Projects, Custom GPTs (ChatGPT), MCP Server (Model Context Protocol), Windsurf, GitHub Copilot e qualsiasi LLM che accetti file Markdown come contesto." },
-    { q: "Devo avere un account per usare Skillgrowth?", a: "Sì, è necessario un account gratuito con Google OAuth per salvare bucket, fonti e generare Skill. La registrazione richiede meno di 30 secondi." },
+    { q: "Devo avere un account per usare Reskill?", a: "Sì, è necessario un account gratuito con Google OAuth per salvare bucket, fonti e generare Skill. La registrazione richiede meno di 30 secondi." },
     { q: "Cosa succede se supero i limiti del piano Free?", a: "Il piano Free ti permette 3 bucket e 10 fonti totali. Se raggiungi il limite, ti invitiamo a fare upgrade al piano Pro (€9/mese) per 10 bucket e 100 fonti, o Team (€29/mese) per risorse illimitate." },
     { q: "Come funziona l'estensione browser?", a: "L'estensione Chrome/Edge/Firefox aggiunge un pulsante contestuale. Cliccando 'Trasforma in Markdown' su qualsiasi pagina, il contenuto viene pulito da ads e rumore, convertito in Markdown e salvato direttamente nel tuo bucket." },
 ];
@@ -492,6 +493,44 @@ export default function Home() {
     const [deleting, setDeleting] = useState(false);
 
     const words = ["YouTube", "X / Twitter", "Reddit", "PDF", "Pagine Web", "Discord", "Blog", "Documentazione"];
+
+    const faqSchema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqs.map((faq) => ({
+            "@type": "Question",
+            name: faq.q,
+            acceptedAnswer: {
+                "@type": "Answer",
+                text: faq.a,
+            },
+        })),
+    };
+
+    const orgSchema = {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "Reskill",
+        url: "https://reskill.app",
+        logo: "https://reskill.app/reskill.png",
+        description: "Piattaforma AI che trasforma contenuti web in Skill Markdown strutturate per agenti AI.",
+    };
+
+    const softwareSchema = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        name: "Reskill",
+        applicationCategory: "DeveloperApplication",
+        operatingSystem: "Chrome, Firefox, Edge, Web",
+        url: "https://reskill.app",
+        description: "Trasforma YouTube, Reddit, PDF e pagine web in Skill Markdown per agenti AI.",
+        offers: [
+            { "@type": "Offer", price: "0", priceCurrency: "EUR", name: "Free" },
+            { "@type": "Offer", price: "12", priceCurrency: "EUR", name: "Pro" },
+            { "@type": "Offer", price: "29", priceCurrency: "EUR", name: "Business" },
+            { "@type": "Offer", price: "59", priceCurrency: "EUR", name: "Enterprise" },
+        ],
+    };
 
     useEffect(() => {
         const current = words[wordIdx];
@@ -520,6 +559,10 @@ export default function Home() {
         <main className="min-h-screen bg-[oklch(13%_0.006_260)] text-white overflow-hidden selection:bg-cyan/30 selection:text-white relative"
 style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.06 240/0.08) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 80% 40%,oklch(72% 0.06 240/0.04) 0%,transparent 50%),radial-gradient(ellipse 30% 40% at 20% 60%,oklch(72% 0.06 240/0.03) 0%,transparent 50%),radial-gradient(ellipse 60% 30% at 50% 100%,oklch(72% 0.06 240/0.05) 0%,transparent 50%)`}}>
 
+            {/* Structured Data for SEO/GEO/AEO */}
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }} />
 
             {/* Hero Section */}
             <section className="pt-32 pb-24 px-6 relative">
@@ -542,20 +585,14 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
 
                     {/* Source Platforms Scroller */}
                     <div className="mb-0 relative max-w-2xl mx-auto overflow-hidden mask-fade-x">
-                        <div className="flex scroll-track scroll-track-right items-center">
+                        <Marquee>
                             {sources.map((s, i) => (
                                 <div key={i} className="shrink-0 flex items-center gap-3 mr-14">
                                     <s.icon className="text-[oklab(60%_-0.00173648_-0.00984808/0.7)] text-2xl" />
                                     <span className="text-sm text-[oklab(60%_-0.00173648_-0.00984808/0.7)] whitespace-nowrap">{s.name}</span>
                                 </div>
                             ))}
-                            {sources.map((s, i) => (
-                                <div key={`dup-${i}`} className="shrink-0 flex items-center gap-3 mr-14">
-                                    <s.icon className="text-[oklab(60%_-0.00173648_-0.00984808/0.7)] text-2xl" />
-                                    <span className="text-sm text-[oklab(60%_-0.00173648_-0.00984808/0.7)] whitespace-nowrap">{s.name}</span>
-                                </div>
-                            ))}
-                        </div>
+                        </Marquee>
                     </div>
 
                     {/* Down arrow between scrollers */}
@@ -568,20 +605,14 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
 
                     {/* AI Platforms Scroller */}
 <div className="mb-8 relative max-w-2xl mx-auto overflow-hidden mask-fade-x">
-                        <div className="flex scroll-track scroll-track-left items-center">
+                        <Marquee reverse>
                             {ais.map((a, i) => (
                                 <div key={i} className="shrink-0 flex items-center gap-3 mr-14">
                                     <a.icon className="text-[oklab(60%_-0.00173648_-0.00984808/0.7)] text-2xl" />
                                     <span className="text-sm text-[oklab(60%_-0.00173648_-0.00984808/0.7)] whitespace-nowrap">{a.name}</span>
                                 </div>
                             ))}
-                            {ais.map((a, i) => (
-                                <div key={`dup-${i}`} className="shrink-0 flex items-center gap-3 mr-14">
-                                    <a.icon className="text-[oklab(60%_-0.00173648_-0.00984808/0.7)] text-2xl" />
-                                    <span className="text-sm text-[oklab(60%_-0.00173648_-0.00984808/0.7)] whitespace-nowrap">{a.name}</span>
-                                </div>
-                            ))}
-                        </div>
+                        </Marquee>
                     </div>
 
 <div className="flex flex-col sm:flex-row gap-4 justify-center items-stretch">
@@ -816,7 +847,7 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
                                     <AntigravityIcon size={16} className="text-gray/60 shrink-0" title="Antigravity" />
                                 </div>
                                 <p className="text-xs text-gray leading-relaxed">
-                                    Collega il server MCP di Skillgrowth a Claude Code, Cursor, Codex o Antigravity. I tuoi agenti possono cercare e consultare le fonti salvate mentre lavorano.
+                                    Collega il server MCP di Reskill a Claude Code, Cursor, Codex o Antigravity. I tuoi agenti possono cercare e consultare le fonti salvate mentre lavorano.
                                 </p>
                             </div>
                             <div className="p-5 bg-white/2 border border-white/8">
@@ -847,20 +878,14 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
 
                         {/* AI scroller */}
                         <div className="mt-16 relative overflow-hidden mask-fade-x">
-                            <div className="flex scroll-track scroll-track-left items-center">
+                            <Marquee reverse>
                                 {ais.map((a, i) => (
                                     <div key={i} className="shrink-0 flex items-center gap-3 mr-14">
                                         <a.icon className="w-5 h-5 text-cyan/60" />
                                         <span className="text-sm whitespace-nowrap text-gray/80">{a.name}</span>
                                     </div>
                                 ))}
-                                {ais.map((a, i) => (
-                                    <div key={`dup-${i}`} className="shrink-0 flex items-center gap-3 mr-14">
-                                        <a.icon className="w-5 h-5 text-cyan/60" />
-                                        <span className="text-sm whitespace-nowrap text-gray/80">{a.name}</span>
-                                    </div>
-                                ))}
-                            </div>
+                            </Marquee>
                         </div>
                     </div>
             </section>
@@ -904,7 +929,7 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
 
                     <div className="flex justify-center">
                         <a
-                            href="https://chromewebstore.google.com/detail/skillgrowth"
+                            href="https://chromewebstore.google.com/detail/Reskill"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-6 py-3 bg-cyan text-black font-bold text-sm transition-all hover:bg-[oklch(60%_0.08_240)] active:scale-95 inline-flex items-center gap-2"
@@ -932,7 +957,7 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
                         <div className="p-6 bg-white/2 border border-white/8 flex flex-col">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-cyan mb-3">Lascia che i tuoi agenti leggano e catturino fonti.</span>
                             <p className="text-xs text-gray leading-relaxed flex-1">
-                                Collega il server MCP di Skillgrowth a Claude, Cursor o Codex: i tuoi agenti potranno accedere alle fonti salvate e catturare pagine web pubbliche come Markdown pulito per il task corrente.
+                                Collega il server MCP di Reskill a Claude, Cursor o Codex: i tuoi agenti potranno accedere alle fonti salvate e catturare pagine web pubbliche come Markdown pulito per il task corrente.
                             </p>
                         </div>
                         <div className="p-6 bg-white/2 border border-white/8 flex flex-col">
@@ -944,7 +969,7 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
                         <div className="p-6 bg-white/2 border border-white/8 flex flex-col">
                             <span className="text-[11px] font-bold uppercase tracking-wider text-cyan mb-3">Cattura nuove fonti dal web</span>
                             <p className="text-xs text-gray leading-relaxed flex-1">
-                                Quando un agente cerca o naviga sul web, può catturare pagine pubbliche utili come Markdown pulito e sincronizzare tutto nel tuo account Skillgrowth.
+                                Quando un agente cerca o naviga sul web, può catturare pagine pubbliche utili come Markdown pulito e sincronizzare tutto nel tuo account Reskill.
                             </p>
                         </div>
                     </div>
@@ -1014,7 +1039,7 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
                                         </div>
                                         <div className="flex gap-2">
                                             <span className="text-cyan">2.</span>
-                                            <span>Trascina il file <code className="bg-[oklch(13%_0.006_260)] px-1 py-0.5 rounded text-white">mcp-setup-guide.md</code> salvato da Skillgrowth.</span>
+                                            <span>Trascina il file <code className="bg-[oklch(13%_0.006_260)] px-1 py-0.5 rounded text-white">mcp-setup-guide.md</code> salvato da Reskill.</span>
                                         </div>
                                         <div className="flex gap-2">
                                             <span className="text-cyan">3.</span>

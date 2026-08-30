@@ -10,10 +10,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  serverExternalPackages: ["jsdom", "pdf-parse"],
-  turbopack: {
-    root: __dirname,
-  },
+  serverExternalPackages: [
+    "jsdom",
+    "pdf-parse",
+    "bcryptjs",
+    "nodemailer",
+    "turndown",
+    "@mozilla/readability",
+    "stripe",
+    "@ai-sdk/openai",
+    "ai",
+    "resend",
+    "youtube-transcript",
+    "@supabase/supabase-js",
+    "next-auth",
+  ],
   async headers() {
     return [
       {

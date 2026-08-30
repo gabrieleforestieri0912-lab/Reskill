@@ -1,5 +1,5 @@
 {
-  "name": "skillgrowth",
+  "name": "Reskill",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -7,6 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
+  },
+  "engines": {
+    "node": ">=18.17.0"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.64",
@@ -22,7 +25,6 @@
     "next": "16.2.6",
     "next-auth": "^5.0.0-beta.31",
     "nodemailer": "^7.0.13",
-    "ollama-ai-provider": "^1.2.0",
     "pdf-parse": "^2.4.5",
     "react": "19.2.4",
     "react-dom": "19.2.4",

@@ -1,4 +1,4 @@
-﻿"use client"
+"use client"
 
 import { signIn, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
@@ -105,7 +105,7 @@ export default function LoginPage() {
             <p className="text-sm text-[oklch(60%_0.01_260)]">
               {mode === "login"
                 ? "Accedi con le tue credenziali o con Google"
-                : "Registrati per iniziare a usare Skillgrowth"}
+                : "Registrati per iniziare a usare Reskill"}
             </p>
           </div>
 
@@ -232,7 +232,7 @@ export default function LoginPage() {
 
           {/* Link utility */}
           <p className="text-xs text-slate-600 text-center mt-4">
-            Utilizzando Skillgrowth accetti i{" "}
+            Utilizzando Reskill accetti i{" "}
             <Link href="/terms" className="text-[oklch(60%_0.01_260)] hover:text-[oklch(98.5%_0.002_260)] underline underline-offset-2 transition-colors">Termini di Servizio</Link>{" "}
             e la{" "}
             <Link href="/privacy" className="text-[oklch(60%_0.01_260)] hover:text-[oklch(98.5%_0.002_260)] underline underline-offset-2 transition-colors">Privacy Policy</Link>

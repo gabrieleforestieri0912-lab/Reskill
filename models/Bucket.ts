@@ -72,6 +72,16 @@ export async function getBucketById(id: string) {
   return data as (IBucket & { sources: ISourceRow[] }) | null;
 }
 
+export async function getBucketByUserAndName(userEmail: string, name: string) {
+  const { data } = await supabase
+    .from("buckets")
+    .select("*, sources(*)")
+    .eq("user_email", userEmail)
+    .eq("name", name)
+    .maybeSingle();
+  return data as (IBucket & { sources: ISourceRow[] }) | null;
+}
+
 export async function createBucket(data: {
   name: string;
   description: string;

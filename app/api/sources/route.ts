@@ -1,4 +1,5 @@
-import { getUserEmail, getUserEmailOrNull } from "@/lib/auth-helper";
+export const runtime = 'nodejs';
+import { getUserEmailOrNull } from "@/lib/auth-helper";
 import { getSourcesByUserEmail, getSourceById, sourceToJSON } from "@/models/Source";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -9,7 +10,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // Support ?single=id to get a specific source
     const singleId = req.nextUrl.searchParams.get("single");
     if (singleId) {
       const source = await getSourceById(singleId);
@@ -20,11 +20,9 @@ export async function GET(req: NextRequest) {
     }
 
     const sources = await getSourcesByUserEmail(userEmail);
-    return NextResponse.json(sources.map((s: any) => ({
-      ...sourceToJSON(s),
-      bucketName: (s as any).bucketName,
-    })));
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json(sources.map((s) => sourceToJSON(s)));
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : "Errore sconosciuto";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

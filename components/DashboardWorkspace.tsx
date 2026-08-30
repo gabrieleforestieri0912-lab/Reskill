@@ -1,4 +1,4 @@
-﻿
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
@@ -487,7 +487,7 @@ export default function DashboardWorkspace() {
  <div className="w-20 h-20 bg-linear-to-tr from-[oklch(13% .006 260)] to-[oklch(72% .06 240)] flex items-center justify-center mx-auto mb-8 shadow-[0_0_30px_rgba(77,138,150,0.3)] rotate-3">
  <Sparkles size={40} className="text-[oklch(72% .06 240)]" />
  </div>
- <h2 className="text-3xl font-extrabold text-[oklch(98.5%_.002_260)] mb-4 tracking-tight">Benvenuto in Skillgrowth!</h2>
+ <h2 className="text-3xl font-extrabold text-[oklch(98.5%_.002_260)] mb-4 tracking-tight">Benvenuto in Reskill!</h2>
  <p className="text-[oklch(72% .06 240)] mb-8 text-sm leading-relaxed max-w-md mx-auto">
  Il tuo <strong className="text-[oklch(98.5%_.002_260)]">secondo cervello AI</strong> Ã¨ pronto. Inizia creando un Bucket per collezionare fonti web tramite l&apos;estensione, e poi usa l&apos;Intelligenza Artificiale per compilare super-skill contestuali.
  </p>
@@ -581,9 +581,9 @@ export default function DashboardWorkspace() {
  <option value="">Modello Auto</option>
  <option value="gpt-4o-mini">GPT-4o Mini</option>
  <option value="gpt-4o">GPT-4o</option>
- <option value="llama3">Llama 3 (locale)</option>
- <option value="llama3.1">Llama 3.1 (locale)</option>
- <option value="mistral">Mistral (locale)</option>
+ <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+ <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+ <option value="gpt-4.1">GPT-4.1</option>
  </select>
  {activeBucket.sources.length > 0 && (
  <button
@@ -804,7 +804,7 @@ export default function DashboardWorkspace() {
  <div>trigger:</div>
  <div className="text-[oklch(98.5%_0.002_260)]">Attiva su argomenti inerenti a {activeBucket.name}</div>
  <div>author:</div>
- <div className="text-[oklch(98.5%_0.002_260)]">Skillgrowth AI</div>
+ <div className="text-[oklch(98.5%_0.002_260)]">Reskill AI</div>
  <div>sources:</div>
  <div className="text-[oklch(98.5%_0.002_260)]">{activeBucket.sources.length} fonti estrapolate</div>
  </div>
@@ -908,7 +908,7 @@ export default function DashboardWorkspace() {
  {`"mcpServers": {
  "skills": {
  "command": "npx",
- "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:\\\\Users\\\\TuoNome\\\\.skillgrowth\\\\skills"]
+ "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:\\\\Users\\\\TuoNome\\\\.reskill\\\\skills"]
  }
 }`}
  </pre>

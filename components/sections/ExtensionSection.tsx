@@ -1,11 +1,11 @@
-﻿/* eslint-disable react/no-unescaped-entities */
+/* eslint-disable react/no-unescaped-entities */
 "use client"
 
 import { useTranslation } from "@/translations"
 import { FaChrome, FaFirefox } from "react-icons/fa6"
 
 const chromeSteps = [
- <>Scarica il file <code className="bg-[oklch(13%_.006_260)]/50 px-1.5 py-0.5 rounded text-[10px] text-[oklch(98.5%_.002_260)] border border-[oklch(98.5%_.002_260)]/6">skillgrowth-extension.zip</code> ed estrailo in una cartella locale.</>,
+ <>Scarica il file <code className="bg-[oklch(13%_.006_260)]/50 px-1.5 py-0.5 rounded text-[10px] text-[oklch(98.5%_.002_260)] border border-[oklch(98.5%_.002_260)]/6">reskill-extension.zip</code> ed estrailo in una cartella locale.</>,
  <>Apri il browser e digita <code className="bg-[oklch(13%_.006_260)]/50 px-1.5 py-0.5 rounded text-[10px] text-[oklch(98.5%_.002_260)] border border-[oklch(98.5%_.002_260)]/6">chrome://extensions</code>.</>,
  <>Attiva <strong className="text-[oklch(98.5%_.002_260)] font-semibold">ModalitÃ  sviluppatore</strong> in alto a destra.</>,
  <>Clicca su <strong className="text-[oklch(98.5%_.002_260)] font-semibold">Carica estensione non pacchettizzata</strong>.</>,
@@ -23,7 +23,7 @@ const firefoxSteps = [
 const usageSteps = [
  <>Naviga su qualsiasi articolo, video YouTube o pagina web che vuoi archiviare.</>,
  <>Fai click destro su una sezione vuota della pagina.</>,
- <>Passa su <strong className="text-[oklch(98.5%_.002_260)] font-semibold">Skillgrowth</strong> â†’ <strong className="text-[oklch(72%_0.06_240)]">Trasforma in Markdown</strong>.</>,
+ <>Passa su <strong className="text-[oklch(98.5%_.002_260)] font-semibold">Reskill</strong> â†’ <strong className="text-[oklch(72%_0.06_240)]">Trasforma in Markdown</strong>.</>,
  <>Il download del file <code className="bg-[oklch(13%_.006_260)]/50 px-1 py-0.5 rounded text-[10px] text-[oklch(98.5%_.002_260)] border border-[oklch(98.5%_.002_260)]/6">.md</code> pulito parte automaticamente.</>,
 ]
 

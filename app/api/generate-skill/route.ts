@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+export const runtime = 'nodejs';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { streamText } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
@@ -40,11 +40,9 @@ REGOLE FONDAMENTALI:
 const MODEL_MAP: Record<string, string> = {
   "gpt-4o-mini": "gpt-4o-mini",
   "gpt-4o": "gpt-4o",
-  "llama3": "llama3",
-  "llama3.1": "llama3.1",
-  "mistral": "mistral",
-  "codellama": "codellama",
-  "gemma": "gemma",
+  "gpt-4.1-nano": "gpt-4.1-nano",
+  "gpt-4.1-mini": "gpt-4.1-mini",
+  "gpt-4.1": "gpt-4.1",
 };
 
 export async function POST(req: Request) {
@@ -66,7 +64,7 @@ export async function POST(req: Request) {
 
     const hourlyLimit = getHourlyLimit(guard.planId);
     const rateKey = `gen:${userEmail || "guest"}`;
-    if (!checkRateLimit(rateKey, hourlyLimit, 60 * 60 * 1000)) {
+    if (!await checkRateLimit(rateKey, hourlyLimit, 60 * 60 * 1000)) {
       return new Response(
         JSON.stringify({
           error: `Limite orario raggiunto per il piano ${guard.planName}. Riprova più tardi o effettua l'upgrade.`,
@@ -80,13 +78,20 @@ export async function POST(req: Request) {
 
     const { prompt, sourcesSummary, model: requestedModel } = await req.json();
 
-    const isOllama = !process.env.OPENAI_API_KEY;
-    const modelName = MODEL_MAP[requestedModel] || (isOllama ? "llama3" : "gpt-4o-mini");
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return new Response(
+        JSON.stringify({
+          error: "Chiave API OpenAI non configurata. Contatta l'amministratore.",
+          upgrade: false,
+        }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
-    const openai = createOpenAI({
-      apiKey: process.env.OPENAI_API_KEY || "ollama",
-      baseURL: isOllama ? "http://localhost:11434/v1" : undefined,
-    });
+    const modelName = MODEL_MAP[requestedModel] || "gpt-4o-mini";
+
+    const openai = createOpenAI({ apiKey });
 
     const result = await streamText({
       model: openai(modelName),
@@ -105,13 +110,14 @@ export async function POST(req: Request) {
     return result.toTextStreamResponse();
   } catch (error: any) {
     console.error("AI Generation Error:", error);
+    const errorMessage = error?.message || "Errore sconosciuto";
     const stream = new ReadableStream({
       async start(controller) {
-        const message = `> **⚠️ Avviso di Rete**: Connessione all'LLM fallita.\n\nAssicurati che **Ollama** sia avviato sul tuo computer (http://localhost:11434) oppure imposta la variabile \`OPENAI_API_KEY\` nel file \`.env\`.\n\n---\n\n# Skill Base\n\nQuesta è una simulazione di streaming testuale generata perché nessun modello LLM ha risposto alla chiamata. Nel tuo ambiente di produzione o con Ollama acceso, qui vedrai il testo del ragionamento AI fluire in tempo reale.`;
+        const message = `> **⚠️ Errore di generazione AI**\n\nSi è verificato un errore durante la generazione della skill: ${errorMessage}\n\nVerifica che la chiave API sia valida e che il modello selezionato sia disponibile.`;
         const words = message.split(" ");
         for (const word of words) {
           controller.enqueue(new TextEncoder().encode(word + " "));
-          await new Promise((r) => setTimeout(r, 80));
+          await new Promise((r) => setTimeout(r, 30));
         }
         controller.close();
       },

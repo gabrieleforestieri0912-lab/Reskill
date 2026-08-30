@@ -22,7 +22,7 @@ declare module "next-auth" {
 if (!process.env.AUTH_SECRET && process.env.NODE_ENV === "production") {
   throw new Error("AUTH_SECRET environment variable is required in production")
 }
-const AUTH_SECRET = process.env.AUTH_SECRET || "skillgrowth-dev-secret-do-not-use-in-prod-2026"
+const AUTH_SECRET = process.env.AUTH_SECRET || "reskill-dev-secret-do-not-use-in-prod-2026"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: AUTH_SECRET,
@@ -74,7 +74,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id
         token.email = user.email
