@@ -10,6 +10,10 @@ try {
     process.exit(0);
   }
 
+  // Add .js extension to any `next/<subpath>` ESM import so bundlers can
+  // resolve it, since Next.js 16 package.json has no `exports` mapping.
+  const re = /(from\s+["'])(next\/[^"']+)(["'])/g;
+
   let patched = 0;
   function walkDir(dir) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
@@ -19,7 +23,10 @@ try {
         walkDir(fullPath);
       } else if (entry.name.endsWith('.js')) {
         let content = fs.readFileSync(fullPath, 'utf8');
-        const newContent = content.replace(/from "next\/server"/g, 'from "next/server.js"');
+        const newContent = content.replace(re, (match, p1, p2, p3) => {
+          const ext = path.extname(p2);
+          return p1 + (ext ? p2 : p2 + '.js') + p3;
+        });
         if (newContent !== content) {
           fs.writeFileSync(fullPath, newContent);
           patched++;
