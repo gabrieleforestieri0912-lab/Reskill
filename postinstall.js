@@ -1,20 +1,29 @@
 const fs = require('fs');
 const path = require('path');
 
-const debug = (msg) => {
-  console.log('POSTINSTALL:', msg);
-  try {
-    fs.writeFileSync(path.join(__dirname, '.postinstall-debug'), new Date().toISOString() + ': ' + msg);
-  } catch(e) {}
-};
+const root = path.join(__dirname);
 
-debug('postinstall started');
+// 1) Patch next/package.json to add exports field for next/server
+const nextPkgPath = path.join(root, 'node_modules', 'next', 'package.json');
+try {
+  if (fs.existsSync(nextPkgPath)) {
+    const pkg = JSON.parse(fs.readFileSync(nextPkgPath, 'utf8'));
+    if (!pkg.exports) pkg.exports = {};
+    if (!pkg.exports['./server']) {
+      pkg.exports['./server'] = './server.js';
+      fs.writeFileSync(nextPkgPath, JSON.stringify(pkg, null, 2));
+      console.log('POSTINSTALL: patched next/package.json exports');
+    }
+  }
+} catch (e) {
+  console.error('POSTINSTALL: failed to patch next/package.json:', e.message);
+}
 
-// Patch next-auth files to use next/server.js instead of next/server
-const nextauthDir = path.join(__dirname, 'node_modules', 'next-auth');
+// 2) Patch next-auth files to use next/server.js instead of next/server
+const nextauthDir = path.join(root, 'node_modules', 'next-auth');
 try {
   if (fs.existsSync(nextauthDir)) {
-    debug('next-auth dir found');
+    let patched = false;
     function walkDir(dir) {
       const entries = fs.readdirSync(dir, { withFileTypes: true });
       for (const entry of entries) {
@@ -26,18 +35,14 @@ try {
           const newContent = content.replace(/from "next\/server"/g, 'from "next/server.js"');
           if (newContent !== content) {
             fs.writeFileSync(fullPath, newContent);
-            debug('patched: ' + fullPath);
+            patched = true;
           }
         }
       }
     }
     walkDir(nextauthDir);
-    debug('next-auth patching complete');
-  } else {
-    debug('next-auth dir NOT found at: ' + nextauthDir);
+    if (patched) console.log('POSTINSTALL: patched next-auth imports');
   }
 } catch (e) {
-  debug('failed to patch next-auth: ' + e.message);
+  console.error('POSTINSTALL: failed to patch next-auth:', e.message);
 }
-
-debug('postinstall finished');
