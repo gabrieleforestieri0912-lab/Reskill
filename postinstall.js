@@ -1,19 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-// Patch next/package.json to add exports field for next/server
-const nextPkgPath = path.join(__dirname, 'node_modules', 'next', 'package.json');
-if (fs.existsSync(nextPkgPath)) {
-  const pkg = JSON.parse(fs.readFileSync(nextPkgPath, 'utf8'));
-  if (!pkg.exports || !pkg.exports['./server']) {
-    pkg.exports = pkg.exports || {};
-    pkg.exports['./server'] = './server.js';
-    fs.writeFileSync(nextPkgPath, JSON.stringify(pkg, null, 2));
-    console.log('Postinstall: patched next/package.json exports');
-  }
-}
-
-// Patch next-auth files to use next/server.js instead of next/server
 const nextauthDir = path.join(__dirname, 'node_modules', 'next-auth');
 if (fs.existsSync(nextauthDir)) {
   function walkDir(dir) {
