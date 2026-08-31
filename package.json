@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "engines": {
-    "node": ">=18.17.0"
+    "node": "20.x"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.64",
