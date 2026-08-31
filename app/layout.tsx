@@ -4,6 +4,8 @@ import { SessionProvider } from "next-auth/react";
 import { auth } from "./auth";
 import { LanguageProvider, type Locale } from "@/translations";
 import { cookies } from "next/headers";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://reskill.app";
 const SITE_NAME = "Reskill";
@@ -111,6 +113,8 @@ export default async function RootLayout({
             {children}
           </LanguageProvider>
         </SessionProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
