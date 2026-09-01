@@ -23,7 +23,6 @@ const nextConfig: NextConfig = {
     "resend",
     "youtube-transcript",
     "@supabase/supabase-js",
-    "next-auth",
   ],
   async headers() {
     return [
