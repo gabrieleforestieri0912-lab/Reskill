@@ -1,7 +1,7 @@
 export const runtime = 'nodejs';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { streamText } from 'ai';
-import { createOpenAI } from '@ai-sdk/openai';
+import { createXkiroClient, getXkiroModelName, isXkiroConfigured } from '@/lib/ai-provider';
 import { getUserEmailOrNull } from "@/lib/auth-helper";
 import { checkGenerationAllowed, getHourlyLimit } from "@/lib/plan-guards";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -37,13 +37,9 @@ REGOLE FONDAMENTALI:
 - Organizza il contenuto per livelli: base → intermedio → avanzato
 - Non superare i 2000 token di output`;
 
-const MODEL_MAP: Record<string, string> = {
-  "gpt-4o-mini": "gpt-4o-mini",
-  "gpt-4o": "gpt-4o",
-  "gpt-4.1-nano": "gpt-4.1-nano",
-  "gpt-4.1-mini": "gpt-4.1-mini",
-  "gpt-4.1": "gpt-4.1",
-};
+// Provider unico: Xkiro. Nessuna mappa multi-modello: tutti gli altri
+// provider sono stati rimossi. Il campo `model` in ingresso viene ignorato
+// per retro-compatibilità con client vecchi.
 
 export async function POST(req: Request) {
   try {
@@ -76,25 +72,23 @@ export async function POST(req: Request) {
       );
     }
 
-    const { prompt, sourcesSummary, model: requestedModel } = await req.json();
+    const { prompt, sourcesSummary } = await req.json();
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    if (!isXkiroConfigured()) {
       return new Response(
         JSON.stringify({
-          error: "Chiave API OpenAI non configurata. Contatta l'amministratore.",
+          error: "Chiave API Xkiro non configurata. Contatta l'amministratore.",
           upgrade: false,
         }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const modelName = MODEL_MAP[requestedModel] || "gpt-4o-mini";
-
-    const openai = createOpenAI({ apiKey });
+    const modelName = getXkiroModelName();
+    const xkiro = createXkiroClient();
 
     const result = await streamText({
-      model: openai(modelName),
+      model: xkiro(modelName),
       messages: [
         {
           role: "system",

@@ -39,7 +39,7 @@ const faqs = [
   },
   {
     question: "Reskill è gratuito?",
-    answer: "Sì! Il piano Free offre 1 bucket, 3 fonti e 10 crediti mensili. I piani a pagamento: Pro (€12/mese) con 15 bucket e 100 fonti, Business (€29/mese) con 50 bucket e 500 fonti, Enterprise (€59/mese) con risorse illimitate.",
+    answer: "Sì! Il piano Free offre 1 bucket, 3 fonti e 10 crediti mensili. I piani a pagamento: Pro (€4,99/mese o €49,90/anno) con 15 bucket e 100 fonti, Business (€9,99/mese o €99,90/anno) con 50 bucket e 500 fonti. Entrambi disponibili con fatturazione mensile o annuale (l'annuale include ~2 mesi gratis).",
   },
   {
     question: "Cosa sono i crediti?",
@@ -67,7 +67,7 @@ const faqs = [
   },
   {
     question: "Posso usare Reskill con modelli AI locali?",
-    answer: "Reskill utilizza modelli OpenAI via API per generare le Skill. Tuttavia, le Skill generate sono in Markdown universale, compatibili con qualsiasi LLM inclusi modelli locali come Llama, Mistral, o Phi.",
+    answer: "Reskill genera le Skill con il provider unico Xkiro. Le Skill generate sono in Markdown universale, compatibili con qualsiasi LLM inclusi modelli locali come Llama, Mistral, o Phi.",
   },
   {
     question: "Come cambio piano o disdico l'abbonamento?",

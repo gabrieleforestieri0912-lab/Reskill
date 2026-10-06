@@ -45,14 +45,24 @@ export default function Navbar() {
         {/* Desktop Nav - Center */}
         <div className="hidden md:flex items-center gap-4">
           <Link
-            href="/#howItWorks"
+            href="/how-it-works"
             className={`px-1.5 py-1 text-[14px] font-semibold transition-all ${
-              pathname === "/#howItWorks"
+              pathname.startsWith("/how-it-works")
                 ? "text-white bg-white/10"
                 : "text-white/80 hover:text-white hover:bg-white/10"
             }`}
           >
-            How it works
+            {t.nav.come_funziona}
+          </Link>
+          <Link
+            href="/tools"
+            className={`px-1.5 py-1 text-[14px] font-semibold transition-all ${
+              pathname.startsWith("/tools")
+                ? "text-white bg-white/10"
+                : "text-white/80 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            {t.nav.strumenti}
           </Link>
           <Link
             href="/feedback"
@@ -237,11 +247,18 @@ export default function Navbar() {
           <div className="md:hidden border-t border-[oklch(72% .06 240)]/8 bg-[oklch(8%_0.004_260)]">
             <div className="px-6 py-4 space-y-2">
               <Link
-                href="/#features"
+                href="/how-it-works"
                 onClick={() => setMenuOpen(false)}
                 className="block px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-all"
               >
-                Features
+                {t.nav.come_funziona}
+              </Link>
+              <Link
+                href="/tools"
+                onClick={() => setMenuOpen(false)}
+                className="block px-3 py-2 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-all"
+              >
+                {t.nav.strumenti}
               </Link>
               <Link
                 href="/feedback"

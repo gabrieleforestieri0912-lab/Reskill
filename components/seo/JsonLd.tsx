@@ -138,7 +138,7 @@ export function FAQJsonLd() {
     },
     {
       question: "Posso usare Reskill con modelli AI locali?",
-      answer: "Reskill utilizza modelli OpenAI via API (GPT-4o-mini, GPT-4.1, ecc.) per generare le Skill. Le Skill generate sono in Markdown universale, compatibili con qualsiasi LLM incluso modelli locali.",
+      answer: "Reskill genera le Skill con il provider unico Xkiro. Le Skill generate sono in Markdown universale, compatibili con qualsiasi LLM incluso modelli locali.",
     },
   ];
 

@@ -15,19 +15,25 @@ export async function POST(req: Request) {
   const userEmail = user?.email;
 
   try {
-    const { planId } = await req.json();
+    const { planId, billing } = await req.json();
     const plan = getPlanById(planId || "pro");
+    const cycle = billing === "annual" ? "annual" : "monthly";
 
     if (plan.id === "free") {
       return NextResponse.json({ url: null, message: "Sei già sul piano Free" });
     }
 
+    const { getPlanPrice } = await import("@/lib/plans");
+    const amount = getPlanPrice(plan, cycle);
+    const label = cycle === "annual" ? `/anno (€${amount})` : `/mese (€${amount})`;
+
     if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.startsWith("sk_test_mock")) {
       return NextResponse.json({
         url: null,
-        message: `Il ${plan.name} costa €${plan.price}/mese. Chiavi Stripe configurate ma non verificate.`,
+        message: `Il ${plan.name} costa €${amount}${cycle === "annual" ? "/anno" : "/mese"}. Chiavi Stripe configurate ma non verificate.`,
         demo: true,
         plan: plan.id,
+        billing: cycle,
       });
     }
 
@@ -41,33 +47,43 @@ export async function POST(req: Request) {
       }
     }
 
+    // Se esistono Price ID Stripe dedicati, usali; altrimenti price_data dinamico.
+    const stripePriceId =
+      cycle === "annual" ? plan.stripeAnnualPriceId : plan.stripePriceId;
+    const useStripePrice =
+      !!stripePriceId && !stripePriceId.includes("_mock");
+
     const checkoutSession = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "subscription",
       customer_email: customerId ? undefined : userEmail || undefined,
       customer: customerId || undefined,
-      line_items: [
-        {
-          price_data: {
-            currency: "eur",
-            product_data: {
-              name: `Reskill ${plan.name}`,
-              description: `Piano ${plan.name} — ${plan.features.maxBuckets === -1 ? "bucket illimitati" : `${plan.features.maxBuckets} bucket`}, ${plan.features.maxSources === -1 ? "fonti illimitate" : `${plan.features.maxSources} fonti`}`,
+      line_items: useStripePrice
+        ? [{ price: stripePriceId as string, quantity: 1 }]
+        : [
+            {
+              price_data: {
+                currency: "eur",
+                product_data: {
+                  name: `Reskill ${plan.name} ${cycle === "annual" ? "Annuale" : "Mensile"}`,
+                  description: `Piano ${plan.name} ${cycle} — ${plan.features.maxBuckets === -1 ? "bucket illimitati" : `${plan.features.maxBuckets} bucket`}, ${plan.features.maxSources === -1 ? "fonti illimitate" : `${plan.features.maxSources} fonti`}`,
+                },
+                unit_amount: Math.round(amount * 100),
+                recurring: { interval: cycle === "annual" ? "year" : "month" },
+              },
+              quantity: 1,
             },
-            unit_amount: plan.price * 100,
-            recurring: { interval: "month" },
-          },
-          quantity: 1,
-        },
-      ],
+          ],
       subscription_data: {
         metadata: {
           planId: plan.id,
+          billing: cycle,
         },
       },
       metadata: {
         userId: userId || "anonymous",
         planId: plan.id,
+        billing: cycle,
       },
       success_url: `${appUrl}/dashboard?success=true&plan=${plan.id}`,
       cancel_url: `${appUrl}/dashboard?canceled=true`,

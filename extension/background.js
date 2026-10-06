@@ -302,48 +302,79 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 });
 
 // ─── Estrai e scarica da URL (click su link) ─────────────────────────────────
+// Supporta video / playlist / canali YouTube → unico file Markdown tramite
+// /api/youtube-to-markdown, con percorso/cartella dalle impostazioni export.
+function sanitizeSegment(s, fallback) {
+  const cleaned = String(s || "").replace(/\\/g, "/").replace(/\.\./g, "").replace(/\/+/g, "/").replace(/^\/+|\/+$/g, "");
+  return cleaned || fallback;
+}
+
+async function getExportSettings() {
+  try {
+    const r = await chrome.storage.local.get(["sg_export_path", "sg_export_folder"]);
+    return {
+      exportPath: sanitizeSegment(r.sg_export_path || "reskill", "reskill"),
+      exportFolder: sanitizeSegment(r.sg_export_folder || "youtube-skills", "youtube-skills"),
+    };
+  } catch {
+    return { exportPath: "reskill", exportFolder: "youtube-skills" };
+  }
+}
+
 async function extractAndDownload(url, sourceType) {
   try {
     const server = await getServerUrl();
     const result = await chrome.storage.local.get([TOKEN_KEY]);
     const headers = { "Content-Type": "application/json" };
     if (result[TOKEN_KEY]) headers["x-extension-token"] = result[TOKEN_KEY];
+    const settings = await getExportSettings();
 
-    const res = await fetch(`${server}/api/extract`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ url }),
-    });
+    const isYT = /youtube\.com|youtu\.be/i.test(url);
+    let title = new URL(url).hostname || "estrazione";
+    let markdown = "";
+    let baseName = "estrazione";
 
-    if (!res.ok) {
-      chrome.tabs.create({ url });
-      return;
+    if (isYT) {
+      const res = await fetch(`${server}/api/youtube-to-markdown`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ url, maxVideos: 30 }),
+      });
+      if (!res.ok) {
+        chrome.tabs.create({ url });
+        return;
+      }
+      const data = await res.json();
+      title = data.title || title;
+      markdown = data.markdown || data.content || "";
+      baseName = (data.filename || title).replace(/\.md$/i, "");
+    } else {
+      const res = await fetch(`${server}/api/extract`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ url }),
+      });
+      if (!res.ok) {
+        chrome.tabs.create({ url });
+        return;
+      }
+      const data = await res.json();
+      title = data.title || title;
+      const content = data.content || data.text || "";
+      const now = new Date().toISOString();
+      markdown = `---\ntitle: "${String(title).replace(/"/g, "'")}"\nsource: ${sourceType}\nurl: "${url}"\nextracted: "${now}"\n---\n\n# ${title}\n\n${content}\n`;
+      baseName = title;
     }
 
-    const data = await res.json();
-    const title = data.title || new URL(url).hostname || "estrazione";
-    const content = data.content || data.text || "";
-    const safeTitle = title.replace(/[^a-z0-9]/gi, "_").substring(0, 50);
-
-    const now = new Date().toISOString();
-    const markdown = `---
-title: "${title}"
-source: ${sourceType}
-url: "${url}"
-extracted: "${now}"
----
-
-# ${title}
-
-${content}
-`;
+    const safeBase = String(baseName).replace(/[^a-zA-Z0-9_\-\s]/g, "").trim().substring(0, 60) || "estrazione";
+    const filename = `${settings.exportPath}/${settings.exportFolder}/${safeBase}.md`;
 
     const blob = new Blob([markdown], { type: "text/markdown;charset=utf-8" });
     const blobUrl = URL.createObjectURL(blob);
 
     chrome.downloads.download({
       url: blobUrl,
-      filename: `${safeTitle}.md`,
+      filename,
       saveAs: false,
     });
 

@@ -481,6 +481,39 @@ function showEmptyFeed(list, status) {
   }
 }
 
+// ─── Export settings: percorso + cartella (condivise con il web) ─────────────
+const EXPORT_PATH_KEY = "sg_export_path";
+const EXPORT_FOLDER_KEY = "sg_export_folder";
+const DEFAULT_EXPORT_PATH = "reskill";
+const DEFAULT_EXPORT_FOLDER = "youtube-skills";
+
+function sanitizePathSegment(s, fallback) {
+  const cleaned = String(s || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/\.\./g, "")
+    .replace(/\/+/g, "/")
+    .replace(/^\/+|\/+$/g, "");
+  return cleaned || fallback;
+}
+
+async function getExportSettings() {
+  try {
+    const r = await chrome.storage.local.get([EXPORT_PATH_KEY, EXPORT_FOLDER_KEY]);
+    return {
+      exportPath: sanitizePathSegment(r[EXPORT_PATH_KEY] || DEFAULT_EXPORT_PATH, DEFAULT_EXPORT_PATH),
+      exportFolder: sanitizePathSegment(r[EXPORT_FOLDER_KEY] || DEFAULT_EXPORT_FOLDER, DEFAULT_EXPORT_FOLDER),
+    };
+  } catch {
+    return { exportPath: DEFAULT_EXPORT_PATH, exportFolder: DEFAULT_EXPORT_FOLDER };
+  }
+}
+
+function buildExportFilename(baseName, settings) {
+  const base = String(baseName || "export").replace(/[^a-zA-Z0-9_\-\s]/g, "").trim().substring(0, 60) || "export";
+  return `${settings.exportPath}/${settings.exportFolder}/${base}.md`;
+}
+
 async function downloadSource(sourceId, title) {
   try {
     const server = await getServerUrl();
@@ -493,13 +526,13 @@ async function downloadSource(sourceId, title) {
     if (!source) return;
 
     const content = source.skillMarkdown || source.content || "";
-    const safeName = title.replace(/[^a-zA-Z0-9_\-\s]/g, "").substring(0, 50) || "risorsa";
+    const settings = await getExportSettings();
     const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 
     await chrome.downloads.download({
       url: url,
-      filename: `${safeName}.md`,
+      filename: buildExportFilename(title, settings),
       saveAs: true,
     });
 
@@ -519,6 +552,16 @@ const convertError = document.getElementById("convert-error");
 const convertStatus = document.getElementById("convert-status");
 
 let lastExtractedMarkdown = "";
+let lastExtractedFilename = "estrazione.md";
+
+function isYouTubeUrl(u) {
+  try {
+    const host = new URL(u).hostname;
+    return /youtube\.com|youtu\.be/i.test(host);
+  } catch {
+    return /youtube\.com|youtu\.be/i.test(u);
+  }
+}
 
 convertExtractBtn?.addEventListener("click", async () => {
   const url = convertUrlInput?.value?.trim();
@@ -539,23 +582,45 @@ convertExtractBtn?.addEventListener("click", async () => {
 
   try {
     const server = await getServerUrl();
-    const res = await fetch(`${server}/api/extract`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url }),
-    });
+    const headers = { "Content-Type": "application/json" };
+    if (currentToken) headers["x-extension-token"] = currentToken;
+
+    // YouTube (video / playlist / canale) → endpoint dedicato;
+    // qualsiasi altro URL → /api/extract classico.
+    let res;
+    if (isYouTubeUrl(url)) {
+      const maxInput = document.getElementById("convert-max-videos");
+      const maxVideos = Math.min(Math.max(parseInt(maxInput?.value || "20", 10) || 20, 1), 100);
+      res = await fetch(`${server}/api/youtube-to-markdown`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ url, maxVideos }),
+      });
+    } else {
+      res = await fetch(`${server}/api/extract`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ url }),
+      });
+    }
 
     const data = await res.json();
 
-    if (res.ok && data.success) {
-      lastExtractedMarkdown = data.content || "";
+    if (res.ok && (data.success || data.markdown)) {
+      lastExtractedMarkdown = data.markdown || data.content || "";
+      lastExtractedFilename = data.filename || data.title || "estrazione";
+      if (!/\.md$/i.test(lastExtractedFilename)) lastExtractedFilename += ".md";
       if (convertOutput) {
-        convertOutput.textContent = lastExtractedMarkdown;
+        const preview = lastExtractedMarkdown.slice(0, 4000);
+        convertOutput.textContent =
+          lastExtractedMarkdown.length > 4000 ? preview + "\n\n…(anteprima troncata)" : lastExtractedMarkdown;
         convertOutput.classList.add("visible");
       }
       if (convertActions) convertActions.style.display = "flex";
       if (convertStatus) {
-        convertStatus.textContent = "✓ Estratto con successo";
+        const extra = data.videoCount ? ` · ${data.videoCount} video` : "";
+        const kind = data.kind ? ` (${data.kind})` : "";
+        convertStatus.textContent = `✓ Estratto con successo${kind}${extra}`;
         convertStatus.className = "status-text success";
       }
     } else {
@@ -597,9 +662,11 @@ document.getElementById("convert-download-btn")?.addEventListener("click", async
   const blob = new Blob([lastExtractedMarkdown], { type: "text/markdown;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   try {
+    const settings = await getExportSettings();
+    const base = lastExtractedFilename.replace(/\.md$/i, "");
     await chrome.downloads.download({
       url: url,
-      filename: "estrazione.md",
+      filename: buildExportFilename(base, settings),
       saveAs: true,
     });
   } catch {
@@ -607,6 +674,35 @@ document.getElementById("convert-download-btn")?.addEventListener("click", async
   }
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 });
+
+// ─── Export settings: save/load (percorso + cartella) ────────────────────────
+async function loadExportSettingsUI() {
+  const s = await getExportSettings();
+  const p = document.getElementById("export-path-input");
+  const f = document.getElementById("export-folder-input");
+  if (p) p.value = s.exportPath;
+  if (f) f.value = s.exportFolder;
+}
+
+document.getElementById("export-settings-save-btn")?.addEventListener("click", async () => {
+  const p = document.getElementById("export-path-input")?.value || DEFAULT_EXPORT_PATH;
+  const f = document.getElementById("export-folder-input")?.value || DEFAULT_EXPORT_FOLDER;
+  const settings = {
+    [EXPORT_PATH_KEY]: sanitizePathSegment(p, DEFAULT_EXPORT_PATH),
+    [EXPORT_FOLDER_KEY]: sanitizePathSegment(f, DEFAULT_EXPORT_FOLDER),
+  };
+  await chrome.storage.local.set(settings);
+  const status = document.getElementById("export-settings-status");
+  if (status) {
+    status.textContent = "✓ Percorso export salvato";
+    status.className = "status-text success";
+    setTimeout(() => { status.textContent = ""; }, 2000);
+  }
+  loadExportSettingsUI();
+});
+
+// Carica le impostazioni export all'avvio
+loadExportSettingsUI();
 
 // ─── Usage: carica statistiche ───────────────────────────────────────────────
 const typeIcons = {
@@ -700,7 +796,11 @@ document.getElementById("usage-upgrade-btn")?.addEventListener("click", () => {
 // ─── Auto-Recharge ───────────────────────────────────────────────────────────
 document.getElementById("recharge-buy-btn")?.addEventListener("click", async () => {
   const select = document.getElementById("recharge-plan-select");
-  const planId = select?.value || "pro";
+  const rawValue = select?.value || "pro";
+  // Supporta valori "pro-annual" / "business-annual" → billing annuale.
+  const isAnnual = rawValue.endsWith("-annual");
+  const planId = isAnnual ? rawValue.replace(/-annual$/, "") : rawValue;
+  const billing = isAnnual ? "annual" : "monthly";
   const server = await getServerUrl();
 
   try {
@@ -710,7 +810,7 @@ document.getElementById("recharge-buy-btn")?.addEventListener("click", async () 
         "Content-Type": "application/json",
         "x-extension-token": currentToken,
       },
-      body: JSON.stringify({ planId }),
+      body: JSON.stringify({ planId, billing }),
     });
 
     const data = await res.json();

@@ -1,7 +1,7 @@
 ﻿"use client"
 
-import { type ReactNode } from "react"
-import { pricingPlans } from "@/lib/site-data"
+import { useState, type ReactNode } from "react"
+import { pricingPlans, planComparison } from "@/lib/site-data"
 import { FaRocket, FaStar, FaBriefcase, FaBuilding, FaCheck } from "react-icons/fa6"
 
 const planIcons: Record<string, ReactNode> = {
@@ -12,6 +12,7 @@ const planIcons: Record<string, ReactNode> = {
 }
 
 export default function PricingSection() {
+ const [billing, setBilling] = useState<"monthly" | "annual">("monthly")
  return (
  <section id="piani" className="py-24 px-6 relative">
  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,oklch(60%_0.01_260/0.03)_0%,transparent_70%)] pointer-events-none" />
@@ -24,6 +25,17 @@ export default function PricingSection() {
   Paga solo per ciò che usi. Crediti consumati da ogni Skill generata con AI.
     </p>
     <p className="text-[13px] text-[oklch(60%_0.01_260)] mt-3">Pagina web: 1 credito · Video social: 2 crediti</p>
+    <div className="inline-flex items-center gap-1 mt-5 p-1 border border-white/10 bg-white/[0.02]">
+      {(["monthly", "annual"] as const).map((b) => (
+        <button
+          key={b}
+          onClick={() => setBilling(b)}
+          className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider transition-all ${billing === b ? "bg-[oklch(72%_0.06_240)] text-black" : "text-[oklch(60%_0.01_260)] hover:text-white"}`}
+        >
+          {b === "monthly" ? "Mensile" : "Annuale −17%"}
+        </button>
+      ))}
+    </div>
   </div>
 
   <div className="grid grid-cols-4 gap-6">
@@ -54,16 +66,22 @@ export default function PricingSection() {
    <h3 className="font-bold text-lg text-[oklch(98.5%_.002_260)]">{plan.name}</h3>
    </div>
 
-   <div className="flex items-baseline gap-0.5 mb-2">
-  <span className="text-4xl font-extrabold text-[oklch(98.5%_.002_260)]">€{plan.price}</span>
-  <span className="text-sm text-[oklch(60%_0.01_260)] ml-0.5">/mese</span>
+    <div className="flex items-baseline gap-0.5 mb-2">
+  <span className="text-4xl font-extrabold text-[oklch(98.5%_.002_260)]">€{billing === "annual" ? (plan.annualPrice ?? plan.price) : plan.price}</span>
+  <span className="text-sm text-[oklch(60%_0.01_260)] ml-0.5">{billing === "annual" ? "/anno" : "/mese"}</span>
  </div>
+ {billing === "annual" && plan.price > 0 && (
+   <p className="text-[11px] text-[oklch(60%_0.01_260)] -mt-1 mb-2">≈ €{((plan.annualPrice ?? plan.price) / 12).toFixed(2)}/mese · 2 mesi gratis</p>
+ )}
 
 <div className="mb-5">
    <span className="text-base text-[oklch(98.5%_.002_260)] font-semibold">{plan.credits.toLocaleString()}</span>
    <span className="text-sm text-[oklch(60%_0.01_260)] ml-1">crediti / mese</span>
    </div>
-   {plan.desc && <p className="text-[12px] text-[oklch(60%_0.01_260)] mb-4 leading-relaxed">{plan.desc}</p>}
+    {plan.desc && <p className="text-[12px] text-[oklch(60%_0.01_260)] mb-1 leading-relaxed">{plan.desc}</p>}
+    {"target" in plan && (plan as { target?: string }).target && (
+      <p className="text-[11px] font-semibold text-cyan/80 mb-4">{(plan as { target?: string }).target}</p>
+    )}
 
   <div className="h-px bg-white/10 mb-4" />
 
@@ -77,14 +95,56 @@ export default function PricingSection() {
  </ul>
 
 <button
+    onClick={async () => {
+      if (plan.price === 0) {
+        window.location.href = "/login"
+        return
+      }
+      try {
+        const res = await fetch("/api/stripe/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ planId: plan.id, billing }),
+        })
+        const data = await res.json()
+        if (data.url) window.location.href = data.url
+        else if (data.demo) alert(`Demo: piano ${plan.name} ${billing === "annual" ? "annuale" : "mensile"}`)
+      } catch { /* ignore */ }
+    }}
     className="w-full py-3 text-sm font-bold transition-all cursor-pointer active:scale-95 bg-[oklch(72%_0.06_240)] text-[oklch(13%_0.006_260)] hover:bg-[oklch(60%_0.08_240)]"
     >
-    {plan.price === 0 ? "Inizia Gratis" : "Scegli"}
+    {plan.price === 0 ? "Inizia Gratis" : billing === "annual" ? "Scegli · Annuale" : "Scegli"}
     </button>
  </div>
  )
  })}
  </div>
+
+  {/* Tabella comparativa offerte */}
+  <div className="mt-14 max-w-4xl mx-auto overflow-x-auto border border-white/8 bg-white/[0.015]">
+    <table className="w-full text-xs min-w-[560px]">
+      <thead>
+        <tr className="border-b border-white/8 text-left">
+          <th className="px-4 py-3 font-bold text-white/90">Confronta le offerte</th>
+          {pricingPlans.map((p) => (
+            <th key={p.id} className="px-4 py-3 font-bold text-white/90 text-center">{p.name}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {planComparison.map((row) => (
+          <tr key={row.label} className="border-b border-white/5 last:border-0 hover:bg-white/[0.02]">
+            <td className="px-4 py-2.5 text-[oklch(60%_0.01_260)] font-medium">{row.label}</td>
+            {[row.free, row.pro, row.business].map((val, i) => (
+              <td key={i} className={`px-4 py-2.5 text-center font-semibold ${val === "—" ? "text-white/25" : val === "✓" ? "text-cyan" : "text-white/85"}`}>
+                {val}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
 
   <p className="text-center text-xs text-[oklch(60%_0.01_260)] mt-6">
                 Pagamenti sicuri tramite Stripe. Cancella quando vuoi.

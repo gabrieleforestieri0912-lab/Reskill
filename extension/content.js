@@ -586,37 +586,25 @@ async function handleYoutubePlaylist() {
     return;
   }
 
-  showStatusMessage(`Estrazione trascrizioni da ${getPlaylistVideoCount()} video...`);
+  const count = getPlaylistVideoCount();
+  showStatusMessage(`Estrazione trascrizioni da ${count} video...`);
 
   try {
-    const res = await fetch(`${await getServerUrl()}/api/extract`, {
+    // Playlist o canale intero → unico file Markdown via backend dedicato.
+    const res = await fetch(`${await getServerUrl()}/api/youtube-to-markdown`, {
       method: "POST",
       headers: await getAuthHeaders(),
-      body: JSON.stringify({ url: window.location.href })
+      body: JSON.stringify({ url: window.location.href, maxVideos: Math.min(Math.max(count || 20, 1), 100) })
     });
 
     if (!res.ok) throw new Error("Errore API");
 
     const data = await res.json();
+    const markdown = data.markdown || data.content || data.text || "";
+    if (!markdown) throw new Error("empty");
 
-    const title = data.title || document.title || "Playlist YouTube";
-    const safeTitle = title.replace(/[^a-z0-9]/gi, "_").substring(0, 50);
-
-    const markdown = `---
-title: "${title}"
-source: youtube_playlist
-url: "${window.location.href}"
-extracted: "${new Date().toISOString()}"
-videos: ${getPlaylistVideoCount()}
----
-
-# ${title}
-
-${data.content || data.text || ""}
-`;
-
-    downloadMarkdown(markdown);
-    showStatusMessage("Playlist estratta con successo!");
+    await downloadMarkdown(markdown, data.filename || document.title);
+    showStatusMessage(`Playlist estratta con successo! (${data.videoCount || count} video)`);
   } catch {
     showStatusMessage("Impossibile estrarre la playlist.");
   }
@@ -655,10 +643,21 @@ function showStatusMessage(msg) {
   setTimeout(() => toast.remove(), 4000);
 }
 
-function downloadMarkdown(markdown) {
-  const pageTitle = document.title.trim() || 'reskill-page';
-  const safeTitle = pageTitle.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
-  const filename = `${safeTitle}.md`;
+async function getExportSettings() {
+  try {
+    const r = await chrome.storage.local.get(["sg_export_path", "sg_export_folder"]);
+    const clean = (s, fb) => String(s || "").replace(/\\/g, "/").replace(/\.\./g, "").replace(/\/+/g, "/").replace(/^\/+|\/+$/g, "") || fb;
+    return { exportPath: clean(r.sg_export_path || "reskill", "reskill"), exportFolder: clean(r.sg_export_folder || "youtube-skills", "youtube-skills") };
+  } catch {
+    return { exportPath: "reskill", exportFolder: "youtube-skills" };
+  }
+}
+
+async function downloadMarkdown(markdown, titleHint) {
+  const pageTitle = (titleHint || document.title || 'reskill-page').trim();
+  const safeTitle = pageTitle.replace(/\.md$/i, "").replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().substring(0, 60) || 'reskill-page';
+  const settings = await getExportSettings();
+  const filename = `${settings.exportPath}/${settings.exportFolder}/${safeTitle}.md`;
 
   const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);
