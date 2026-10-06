@@ -91,7 +91,41 @@ triggers:
   - "tool-calling loop"
 \`\`\`
 
-> Timestamped segments (every ~30s) let the AI cite the exact moment a concept was explained.`
+> Timestamped segments (every ~30s) let the AI cite the exact moment a concept was explained.
+
+## Full Transcript Structure
+
+A 24-minute technical talk like this one typically breaks down into reusable chapters — each one a candidate sub-skill:
+
+| Timestamp | Chapter | Reusable pattern |
+|-----------|---------|------------------|
+| 00:00–03:30 | Why agents, why now | The "batch vs interactive" framing for stakeholders |
+| 03:30–09:00 | Orchestrator design | State-machine loop you can copy into any project |
+| 09:00–15:30 | Tool registry | Zod-schema pattern for typed tool definitions |
+| 15:30–20:00 | Memory strategies | Vector vs KV trade-off table for your own docs |
+| 20:00–24:00 | Live demo + Q&A | Failure cases worth turning into anti-patterns |
+
+## Turning Chapters into Triggers
+
+One video, many Skills: split by chapter instead of saving one giant file.
+
+\`\`\`yaml
+# skill: agent-orchestrator-loop
+triggers:
+  - "designing an agent loop"
+  - "LangGraph vs Semantic Kernel"
+  - "state machine for LLM tools"
+\`\`\`
+
+\`\`\`yaml
+# skill: tool-registry-patterns
+triggers:
+  - "registering tools for an agent"
+  - "typed tool schemas with Zod"
+  - "MCP tool definitions"
+\`\`\`
+
+> Rule of thumb: if a chapter answers a question you get asked twice, it deserves its own Skill file.`
     },
     {
         id: "demo-ig",
@@ -147,7 +181,97 @@ triggers:
 | 2 | Add one \`.cursorrules\` file per project, not global |
 | 3 | Save this post as a Skill so the AI remembers the stack |
 
-> Visual posts like this one are a goldmine for tooling decisions: extract the table above, not the video frames.`
+> Visual posts like this one are a goldmine for tooling decisions: extract the table above, not the video frames.
+
+## Editor Configuration
+
+The core of the setup is a tuned \`settings.json\` — Vim motions everywhere, format-on-save, and AI completions that stay out of the way until summoned:
+
+\`\`\`json
+{
+  "vim.useSystemClipboard": true,
+  "editor.formatOnSave": true,
+  "editor.tabSize": 2,
+  "cursor.cpp.disabledLanguages": ["markdown"],
+  "files.associations": { ".cursorrules": "markdown" }
+}
+\`\`\`
+
+Keybindings worth stealing:
+
+| Keys | Action | Why it matters |
+|------|--------|----------------|
+| \`Cmd+K\` | Inline AI edit | Change code without leaving the line |
+| \`Cmd+L\` | Chat with codebase | Ask about the whole repo, not one file |
+| \`Cmd+Shift+L\` | Add selection to chat | Precise context, fewer wasted tokens |
+| \`gd\` (Vim) | Go to definition | Muscle memory beats the mouse |
+
+## Terminal and Shell
+
+Warp with AI suggestions plus a minimal prompt that shows git branch and last-command status. Aliases that pay for themselves in a week:
+
+\`\`\`bash
+alias gs="git status -sb"
+alias gcm="git commit -m"
+alias dev="npm run dev"
+alias sk="npx @reskill/mcp --search"
+\`\`\`
+
+## MCP Filesystem Wiring
+
+Point the MCP server at the folder where your Skills live, so every agent sees the same library:
+
+\`\`\`json
+{
+  "mcpServers": {
+    "skills": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/you/.reskill/skills"]
+    }
+  }
+}
+\`\`\`
+
+## The .cursorrules Template
+
+\`\`\`markdown
+# Project conventions (auto-loaded by Cursor)
+
+- Stack: Next.js 16 App Router + Tailwind v4
+- All server state via Server Components; client components need a reason
+- Commit style: feat/fix/chore + short imperative message
+- Never invent APIs: check /docs or ask before assuming an endpoint
+\`\`\`
+
+## The context.md Habit
+
+One file per project, updated when architecture decisions are made:
+
+\`\`\`markdown
+# Context — checkout-service
+
+- Decided 2026-09: Stripe PaymentIntents, no custom card forms
+- Gotcha: webhooks must be idempotent (Stripe retries for 3 days)
+- Owner: @codewithstyle — ask before touching pricing logic
+\`\`\`
+
+## Daily Workflow with AI
+
+1. **Morning**: pull latest Skills into the agent ("what changed in my MCP skill?").
+2. **Build**: inline edits for boilerplate, chat for architecture questions.
+3. **Review**: paste the diff and ask for the three riskiest lines — then verify each one yourself.
+4. **Evening**: save anything you explained twice into a Skill so you never type it again.
+
+## Indicative Monthly Cost
+
+| Item | Plan | Cost/month |
+|------|------|------------|
+| Cursor Pro | Individual | ~20 EUR |
+| Warp | Free tier | 0 |
+| AI API overflow | Pay-as-you-go | 5–15 EUR |
+| Reskill Pro | 500 credits | 4.99 EUR |
+
+> The whole stack costs less than one hour of freelance work — and this exact setup is what the reel walks through, timestamp by timestamp.`
     },
     {
         id: "demo-x",
@@ -207,7 +331,40 @@ Start broad, then narrow constraints. First pass: general architecture. Second p
 | Few-Shot | 2-3 examples > 10 vague ones |
 | Refinement | Broad → narrow, never the reverse |
 
-> Save threads like this as Skills: X posts disappear from memory, Markdown does not.`
+> Save threads like this as Skills: X posts disappear from memory, Markdown does not.
+
+## Full 18-Post Breakdown
+
+Long threads follow a hidden arc — hook, lessons, proof, CTA. Mapping it tells your AI which part to quote for each question:
+
+| Posts | Role | What to extract |
+|-------|------|-----------------|
+| 1–2 | Hook + credibility | The opening line that earned 2.4K likes |
+| 3–7 | Lessons 1–2 with examples | Bad-vs-good prompt pairs (copy verbatim) |
+| 8–12 | Lessons 3–4 + data | The "40% fewer hallucinations" claim + context |
+| 13–16 | Lesson 5 + war stories | Production anecdotes for stakeholder buy-in |
+| 17–18 | CTA + replies | Best follow-up questions from the comments |
+
+## Reply Goldmine
+
+The most-liked replies often beat the thread itself:
+
+- **@promptwitch**: "Role prompting fails without output format — always pair them." (412 likes)
+- **@shipit_dev**: "We cut support tickets 18% by adding 2 examples to our bot prompt." (287 likes)
+- **@techemystic (OP)**: "Biggest mistake: 500-word system prompts. Constraints > prose." (531 likes)
+
+## Prompt Templates from the Thread
+
+\`\`\`
+ROLE: You are a {seniority} {domain} expert.
+CONTEXT: {stack}, {constraints}, {audience}.
+TASK: {one verb + one deliverable}.
+FORMAT: {code only | table | max N bullets}.
+THINK: Reason step-by-step before answering.
+EXAMPLES: {2 pasted examples of great output}.
+\`\`\`
+
+> Fill the braces, paste into any model, and you have applied all five lessons at once.`
     },
     {
         id: "demo-reddit",
@@ -275,7 +432,44 @@ Add to \`.cursor/mcp.json\` and restart. The tool appears automatically in AI co
 
 1. Run the server with \`npx -y mcp-inspector\` before wiring it into the IDE
 2. Check stderr logs: most failures are Zod schema mismatches
-3. Restart the MCP host after every config change`
+3. Restart the MCP host after every config change
+
+## Comment Highlights by Theme
+
+| Theme | Verdict from the thread |
+|-------|------------------------|
+| Host choice | Cursor just works; Claude Desktop needs manual JSON edits |
+| Transport | stdio for local, SSE the moment a teammate needs the same server |
+| Auth | Bearer tokens via env, never hardcoded in mcp.json |
+| Testing | mcp-inspector catches 90% of bugs before the IDE is involved |
+| Versioning | Pin SDK + protocol version together or face handshake errors |
+
+## Minimal Production Server
+
+\`\`\`typescript
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { z } from "zod";
+
+const server = new McpServer({ name: "docs-search", version: "1.0.0" });
+
+server.tool(
+  "search_docs",
+  "Full-text search over the team's documentation",
+  { query: z.string(), limit: z.number().default(5) },
+  async ({ query, limit }) => ({
+    content: [{ type: "text", text: JSON.stringify(await search(query, limit)) }],
+  })
+);
+
+await server.connect(new StdioServerTransport());
+\`\`\`
+
+## What the Post Deliberately Skips
+
+- **Resources vs tools**: use resources for readable context, tools for actions with side effects.
+- **Sampling**: letting the server ask the model back is powerful — and a security boundary. Treat it as untrusted input.
+- **Pagination**: cap every list tool (default 5–10) or the model drowns in JSON.`
     },
     {
         id: "demo-linkedin",
@@ -330,7 +524,33 @@ User → API Gateway → Agent Router → Specialized Agents
 | Human approval | 100% of destructive ops | Audit log of confirmations |
 | Cache hit rate | > 40% | Semantic cache metrics |
 
-> LinkedIn posts like this compress months of production pain into minutes: extract the scorecard, then ask your AI to grade your own stack against it.`
+> LinkedIn posts like this compress months of production pain into minutes: extract the scorecard, then ask your AI to grade your own stack against it.
+
+## The Scaling Timeline
+
+| Phase | Team size | Architecture | What breaks next |
+|-------|-----------|--------------|------------------|
+| Prototype | 1–2 | Single agent, one model | Costs spike on first real traffic |
+| Pilot | 3–5 | Router + 3 specialists | No observability — debugging is guesswork |
+| Growth | 5–15 | Cached tools, HITL gates | Stale context causes wrong actions |
+| Scale | 15+ | Multi-region, fallbacks | Rate limits and noisy-neighbor tenants |
+
+## Comment Section Wisdom (214 comments distilled)
+
+- **On caching**: "Semantic cache paid for our entire infra team. 40% is conservative — we see 55%." (top reply, 198 likes)
+- **On HITL**: "Approve-by-default with undo beats approve-everything. Operators fatigue in week two." (143 likes)
+- **On evals**: "If you can't replay a failing trace, you don't have evals — you have vibes." (121 likes)
+- **Maria (author) reply**: "Biggest regret: building the orchestrator before the tracing. Instrument first."
+
+## Cost Model per 1K Tasks
+
+| Setup | Tokens/task | Cost/1K tasks |
+|-------|-------------|---------------|
+| GPT-class, no cache | ~12K | ~$60 |
+| Same + semantic cache | ~5K | ~$25 |
+| Small model + tools + cache | ~4K | ~$4 |
+
+> Numbers move fast, but the ordering never changes: cache first, downgrade model second, optimize prompts last.`
     },
     {
         id: "demo-blog",
@@ -405,7 +625,39 @@ Filesystem for personal skills on your machine; remote (SSE/HTTP) when a team sh
 
 1. Save this article as a Skill with Reskill
 2. Point an MCP filesystem server at the download folder
-3. Ask your agent: "list my skills about MCP" — it will discover the file on its own`
+3. Ask your agent: "list my skills about MCP" — it will discover the file on its own
+
+## Protocol Deep Dive
+
+MCP separates three concerns that older plugin systems tangled together:
+
+| Concern | MCP answer | Why it matters |
+|---------|-----------|----------------|
+| Discovery | Capability negotiation at connect | No hardcoded tool lists in prompts |
+| Invocation | JSON-RPC 2.0 over stdio/SSE | Same contract, local or remote |
+| Context | Resources (read) vs Tools (act) | The model knows what is safe to touch |
+
+## Server Types Compared
+
+| Type | Transport | Best for | Example |
+|------|-----------|----------|---------|
+| Filesystem | stdio | Personal skills on your machine | \`server-filesystem ./skills\` |
+| Docs search | stdio/SSE | Team knowledge bases | Reskill MCP server |
+| Browser control | SSE | E2E agents | Playwright MCP |
+| Cloud APIs | Streamable HTTP | Multi-tenant SaaS | Hosted connectors |
+
+## Security Notes Worth Saving
+
+- Treat tool descriptions as attack surface: a malicious server can prompt-inject via them.
+- Prefer read-only tools during evaluation; enable writes per-task, not per-session.
+- Sampling (server → model callbacks) must be sandboxed like any user input.
+
+## Glossary for the Team
+
+- **Host**: the AI app (Cursor, Claude Desktop) that owns the model.
+- **Client**: the MCP connection inside the host (one per server).
+- **Server**: your code, exposing tools/resources/prompts.
+- **Transport**: stdio for local processes, SSE or streamable HTTP for remote ones.`
     },
     {
         id: "demo-article",
@@ -458,7 +710,36 @@ We are moving from **autocomplete** to **autonomous agents**. The next 12 months
 
 - IDEs shipping native MCP support (tool discovery inside completions)
 - Agent benchmarks (AgentBench 2.0) scoring tool-use, not just chat
-- Teams hiring for "agent orchestration" instead of "prompt engineering"`
+- Teams hiring for "agent orchestration" instead of "prompt engineering"
+
+## Junior vs Senior in the Agent Era
+
+| Task | Old world | Agent-assisted |
+|------|-----------|----------------|
+| Boilerplate CRUD | Typed by hand | Generated, human reviews the edges |
+| Debugging | Print statements | Agent bisects with tool calls, human confirms |
+| Docs | Written last, rots first | Generated from the Skill, reviewed like code |
+| Onboarding | Weeks of shadowing | "Read these 3 Skills, then ask the agent" |
+
+## The Skill Flywheel
+
+\`\`\`
+Save what you read
+      ↓
+Compile Skills per topic
+      ↓
+Agents answer with YOUR context
+      ↓
+Better answers → more trust → more saving
+\`\`\`
+
+Each loop makes the next one cheaper: the first Skill takes an hour, the tenth takes ten minutes because patterns repeat.
+
+## Counter-Arguments (Steelmanned)
+
+- **"Skills go stale"**: true — which is why they live in git with owners and quarterly reviews, unlike chat history.
+- **"The model already knows this"**: models know the average; Skills encode *your* stack, *your* customers, *your* edge cases.
+- **"Too much process"**: start with one file. Process earns its keep at Skill #5, not before.`
     },
     {
         id: "demo-essay",
@@ -536,7 +817,46 @@ version: 1.0.0
 1. Collect your 5 most-reused prompts
 2. Group them by trigger (same trigger = same Skill)
 3. Add one negative condition each ("do NOT use when…")
-4. Store in git; review quarterly like code`
+4. Store in git; review quarterly like code
+
+## Anatomy of a Great Trigger
+
+Triggers fail in two ways: too broad (fires everywhere) or too narrow (never fires). Aim for the middle:
+
+| Bad trigger | Why it fails | Fixed trigger |
+|-------------|--------------|---------------|
+| "react" | Half your questions mention React | "React Server Component data fetching" |
+| "code review" | Fires on any review | "Reviewing a PR that touches /payments" |
+| "API" | Meaningless alone | "Designing a paginated REST endpoint" |
+
+## Negative Triggers Are Underrated
+
+Every Skill should say when NOT to load — it saves thousands of tokens per session:
+
+\`\`\`yaml
+trigger: "Postgres query optimization"
+do_not_load_when:
+  - "the query runs on SQLite"
+  - "the table has fewer than 10k rows"
+  - "the user asked for ORM-level help, not SQL"
+\`\`\`
+
+## Skill Library Layout That Scales
+
+\`\`\`
+.skills/
+├── frontend/
+│   ├── react-server-components.md
+│   └── tailwind-theming.md
+├── backend/
+│   ├── postgres-indexing.md
+│   └── stripe-webhooks.md
+└── process/
+    ├── code-review-checklist.md
+    └── incident-postmortem.md
+\`\`\`
+
+> Folders mirror how developers already think (stack → topic), so the right Skill is one \`ls\` away even without AI search.`
     },
     {
         id: "demo-newsletter",
@@ -585,7 +905,34 @@ A new benchmark (AgentBench 2.0) evaluates agents on real-world coding tasks. To
 
 - **Monday scan**: read only the bold one-liners (2 minutes)
 - **Deep dive**: follow exactly one link per week and save it as a source
-- **Compound**: after 4 issues, compile the saved links into one "Q3 AI landscape" Skill`,
+- **Compound**: after 4 issues, compile the saved links into one "Q3 AI landscape" Skill
+
+## Issue #42 Annotated
+
+**Story 1 — MCP goes mainstream.** GitHub's native Copilot support means MCP servers now run where developers already work. Action: if you maintain internal docs, expose them as an MCP resource this quarter — adoption cost is near zero.
+
+**Story 2 — AgentBench 2.0.** New leaderboard on real-world coding tasks: Claude 4.5 leads, GPT-5 follows, Gemini 3 trails on multi-step tool use. Action: benchmark your own agent on 5 of your tickets before trusting vendor charts.
+
+**Story 3 — Tool of the week: Reskill.** An open-source skill manager syncing prompts across Cursor, Claude Code and Windsurf via MCP filesystem. Action: try it on one bucket before building anything custom.
+
+## Newsletter-to-Skill Pipeline
+
+\`\`\`
+Inbox (5 min skim)
+  → star 1 link worth keeping
+    → Reskill extract → bucket "AI landscape"
+      → monthly: compile 4 issues → 1 evergreen Skill
+\`\`\`
+
+Twelve issues a year become three Skills that never expire — while everyone else's inbox just fills up.
+
+## Past Issues Worth Retrieving
+
+| Issue | Why it still matters |
+|-------|---------------------|
+| #38 — RAG is not dead | Chunking strategies that AgentBench later validated |
+| #35 — Eval harnesses | The replay-trace pattern Maria's post also recommends |
+| #31 — Small models win | Cost math that still holds after two model generations |`,
     },
     {
         id: "demo-github",
@@ -645,7 +992,51 @@ server.tool("search_docs", {
 - [ ] Every tool has a description the model can read
 - [ ] Optional params carry defaults, required ones are minimal
 - [ ] Errors return text content, never throw across the transport
-- [ ] README documents the minimum protocol version`,
+- [ ] README documents the minimum protocol version
+
+## Package Tour: What Lives Where
+
+| Path | Contains | Read it when |
+|------|----------|--------------|
+| \`src/server/\` | McpServer, tool/resource/prompt registration | Adding a new capability |
+| \`src/client/\` | Client + transport negotiation | Connecting programmatically |
+| \`src/types.ts\` | Zod schemas for every message | Debugging handshake failures |
+| \`src/shared/\` | URI templates, protocol utils | Implementing custom transports |
+| \`examples/\` | Minimal server + client | First 15 minutes with the SDK |
+
+## Transport Decision Guide
+
+\`\`\`
+Local IDE or CLI?
+├── YES → StdioServerTransport (zero config, one process)
+└── NO → Is the server shared across machines?
+    ├── YES → Streamable HTTP (session-based, scales)
+    └── Legacy only → SSE (deprecated, avoid for new code)
+\`\`\`
+
+## Error Handling That Survives Production
+
+\`\`\`typescript
+async ({ query }) => {
+  try {
+    const hits = await docs.search(query);
+    if (hits.length === 0) {
+      return { content: [{ type: "text", text: "No results. Try broader terms." }] };
+    }
+    return { content: [{ type: "text", text: JSON.stringify(hits) }] };
+  } catch (err) {
+    // Never leak stack traces to the model — log server-side instead
+    console.error("search_docs failed", err);
+    return { content: [{ type: "text", text: "Search unavailable, try again shortly." }] };
+  }
+}
+\`\`\`
+
+## Contribution Signals (from repo pulse)
+
+- Most active area: client transports (HTTP streaming work)
+- Good first issues are labeled and usually docs-shaped, not protocol-shaped
+- Releases follow the spec version — check the README matrix before upgrading`,
     },
     {
         id: "demo-docs",
@@ -687,6 +1078,12 @@ const data = await fetch("https://api…", { next: { revalidate: 60 } });
 
 // Always fresh: skip every cache layer
 const live = await fetch("https://api…", { cache: "no-store" });
+
+// Tagged: revalidate many fetches at once after a mutation
+const posts = await fetch("https://api…/posts", { next: { tags: ["posts"] } });
+// later, in a Server Action:
+import { revalidateTag } from "next/cache";
+revalidateTag("posts");
 \`\`\`
 
 ## Revalidation Rules
@@ -695,11 +1092,99 @@ const live = await fetch("https://api…", { cache: "no-store" });
 - **On-demand**: \`revalidatePath("/blog")\` or \`revalidateTag("posts")\` after mutations.
 - **Route handler wins**: a dynamic function (\`cookies()\`, \`headers()\`) opts the whole route out of static rendering.
 
+## Request Memoization in Depth
+
+During a single render pass, React deduplicates identical GET fetches automatically — even across components that never talk to each other:
+
+\`\`\`typescript
+// layout.tsx and page.tsx both call getUser() → ONE underlying request
+async function getUser(id: string) {
+  const res = await fetch(\`https://api…/users/\${id}\`);
+  return res.json();
+}
+\`\`\`
+
+Rules to remember:
+
+- Only GET requests are memoized; POST/PUT always hit the network.
+- Memoization lasts for one render pass, then it is gone — it is not a cache.
+- Same URL + same options = same memoized result; different options = different entries.
+
+## Data Cache Option Matrix
+
+| Option | Behavior | Use when |
+|--------|----------|----------|
+| *(default)* | \`force-cache\`, persists after build | Static content, docs, marketing |
+| \`cache: 'force-cache'\` | Explicit version of default | You want to be explicit in shared libs |
+| \`cache: 'no-store'\` | Fresh on every request | Dashboards, carts, user-specific data |
+| \`next: { revalidate: 60 }\` | Stale-while-revalidate, 60s | Feeds, listings, prices that drift slowly |
+| \`next: { tags: [...] }\` | Manual invalidation group | Content edited from a CMS or admin panel |
+
+## Static vs Dynamic Rendering
+
+A route is static when every fetch in it is cacheable and no dynamic API is used. One dynamic call anywhere in the tree makes the whole route dynamic:
+
+\`\`\`typescript
+import { cookies, headers } from "next/headers";
+
+// Any of these opts the route out of the Full Route Cache:
+const token = (await cookies()).get("session");   // dynamic
+const ua = (await headers()).get("user-agent");    // dynamic
+\`\`\`
+
+Route segment config cheat-sheet:
+
+| Export | Values | Effect |
+|--------|--------|--------|
+| \`dynamic\` | \`'auto' \\| 'force-dynamic' \\| 'force-static' \\| 'error'\` | Override the automatic behavior |
+| \`revalidate\` | \`false \\| 0 \\| number\` | Default revalidation for the segment |
+| \`fetchCache\` | \`'auto' \\| 'force-cache' \\| 'only-cache' \\| ...\` | Default fetch caching for the segment |
+| \`runtime\` | \`'nodejs' \\| 'edge'\` | Where the route executes |
+
+## Router Cache and Navigation
+
+The client-side Router Cache keeps visited route segments for ~30 seconds so back/forward feels instant:
+
+- Links with prefetch (default in production) warm the cache on hover/viewport.
+- \`router.refresh()\` re-fetches the current route and merges fresh Server Components.
+- Prefetching can be tuned per link: \`<Link prefetch={false}>\` for rarely visited pages.
+
+## Debugging Cache Issues
+
+1. Inspect the \`x-nextjs-cache\` response header: HIT, MISS or STALE tells you which layer answered.
+2. Add temporary logging inside the fetch wrapper to see how often it really runs.
+3. Suspect the Data Cache when content updates "randomly late"; suspect memoization when a mutation seems ignored in the same render.
+4. In development everything looks dynamic — always verify caching behavior in a production build.
+
+## Decision Flowchart
+
+\`\`\`
+Is the data the same for every user?
+├── YES → can it be stale for a minute?
+│   ├── YES → fetch + revalidate: 60 (or tags)
+│   └── NO  → static, default caching
+└── NO  → is it per-request only?
+    ├── YES → cache: 'no-store'
+    └── NO  → tags + on-demand revalidation
+\`\`\`
+
 ## Anti-Patterns
 
 - Caching user-specific data with a shared key
 - Using \`router.refresh()\` in a loop instead of keying the mutation
-- Mixing \`force-cache\` with auth headers on the same fetch`,
+- Mixing \`force-cache\` with auth headers on the same fetch
+- Calling \`revalidatePath\` inside render instead of in a Server Action
+- Assuming dev-mode behavior matches production caching
+
+## Quick Reference Card
+
+| Goal | Do this |
+|------|---------|
+| Blog post, rarely changes | Default fetch, static route |
+| Product listing, updates hourly | \`revalidate: 3600\` |
+| User dashboard | \`cache: 'no-store'\` |
+| CMS content with "publish" button | \`tags: ["cms"]\` + \`revalidateTag\` |
+| A/B test per visitor | \`cookies()\` → route becomes dynamic |`,
     },
 ];
 
