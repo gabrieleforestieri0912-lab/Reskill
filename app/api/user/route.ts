@@ -31,7 +31,10 @@ export async function PATCH(req: Request) {
     }
 
     return NextResponse.json({ success: true, name: name.trim() });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message || "Errore" }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Errore" },
+      { status: 500 }
+    );
   }
 }

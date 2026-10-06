@@ -328,11 +328,11 @@ type DeepStringRecord = { [key: string]: DeepString | DeepStringRecord };
 
 export type Translations = {
   [K in keyof typeof it]: {
-    [P in keyof (typeof it)[K]]: (typeof it)[K][P] extends Array<infer _>
-      ? string[]
-      : (typeof it)[K][P] extends (...args: any[]) => string
-      ? (...args: Parameters<typeof it[K][P] extends (...args: any[]) => string ? typeof it[K][P] : never>) => string
-      : string;
+    [P in keyof (typeof it)[K]]: (typeof it)[K][P] extends (...args: infer A) => string
+      ? (...args: A) => string
+      : (typeof it)[K][P] extends readonly unknown[]
+        ? string[]
+        : string;
   };
 };
 export default it;

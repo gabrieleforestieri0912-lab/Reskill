@@ -140,8 +140,8 @@ export default function FeedPage() {
         if (bucketsRes.ok) setBuckets(await bucketsRes.json())
       }
       setConvertUrl("")
-    } catch (e: any) {
-      setExtractionError(e.message || "Errore durante l'estrazione")
+    } catch (e: unknown) {
+      setExtractionError(e instanceof Error ? e.message : "Errore durante l'estrazione")
     } finally {
       setIsExtracting(false)
     }

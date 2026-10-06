@@ -30,7 +30,10 @@ export async function GET() {
       cancelAtPeriodEnd: sub.cancel_at_period_end,
       planDetails,
     });
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 500 });
+  } catch (e: unknown) {
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Errore sconosciuto" },
+      { status: 500 }
+    );
   }
 }

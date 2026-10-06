@@ -25,7 +25,6 @@ export async function POST(req: Request) {
 
     const { getPlanPrice } = await import("@/lib/plans");
     const amount = getPlanPrice(plan, cycle);
-    const label = cycle === "annual" ? `/anno (€${amount})` : `/mese (€${amount})`;
 
     if (!process.env.STRIPE_SECRET_KEY || process.env.STRIPE_SECRET_KEY.startsWith("sk_test_mock")) {
       return NextResponse.json({
@@ -90,7 +89,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ url: checkoutSession.url });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Stripe Checkout Error:", error);
     return NextResponse.json(
       { error: "Errore durante la creazione del checkout Stripe" },

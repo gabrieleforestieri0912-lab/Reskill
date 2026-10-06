@@ -196,7 +196,7 @@ export default function McpPage() {
         {/* Architecture Diagram */}
         <section className="mb-20">
           <div className="p-8 bg-[oklch(13% 0.006 260)] border border-[oklch(60%_0.01_260)]/15">
-            <h2 className="text-xl font-bold text-white mb-4"><span className="text-[oklch(72%_0.06_240)]">Cos'è</span> MCP?</h2>
+            <h2 className="text-xl font-bold text-white mb-4"><span className="text-[oklch(72%_0.06_240)]">Cos&apos;è</span> MCP?</h2>
             <p className="text-sm text-[oklch(60%_0.01_260)] leading-relaxed mb-6">{t.mcp.intro_text}</p>
 
             <div className="p-6 bg-black/40 border border-white/6 font-mono text-xs leading-relaxed overflow-x-auto mb-6">
@@ -226,15 +226,15 @@ export default function McpPage() {
             <div className="grid md:grid-cols-3 gap-4 text-xs">
               <div className="p-4 bg-white/2 border border-white/6">
                 <h4 className="font-semibold text-white mb-1.5">1. Il tuo IDE (Client MCP)</h4>
-                <p className="text-[oklch(60%_0.01_260)] leading-relaxed">Cursor, Windsurf, Claude Desktop eseguono il server MCP come processo figlio. Scoprono i tool disponibili all'avvio tramite il protocollo MCP.</p>
+                <p className="text-[oklch(60%_0.01_260)] leading-relaxed">Cursor, Windsurf, Claude Desktop eseguono il server MCP come processo figlio. Scoprono i tool disponibili all&apos;avvio tramite il protocollo MCP.</p>
               </div>
               <div className="p-4 bg-white/2 border border-white/6">
                 <h4 className="font-semibold text-white mb-1.5">2. Server MCP (Locale)</h4>
-                <p className="text-[oklch(60%_0.01_260)] leading-relaxed">npx esegue @reskill/mcp-server in locale. Il server si autentica con il tuo token e interroga l'API Reskill per conto tuo.</p>
+                <p className="text-[oklch(60%_0.01_260)] leading-relaxed">npx esegue @reskill/mcp-server in locale. Il server si autentica con il tuo token e interroga l&apos;API Reskill per conto tuo.</p>
               </div>
               <div className="p-4 bg-white/2 border border-white/6">
                 <h4 className="font-semibold text-white mb-1.5">3. API Reskill (Cloud)</h4>
-                <p className="text-[oklch(60%_0.01_260)] leading-relaxed">L'API restituisce i dati dei tuoi bucket. Il server MCP li espone come tool strutturati con schemi tipizzati JSON Schema.</p>
+                <p className="text-[oklch(60%_0.01_260)] leading-relaxed">L&apos;API restituisce i dati dei tuoi bucket. Il server MCP li espone come tool strutturati con schemi tipizzati JSON Schema.</p>
               </div>
             </div>
           </div>
@@ -302,7 +302,7 @@ export default function McpPage() {
               <h4 className="font-semibold text-sm text-white mb-2">{t.mcp.step3_title}</h4>
               <p className="text-xs text-[oklch(60%_0.01_260)] leading-relaxed mb-3">{t.mcp.step3_desc}</p>
               <div className="bg-black/30 p-2.5 font-mono text-[11px] text-[oklch(60%_0.01_260)]">
-                Esempio: "Cerca nei miei bucket informazioni su React hooks"
+                Esempio: &quot;Cerca nei miei bucket informazioni su React hooks&quot;
               </div>
             </div>
           </div>

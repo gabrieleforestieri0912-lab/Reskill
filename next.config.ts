@@ -23,7 +23,9 @@ const nextConfig: NextConfig = {
     "resend",
     "youtube-transcript",
     "@supabase/supabase-js",
-    "next-auth",
+    // NOTA: next-auth NON va externalizzato: i suoi import "next/server"
+    // senza estensione falliscono a runtime con Turbopack (fix già applicato
+    // in passato e poi perso nel commit "prep for Vercel deployment").
   ],
   async headers() {
     return [

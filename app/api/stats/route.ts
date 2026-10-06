@@ -4,7 +4,7 @@ import { getBucketsByUserEmail } from "@/models/Bucket";
 import { getSourcesByBucketIds } from "@/models/Source";
 import { getUserByEmail } from "@/models/User";
 import { getSubscriptionByUserId, resetCreditsIfNeeded } from "@/models/UserSubscription";
-import { getPlanById, PLANS } from "@/lib/plans";
+import { getPlanById } from "@/lib/plans";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -42,7 +42,14 @@ export async function GET(req: NextRequest) {
     const totalCreditsUsed = subscription?.credits_used || 0;
 
     // Attività recente
-    const recentActivity: any[] = [];
+    interface ActivityItem {
+      type: string;
+      id: string;
+      name: string;
+      date: string;
+      sourceType?: string;
+    }
+    const recentActivity: ActivityItem[] = [];
     for (const b of buckets) {
       recentActivity.push({
         type: "bucket",
@@ -78,8 +85,11 @@ export async function GET(req: NextRequest) {
         sources: totalSources,
       },
     });
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("Stats error:", e);
-    return NextResponse.json({ error: e.message }, { status: 500 });
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : "Errore sconosciuto" },
+      { status: 500 }
+    );
   }
 }

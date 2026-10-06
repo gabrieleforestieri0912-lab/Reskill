@@ -53,26 +53,34 @@ export default function AccountPage() {
     }
     fetchStats()
 
-    const savedRecharge = localStorage.getItem("sg_auto_recharge")
-    if (savedRecharge) {
-      try {
-        const cfg = JSON.parse(savedRecharge)
-        setAutoRecharge(cfg.enabled || false)
-      } catch {}
-    }
-
-    try {
-      const raw = localStorage.getItem("reskill_export_settings")
-      if (raw) {
-        const cfg = JSON.parse(raw)
-        if (cfg.exportPath) setExportPath(String(cfg.exportPath))
-        if (cfg.exportFolder) setExportFolder(String(cfg.exportFolder))
+    // Letture localStorage differite: evitano setState sincroni nell'effect
+    // (cascading renders) e girano solo sul client, senza mismatch di hydration.
+    const t = setTimeout(() => {
+      const savedRecharge = localStorage.getItem("sg_auto_recharge")
+      if (savedRecharge) {
+        try {
+          const cfg = JSON.parse(savedRecharge)
+          setAutoRecharge(cfg.enabled || false)
+        } catch {}
       }
-    } catch {}
+
+      try {
+        const raw = localStorage.getItem("reskill_export_settings")
+        if (raw) {
+          const cfg = JSON.parse(raw)
+          if (cfg.exportPath) setExportPath(String(cfg.exportPath))
+          if (cfg.exportFolder) setExportFolder(String(cfg.exportFolder))
+        }
+      } catch {}
+    }, 0)
+    return () => clearTimeout(t)
   }, [])
 
   useEffect(() => {
-    if (session?.user?.name) setNameValue(session.user.name)
+    if (!session?.user?.name) return
+    const name = session.user.name
+    const t = setTimeout(() => setNameValue(name), 0)
+    return () => clearTimeout(t)
   }, [session])
 
   const handleSaveName = async () => {
