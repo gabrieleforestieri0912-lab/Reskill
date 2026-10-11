@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/translations"
+import { useToast } from "@/components/ui/Toast"
 import {
   Plug, Key, Terminal, Globe, Loader2, Check,
   Copy, ChevronLeft, RefreshCw,
@@ -31,6 +32,7 @@ function SectionIcon({ children }: { children: React.ReactNode }) {
 export default function ConnectionsPage() {
   const router = useRouter()
   const { t } = useTranslation()
+  const toast = useToast()
   const a = t.account
 
   const [mcpUrl, setMcpUrl] = useState("")
@@ -96,8 +98,9 @@ export default function ConnectionsPage() {
       localStorage.setItem("sg_mcp_url", mcpUrl.trim())
       setMcpSaved(true)
       setTimeout(() => setMcpSaved(false), 2000)
+      toast.success("URL MCP salvato correttamente.")
     } catch {
-      alert("URL non valido")
+      toast.error("URL non valido. Inserisci un indirizzo completo, es. http://localhost:3001")
     }
   }
 
@@ -123,9 +126,13 @@ export default function ConnectionsPage() {
         setApiKeyMask("")
         localStorage.setItem("reskill_api_key", data.key)
         await navigator.clipboard.writeText(data.key)
+        toast.success("API Key generata e copiata negli appunti.")
+      } else {
+        toast.error("Impossibile generare l'API Key. Riprova.")
       }
     } catch (e) {
       console.error(e)
+      toast.error("Errore durante la generazione dell'API Key.")
     } finally {
       setGeneratingKey(false)
     }
@@ -145,9 +152,13 @@ export default function ConnectionsPage() {
         setMcpTokenPrefix(data.keyPrefix)
         setMcpTokenId(data.id || "")
         await navigator.clipboard.writeText(data.token)
+        toast.success("Token MCP generato e copiato negli appunti.")
+      } else {
+        toast.error("Impossibile generare il Token MCP. Riprova.")
       }
     } catch (e) {
       console.error(e)
+      toast.error("Errore durante la generazione del Token MCP.")
     } finally {
       setGeneratingToken(false)
     }
@@ -166,17 +177,23 @@ export default function ConnectionsPage() {
     if (!mcpTokenId) return
     setRevokingToken(true)
     try {
-      await fetch("/api/mcp/token", {
+      const res = await fetch("/api/mcp/token", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: mcpTokenId }),
       })
-      setMcpToken("")
-      setMcpTokenPrefix("")
-      setMcpTokenId("")
-      setShowMcpToken(false)
+      if (res.ok) {
+        setMcpToken("")
+        setMcpTokenPrefix("")
+        setMcpTokenId("")
+        setShowMcpToken(false)
+        toast.success("Token MCP revocato.")
+      } else {
+        toast.error("Impossibile revocare il token. Riprova.")
+      }
     } catch (e) {
       console.error(e)
+      toast.error("Errore durante la revoca del token.")
     } finally {
       setRevokingToken(false)
     }

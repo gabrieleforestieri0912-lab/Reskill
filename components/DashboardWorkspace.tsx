@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import StatsPanel from "@/components/StatsPanel";
 import PlansSection from "@/components/PlansSection";
+import { useToast } from "@/components/ui/Toast";
 
 interface Source {
  id: string;
@@ -40,6 +41,7 @@ interface Bucket {
 
 export default function DashboardWorkspace() {
   const { data: session } = useSession();
+ const toast = useToast();
  const [buckets, setBuckets] = useState<Bucket[]>([]);
  const [activeBucketId, setActiveBucketId] = useState<string>("");
  const [activeSourceId, setActiveSourceId] = useState<string | null>(null);
@@ -56,6 +58,7 @@ export default function DashboardWorkspace() {
  const [searchQuery, setSearchQuery] = useState("");
  const [copyFeedback, setCopyFeedback] = useState(false);
  const [showCreateBucketModal, setShowCreateBucketModal] = useState(false);
+ const [deleteBucketId, setDeleteBucketId] = useState<string | null>(null);
  const [extractionError, setExtractionError] = useState<string | null>(null);
 
  const [isLoading, setIsLoading] = useState(true);
@@ -198,9 +201,9 @@ export default function DashboardWorkspace() {
  const detail = res.status === 429
  ? `Limite orario raggiunto per il piano.`
  : `Crediti esauriti per il piano corrente.`;
- setExtractionError(`âš ï¸ ${detail} ${errorMsg} â€” effettua l'upgrade dalla pagina Account.`);
+ setExtractionError(`${detail} ${errorMsg} — effettua l'upgrade dalla pagina Account.`);
  } else {
- setExtractionError(`âš ï¸ ${errorMsg}`);
+ setExtractionError(`${errorMsg}`);
  }
  setIsGeneratingSkill(false);
  return;
@@ -334,25 +337,27 @@ export default function DashboardWorkspace() {
  }
  };
 
- const handleDeleteBucket = async (bucketId: string) => {
- if (!confirm("Sei sicuro di voler eliminare questo intero Bucket?")) return;
+const handleDeleteBucket = async (bucketId: string) => {
  try {
- const res = await fetch(`/api/buckets/${bucketId}`, { method: "DELETE" });
- if (!res.ok) throw new Error("Eliminazione fallita");
+  const res = await fetch(`/api/buckets/${bucketId}`, { method: "DELETE" });
+  if (!res.ok) throw new Error("Eliminazione fallita");
  } catch (err) {
- console.error(err);
- return;
+  console.error(err);
+  toast.error("Errore durante l'eliminazione del Bucket.");
+  return;
  }
  const updatedBuckets = buckets.filter((b) => b.id !== bucketId);
  setBuckets(updatedBuckets);
+ setDeleteBucketId(null);
+ toast.success("Bucket eliminato con successo.");
 
  if (activeBucketId === bucketId) {
- if (updatedBuckets.length > 0) {
- setActiveBucketId(updatedBuckets[0].id);
- } else {
- setActiveBucketId("");
- }
- setActiveSourceId(null);
+  if (updatedBuckets.length > 0) {
+  setActiveBucketId(updatedBuckets[0].id);
+  } else {
+  setActiveBucketId("");
+  }
+  setActiveSourceId(null);
  }
  };
 
@@ -368,7 +373,7 @@ export default function DashboardWorkspace() {
  case "twitter":
  return (
  <span className="w-8 h-8 bg-[#14202a] border border-sky-900/35 text-[oklch(72%_.06_240)] flex items-center justify-center font-bold text-[12px]">
- ð•
+  X
  </span>
  );
  case "reddit":
@@ -397,15 +402,16 @@ export default function DashboardWorkspace() {
  );
 
  return (
- <main className="flex-1 flex flex-col md:flex-row min-h-[calc(100vh-73px)] pt-[73px] bg-[oklch(13% 0.006 260)] text-slate-350 select-none">
+ <main className="flex-1 flex flex-col md:flex-row min-h-[calc(100vh-73px)] pt-[73px] bg-[oklch(13% 0.006 260)] text-slate-350">
  {/* LEFT SIDEBAR: BUCKETS LIST */}
  <aside className="w-full md:w-80 bg-[oklch(13% .006 260)] border-b md:border-b-0 md:border-r border-[oklch(72% .06 240)]/15 p-6 flex flex-col gap-6">
  <div className="flex items-center justify-between">
  <h2 className="text-lg font-bold text-[oklch(98.5%_.002_260)] tracking-tight">I tuoi Bucket</h2>
- <button
+<button
  onClick={() => setShowCreateBucketModal(true)}
  className="w-8 h-8 bg-[oklch(13% .006 260)] hover:bg-[oklch(13% .006 260)] text-[oklch(72% .06 240)] border border-[oklch(72% .06 240)]/40 flex items-center justify-center transition-transform active:scale-95"
  title="Crea nuovo Bucket"
+ aria-label="Crea nuovo Bucket"
  >
  <Plus size={14} />
  </button>
@@ -444,13 +450,14 @@ export default function DashboardWorkspace() {
  <h3 className="font-bold text-[oklch(98.5%_0.002_260)] group-hover:text-[oklch(98.5%_.002_260)] transition-colors line-clamp-1 text-sm">
  {b.name}
  </h3>
- <button
+<button
  onClick={(e) => {
  e.stopPropagation();
- handleDeleteBucket(b.id);
+ setDeleteBucketId(b.id);
  }}
  className="text-[oklch(60%_0.01_260)] hover:text-[oklch(72%_.06_240)] text-xs opacity-0 group-hover:opacity-100 transition-opacity ml-2"
  title="Elimina bucket"
+ aria-label={`Elimina bucket ${b.name}`}
  >
  <Trash2 size={12} />
  </button>
@@ -489,7 +496,7 @@ export default function DashboardWorkspace() {
  </div>
  <h2 className="text-3xl font-extrabold text-[oklch(98.5%_.002_260)] mb-4 tracking-tight">Benvenuto in Reskill!</h2>
  <p className="text-[oklch(72% .06 240)] mb-8 text-sm leading-relaxed max-w-md mx-auto">
- Il tuo <strong className="text-[oklch(98.5%_.002_260)]">secondo cervello AI</strong> Ã¨ pronto. Inizia creando un Bucket per collezionare fonti web tramite l&apos;estensione, e poi usa l&apos;Intelligenza Artificiale per compilare super-skill contestuali.
+ Il tuo <strong className="text-[oklch(98.5%_.002_260)]">secondo cervello AI</strong> è pronto. Inizia creando un Bucket per collezionare fonti web tramite l&apos;estensione, e poi usa l&apos;Intelligenza Artificiale per compilare super-skill contestuali.
  </p>
  <button
  onClick={() => setShowCreateBucketModal(true)}
@@ -554,8 +561,8 @@ export default function DashboardWorkspace() {
  )}
  </button>
  </form>
- {extractionError && (
- <p className="text-xs text-[oklch(72%_.06_240)] mt-2 flex items-center gap-1"><AlertTriangle size={11} /> {extractionError}</p>
+{extractionError && (
+ <p className="text-xs text-red-400 mt-2 flex items-center gap-1"><AlertTriangle size={11} /> {extractionError}</p>
  )}
  <div className="flex gap-4 mt-3 text-[12px] text-slate-600 font-medium">
  <span className="flex items-center gap-1"><Video size={9} /> YouTube</span>
@@ -630,18 +637,19 @@ export default function DashboardWorkspace() {
  {s.title}
  </h4>
  <p className="text-[12px] text-slate-550 truncate mt-0.5 font-mono">
- {s.domain} â€¢ {s.date}
+ {s.domain} • {s.date}
  </p>
  </div>
  </div>
  <div className="flex items-center gap-2">
- <a
+<a
  href={s.url}
  target="_blank"
  rel="noreferrer"
  onClick={(e) => e.stopPropagation()}
  className="text-[oklch(60%_0.01_260)] hover:text-[oklch(98.5%_0.002_260)] text-xs transition-colors p-1"
  title="Apri URL originale"
+ aria-label="Apri URL originale"
  >
  <ExternalLink size={12} />
  </a>
@@ -652,6 +660,7 @@ export default function DashboardWorkspace() {
  }}
  className="text-[oklch(60%_0.01_260)] hover:text-[oklch(72%_.06_240)] text-xs transition-colors p-1"
  title="Rimuovi fonte"
+ aria-label="Rimuovi fonte"
  >
  <Trash2 size={12} />
  </button>
@@ -687,7 +696,7 @@ export default function DashboardWorkspace() {
  <Folder size={40} className="text-[oklch(72% .06 240)] mb-4" />
  <h2 className="text-base font-bold text-[oklch(98.5%_0.002_260)]">Nessun Bucket selezionato</h2>
  <p className="text-xs text-[oklch(60%_0.01_260)] mt-1 max-w-xs leading-relaxed">
- Seleziona un bucket dal menu a sinistra o creane uno nuovo per iniziare ad accumulare abilitÃ  AI.
+ Seleziona un bucket dal menu a sinistra o creane uno nuovo per iniziare ad accumulare abilità AI.
  </p>
  </div>
  )}
@@ -746,11 +755,11 @@ export default function DashboardWorkspace() {
  skillSaveStatus === "saving" ? <><Loader2 size={12} className="animate-spin" /> Salvataggio...</> :
  <><Check size={12} /> Salva</>}
  </button>
- <button
+<button
  onClick={() => {
  const url = `${window.location.origin}/share/${activeBucket.id}`;
  navigator.clipboard.writeText(url);
- alert("Link pubblico copiato! Chiunque puÃ² vedere questa Skill.");
+ toast.success("Link pubblico copiato! Chiunque può vedere questa Skill.");
  }}
  className="px-3 py-2 bg-[oklch(13% .006 260)] hover:bg-[oklch(13% .006 260)] border border-[oklch(72% .06 240)]/50 text-xs font-semibold transition-all flex items-center gap-1.5 text-[oklch(72% .06 240)]"
  title="Copia link per la condivisione pubblica"
@@ -882,7 +891,7 @@ export default function DashboardWorkspace() {
  Cursor (.cursorrules)
  </h3>
  <p className="text-[12px] text-[oklch(60%_0.01_260)] mb-2">
- Inserisci il contenuto di questo file all&apos;interno del file <code className="bg-[oklch(13% 0.006 260)] px-1.5 py-0.5 rounded text-[oklch(98.5%_.002_260)] text-[12px]">.cursorrules</code> alla radice del tuo progetto. Cursor applicherÃ  automaticamente queste istruzioni ad ogni query.
+ Inserisci il contenuto di questo file all&apos;interno del file <code className="bg-[oklch(13% 0.006 260)] px-1.5 py-0.5 rounded text-[oklch(98.5%_.002_260)] text-[12px]">.cursorrules</code> alla radice del tuo progetto. Cursor applicherà automaticamente queste istruzioni ad ogni query.
  </p>
  </div>
 
@@ -892,7 +901,7 @@ export default function DashboardWorkspace() {
  Claude.ai Projects & Custom GPTs
  </h3>
  <p className="text-[12px] text-[oklch(60%_0.01_260)] mb-2">
- Se utilizzi Claude Pro (Projects) o ChatGPT Plus (Custom GPTs): scarica il file <code className="bg-[oklch(13% 0.006 260)] px-1.5 py-0.5 rounded text-[oklch(98.5%_.002_260)] text-[12px]">.md</code> e caricalo direttamente nella sezione &quot;Project Files&quot; o &quot;Knowledge&quot;. L&apos;AI interrogherÃ  questo documento ogni volta che ne ha bisogno!
+ Se utilizzi Claude Pro (Projects) o ChatGPT Plus (Custom GPTs): scarica il file <code className="bg-[oklch(13% 0.006 260)] px-1.5 py-0.5 rounded text-[oklch(98.5%_.002_260)] text-[12px]">.md</code> e caricalo direttamente nella sezione &quot;Project Files&quot; o &quot;Knowledge&quot;. L&apos;AI interrogherà questo documento ogni volta che ne ha bisogno!
  </p>
  </div>
 
@@ -937,7 +946,7 @@ export default function DashboardWorkspace() {
  <Sparkles size={40} className="text-[oklch(72% .06 240)] mb-4" />
  <h3 className="text-base font-bold text-[oklch(60%_0.01_260)]">AI Workspace</h3>
  <p className="text-xs text-[oklch(60%_0.01_260)] max-w-sm mt-2 leading-relaxed">
- Il compilatore di contesto AI si attiverÃ  qui non appena selezioni un bucket e generi la tua Skill.
+ Il compilatore di contesto AI si attiverà qui non appena selezioni un bucket e generi la tua Skill.
  </p>
  </div>
  )}
@@ -1002,12 +1011,47 @@ export default function DashboardWorkspace() {
  Crea Bucket
  </button>
  </div>
- </form>
+</form>
+ </div>
+ </div>
+ )}
+
+ {/* DELETE BUCKET CONFIRM MODAL */}
+ {deleteBucketId && (
+ <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
+ <div className="w-full max-w-sm bg-[oklch(13% .006 260)] border border-red-500/30 p-6 shadow-2xl">
+ <div className="flex justify-between items-center mb-4">
+ <h3 className="text-base font-bold text-[oklch(98.5%_.002_260)]">Elimina Bucket</h3>
+ <button
+ onClick={() => setDeleteBucketId(null)}
+ className="text-[oklch(60%_0.01_260)] hover:text-[oklch(98.5%_.002_260)] transition-colors"
+ aria-label="Chiudi"
+ >
+ <X size={16} />
+ </button>
+ </div>
+ <p className="text-xs text-[oklch(60%_0.01_260)] leading-relaxed mb-6">
+ Sei sicuro di voler eliminare questo intero Bucket? L&apos;operazione è irreversibile e tutte le fonti salvate verranno rimosse.
+ </p>
+ <div className="flex gap-3 justify-end">
+ <button
+ onClick={() => setDeleteBucketId(null)}
+ className="px-4 py-2 border border-slate-800 hover:bg-[oklch(13%_0.006_260)] text-xs font-semibold transition-colors text-slate-450"
+ >
+ Annulla
+ </button>
+ <button
+ onClick={() => handleDeleteBucket(deleteBucketId)}
+ className="px-5 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 text-xs font-bold transition-all"
+ >
+ Elimina
+ </button>
+ </div>
  </div>
  </div>
  )}
  </main>
  );
-}
+ }
 
 

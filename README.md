@@ -1,149 +1,72 @@
-# Reskill
+# Reskill (app mobile)
 
-Piattaforma per generare Skill AI (file Markdown strutturati) da fonti web, YouTube, PDF e social media. Le Skill vengono usate come contesto da agenti AI come Cursor, Claude, ChatGPT, MCP, Windsurf e GitHub Copilot.
+Companion app Flutter per la piattaforma web **Reskill** (genera Skill AI da fonti web, YouTube, PDF e social media).
+
+L'app mobile consuma le stesse API REST del backend web:
+
+- **Auth** — Registrazione (`/api/register`) e login in due modalità:
+  - Email + password (flusso NextAuth credentials, gestione cookie di sessione)
+  - Codice email (passwordless: `/api/extension/send-code` + `/api/extension/verify`, usa header `x-extension-token`)
+- **Bucket** — Elenco, creazione, eliminazione, aggiornamento (`/api/buckets`, `/api/buckets/[id]`)
+- **Fonti** — Estrazione contenuti da URL (`/api/extract`) e salvataggio in un bucket (`/api/buckets/[id]/sources`)
+- **Generazione Skill** — Chiamata streaming a `/api/generate-skill` che produce un file Markdown strutturato
+- **Statistiche & Piano** — `/api/stats`, `/api/subscription`, upgrade via `/api/stripe/checkout`
+- **Feedback** — `/api/feedback`
 
 ## Stack
 
 | Layer | Tecnologia |
 |-------|-----------|
-| Framework | Next.js 16 (App Router, Turbopack) |
-| Linguaggio | TypeScript (strict) |
-| Styling | Tailwind CSS 4 |
-| Database | Supabase (PostgreSQL) |
-| Auth | NextAuth v5 (Google OAuth + Credenziali) |
-| Pagamenti | Stripe |
-| AI | SDK AI (`ai`, `@ai-sdk/openai`, `ollama-ai-provider`) |
-| Email | Resend |
-
-## Struttura del progetto
-
-```
-Reskill/
-├── app/                          # Next.js App Router
-│   ├── api/                      # API route handlers
-│   │   ├── auth/                 # NextAuth handler
-│   │   ├── buckets/              # CRUD bucket
-│   │   ├── sources/              # CRUD fonti
-│   │   ├── extension/            # Invio/verifica codice estensione
-│   │   ├── extract/              # Estrazione contenuti web/YouTube
-│   │   ├── feedback/             # Invio feedback utente
-│   │   ├── generate-skill/       # Generazione Skill via AI
-│   │   ├── register/             # Registrazione utente
-│   │   ├── stats/                # Statistiche utente
-│   │   ├── stripe/               # Checkout, portale, webhook
-│   │   └── subscription/         # Stato abbonamento
-│   ├── auth.ts                   # Configurazione NextAuth
-│   ├── dashboard/                # Dashboard utente
-│   ├── share/[id]/               # Pagina pubblica Skill
-│   └── page.tsx                  # Landing page
-├── components/                   # Componenti React
-│   ├── sections/                 # Sezioni landing page
-│   ├── PlansSection.tsx          # Card piani (dashboard)
-│   └── DashboardWorkspace.tsx    # Workspace principale
-├── lib/                          # Utility
-│   ├── supabase.ts               # Client Supabase (server)
-│   ├── plans.ts                  # Definizioni piani e limiti
-│   └── site-data.ts              # Dati statici landing page
-├── models/                       # Query e interfacce database
-│   ├── User.ts
-│   ├── Bucket.ts
-│   ├── Source.ts
-│   ├── Feedback.ts
-│   └── UserSubscription.ts
-└── supabase-schema.sql           # Schema PostgreSQL
-```
-
-## Schema database (Supabase)
-
-### `users`
-| Colonna | Tipo | Note |
-|---------|------|------|
-| id | UUID | PK, auto |
-| email | TEXT | UNIQUE, lowercase |
-| password | TEXT | bcrypt hash |
-| name | TEXT | |
-| created_at | TIMESTAMPTZ | auto |
-| updated_at | TIMESTAMPTZ | auto |
-
-### `buckets`
-Raccoglitori di fonti. Ogni bucket genera una Skill.
-| Colonna | Tipo | Note |
-|---------|------|------|
-| id | UUID | PK |
-| name | TEXT | Nome del bucket |
-| description | TEXT | |
-| user_email | TEXT | Proprietario |
-| generated_skill | TEXT | Markdown generato dall'AI |
-| created_at / updated_at | TIMESTAMPTZ | |
-
-### `sources`
-Singole fonti collegate a un bucket (YouTube, X, Reddit, PDF, pagine web).
-| Colonna | Tipo | Note |
-|---------|------|------|
-| id | UUID | PK |
-| type | TEXT | youtube, x, reddit, pdf, article/web |
-| title, url, domain | TEXT | Metadati |
-| content | TEXT | Contenuto estratto |
-| skill_markdown | TEXT | Versione Markdown |
-| bucket_id | UUID | FK → buckets(id) ON DELETE CASCADE |
-
-### `user_subscriptions`
-Abbonamenti Stripe.
-| Colonna | Tipo | Note |
-|---------|------|------|
-| user_id | TEXT | UNIQUE |
-| plan | TEXT | free, starter, pro, business, enterprise |
-| stripe_customer_id | TEXT | UNIQUE |
-| stripe_subscription_id | TEXT | UNIQUE |
-| stripe_current_period_end | TIMESTAMPTZ | |
-
-## Flussi principali
-
-### Autenticazione
-- `app/auth.ts` → NextAuth con provider Google e Credenziali (email/password)
-- `app/api/register/` → Registrazione con bcrypt + salvataggio in `users`
-- Login via Google OAuth o credentials JWT
-
-### Bucket e fonti
-1. Utente crea un bucket (`POST /api/buckets`)
-2. Aggiunge fonti (`POST /api/buckets/[id]/sources`) — contenuto estratto da YouTube, URL, PDF, social
-3. Genera Skill (`POST /api/generate-skill`) — l'AI processa tutte le fonti del bucket e produce un file Markdown strutturato
-4. La Skill è visualizzabile pubblicamente su `/share/[id]`
-
-### Estensione browser
-1. Utente inserisce email → `POST /api/extension/send-code` invia codice via Resend
-2. Inserisce codice → `POST /api/extension/verify` lo convalida
-3. L'estensione può salvare contenuti direttamente nei bucket dell'utente
-
-### Abbonamenti (Stripe)
-- `lib/plans.ts` definisce 5 piani con limiti di bucket/fonti
-- `POST /api/stripe/checkout` crea sessione Stripe
-- Webhook `POST /api/stripe/webhook` mantiene aggiornato `user_subscriptions`
-- `GET /api/subscription` restituisce il piano corrente
-- Limiti verificati via `hasReachedBucketLimit()` / `hasReachedSourceLimit()`
+| Framework | Flutter 3.x |
+| Stato | `provider` (ChangeNotifier) |
+| Rete | `dio` |
+| Navigazione | `go_router` |
+| Markdown | `flutter_markdown` |
 
 ## Setup
 
 ```bash
-# 1. Clona e installa
-npm install
+# 1. Copia le variabili d'ambiente
+cp .env.example .env
+#    Modifica RESKILL_API_URL con l'URL del backend web in esecuzione
 
-# 2. Copia .env.example in .env e inserisci:
-#    - DATABASE_URL (MongoDB) oppure NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY
-#    - GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET (Google Cloud Console)
-#    - RESEND_API_KEY (Resend)
-#    - STRIPE_SECRET_KEY (Stripe)
+# 2. Installa le dipendenze
+flutter pub get
 
-# 3. Se usi Supabase: incolla supabase-schema.sql nell'SQL Editor
-
-# 4. Avvia
-npm run dev
+# 3. Avvia (emulatori Android/iOS o device)
+flutter run
 ```
 
-## Comandi
+## Struttura
 
-| Comando | Descrizione |
-|---------|-------------|
-| `npm run dev` | Sviluppo con Turbopack |
-| `npm run build` | Build produzione |
-| `npm run lint` | ESLint |
+```
+lib/
+├── config/          # AppConfig (URL backend)
+├── models/          # Bucket, Source, Plan, Stats, AppUser
+├── services/        # ApiClient (unica fonte di verità per la rete)
+├── providers/       # AuthProvider, BucketProvider
+├── router/          # AppRouter (go_router)
+├── theme/           # AppColors, AppTheme
+├── screens/         # Auth, Dashboard, Buckets, BucketDetail, SkillView, Plans, Account, Feedback
+└── widgets/         # Componenti riutilizzabili
+```
+
+## Configurazione backend
+
+L'app mobile **condivide lo stesso database e gli stessi utenti del backend web**:
+non serve creare un DB separato né credenziali dedicate. Basta avviare il backend web
+(`Documenti/Progetti/Web/reskill`, `npm run dev`) e far puntare l'app alla sua istanza.
+
+- Il backend web gira su `http://localhost:3000` (vedi `NEXTAUTH_URL` nel `.env` del web).
+- Su **Android Emulator** l'alias `10.0.2.2` mappa `localhost` del PC → `RESKILL_API_URL=http://10.0.2.2:3000`.
+- Su **iOS Simulator** usa `http://localhost:3000`.
+- Su **dispositivo fisico** usa l'IP LAN della macchina (es. `http://192.168.1.10:3000`).
+
+L'autenticazione avviene con gli **stessi account del sito web** (registrazione/login email,
+oppure codice passwordless via estensione). Il backend accetta sia il cookie di sessione
+NextAuth (`authjs.session-token`) sia l'header `x-extension-token`, quindi entrambi i flussi
+di login dell'app funzionano contro il DB condiviso.
+
+> Nota: il backend deve essere raggiungibile in chiaro (http) durante lo sviluppo.
+> Su Android è già abilitato `android:usesCleartextTraffic="true"` nel `AndroidManifest.xml`.
+> In produzione usa HTTPS e imposta `NEXTAUTH_URL` al dominio reale del web.

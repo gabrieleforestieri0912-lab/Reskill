@@ -147,11 +147,11 @@ export default function StatsPanel() {
 
  <div className="bg-[oklch(13% .006 260)] border border-[oklch(72% .06 240)]/15 p-4">
  <h4 className="text-[12px] font-bold text-gray uppercase tracking-wider mb-3 flex items-center gap-1.5">
- <Activity size={11} /> AttivitÃ  Recente
+ <Activity size={11} /> Attività Recente
  </h4>
  <div className="space-y-2 max-h-[160px] overflow-y-auto">
  {stats.lastActivity.length === 0 ? (
- <p className="text-[12px] text-slate-600">Nessuna attivitÃ </p>
+ <p className="text-[12px] text-slate-600">Nessuna attività </p>
  ) : (
  stats.lastActivity.slice(0, 5).map((item, idx) => (
  <div key={idx} className="flex items-center gap-2 text-[12px]">

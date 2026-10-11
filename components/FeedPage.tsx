@@ -7,6 +7,7 @@ import {
   Search, Loader2, ExternalLink, Trash2, Plus, X, Zap,
   Rss, Link2, FolderOpen,
 } from "lucide-react"
+import { useToast } from "@/components/ui/Toast"
 
 interface SourceItem {
   id: string
@@ -68,6 +69,7 @@ function formatDate(dateStr: string) {
 export default function FeedPage() {
   const { data: session } = useSession()
   const router = useRouter()
+  const toast = useToast()
 
   const [sources, setSources] = useState<SourceItem[]>([])
   const [buckets, setBuckets] = useState<Bucket[]>([])
@@ -138,10 +140,14 @@ export default function FeedPage() {
         ])
         if (sourcesRes.ok) setSources(await sourcesRes.json())
         if (bucketsRes.ok) setBuckets(await bucketsRes.json())
+        toast.success("Contenuto estratto e salvato nel Feed.")
+      } else {
+        toast.info("Crea prima una cartella per salvare il contenuto estratto.")
       }
       setConvertUrl("")
     } catch (e: any) {
       setExtractionError(e.message || "Errore durante l'estrazione")
+      toast.error(e.message || "Errore durante l'estrazione")
     } finally {
       setIsExtracting(false)
     }
@@ -152,9 +158,13 @@ export default function FeedPage() {
       const res = await fetch(`/api/sources/${sourceId}`, { method: "DELETE" })
       if (res.ok) {
         setSources((prev) => prev.filter((s) => s.id !== sourceId))
+        toast.success("Risorsa eliminata.")
+      } else {
+        toast.error("Impossibile eliminare la risorsa.")
       }
     } catch (e) {
       console.error("Failed to delete source", e)
+      toast.error("Errore durante l'eliminazione.")
     }
   }
 
@@ -171,9 +181,13 @@ export default function FeedPage() {
         setBuckets((prev) => [...prev, { ...newBucket, sources: [] }])
         setNewFolderName("")
         setShowCreateFolder(false)
+        toast.success("Cartella creata.")
+      } else {
+        toast.error("Impossibile creare la cartella.")
       }
     } catch (e) {
       console.error("Failed to create bucket", e)
+      toast.error("Errore durante la creazione della cartella.")
     }
   }
 
@@ -222,9 +236,9 @@ export default function FeedPage() {
                 Estrai
               </button>
             </div>
-            {extractionError && (
-              <p className="text-xs text-cyan mt-2">{extractionError}</p>
-            )}
+{extractionError && (
+  <p className="text-xs text-red-400 mt-2">{extractionError}</p>
+  )}
           </section>
 
           {/* Risorse salvate */}
@@ -364,12 +378,14 @@ export default function FeedPage() {
                         rel="noopener noreferrer"
                         onClick={(e) => e.stopPropagation()}
                         className="px-2 py-1 border border-cyan/20 text-cyan text-[10px] transition-all hover:bg-cyan/15"
+                        aria-label="Apri URL originale"
                       >
                         <ExternalLink size={11} />
                       </a>
                       <button
                         onClick={() => handleDeleteSource(source.id)}
                         className="px-2 py-1 border border-cyan/20 text-cyan text-[10px] transition-all hover:bg-cyan/15"
+                        aria-label="Rimuovi risorsa"
                       >
                         <Trash2 size={11} />
                       </button>

@@ -28,6 +28,16 @@ export const PLANS: Record<string, Plan> = {
     stripePriceId: null,
     features: { maxBuckets: 1, maxSources: 3, aiGeneration: true, prioritySupport: false, teamSharing: false },
   },
+  starter: {
+    id: "starter",
+    name: "Starter",
+    price: 7.99,
+    credits: 250,
+    currency: "EUR",
+    interval: "month",
+    stripePriceId: process.env.STRIPE_STARTER_PRICE_ID || "price_starter_mock",
+    features: { maxBuckets: 5, maxSources: 30, aiGeneration: true, prioritySupport: false, teamSharing: false },
+  },
   pro: {
     id: "pro",
     name: "Pro",

@@ -249,7 +249,7 @@ const en: Translations = {
     section3_title: "3. Account and Security",
     section3_text: "You are responsible for maintaining the confidentiality of your login credentials and for all activities under your account. We are committed to protecting your data with encryption and industry-standard security measures.",
     section4_title: "4. Plans and Payments",
-    section4_text: "We offer Free, Pro (€12/month) and Business (€29/month) plans. Payments are processed through Stripe. You can cancel your subscription at any time. Refunds are handled according to Stripe's policy.",
+    section4_text: "We offer Free, Starter (€7.99/month), Pro (€12/month) and Business (€29/month) plans. Payments are processed through Stripe. You can cancel your subscription at any time. Refunds are handled according to Stripe's policy.",
     section5_title: "5. Acceptable Use",
     section5_text: "You may not use the Service to violate laws, send spam, collect data without authorization, or interfere with system integrity. We reserve the right to suspend accounts that violate these terms.",
     section6_title: "6. Intellectual Property",

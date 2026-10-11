@@ -97,7 +97,7 @@ export default function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center max-w-md mx-auto w-full relative z-10">
         <div className="w-full">
-          {/* Header â€” nessuna icona, solo testo */}
+          {/* Header — nessuna icona, solo testo */}
           <div className="text-center mb-6">
             <h1 className="text-2xl text-[oklch(98.5%_.002_260)] tracking-tight mb-1.5">
               {mode === "login" ? "Bentornato" : "Crea il tuo account"}
@@ -222,7 +222,7 @@ export default function LoginPage() {
               </>
             ) : (
               <>
-                Hai giÃ  un account?{" "}
+                Hai già un account?{" "}
                 <button onClick={() => { setMode("login"); setError("") }} className="text-[oklch(72%_0.06_240)] hover:text-[oklch(98.5%_.002_260)] transition-colors underline underline-offset-2 decoration-[oklch(72%_0.06_240)]/30 hover:decoration-white/30">
                   Accedi
                 </button>

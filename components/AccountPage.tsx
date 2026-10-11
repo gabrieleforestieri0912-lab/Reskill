@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/translations"
+import { useToast } from "@/components/ui/Toast"
 import {
   User, CreditCard, Zap, Plug,
   ChevronLeft, Settings, ArrowUpRight,
@@ -24,6 +25,7 @@ export default function AccountPage() {
   const { data: session, update } = useSession()
   const router = useRouter()
   const { t, locale, setLocale } = useTranslation()
+  const toast = useToast()
   const a = t.account
 
   const [stats, setStats] = useState<Stats | null>(null)
@@ -74,9 +76,13 @@ export default function AccountPage() {
       if (res.ok) {
         await update({ name: nameValue.trim() })
         setEditingName(false)
+        toast.success("Nome aggiornato correttamente.")
+      } else {
+        toast.error("Impossibile aggiornare il nome.")
       }
     } catch (e) {
       console.error(e)
+      toast.error("Errore durante il salvataggio del nome.")
     } finally {
       setNameSaving(false)
     }
@@ -89,6 +95,7 @@ export default function AccountPage() {
     )
     setRechargeSaved(true)
     setTimeout(() => setRechargeSaved(false), 2000)
+    toast.success(autoRecharge ? a.recharge_saved || "Ricarica automatica attivata." : "Ricarica automatica disattivata.")
   }
 
   const creditsUsed = stats?.totalCreditsUsed || 0

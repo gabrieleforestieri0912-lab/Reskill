@@ -7,7 +7,7 @@ import { FaChrome, FaFirefox } from "react-icons/fa6"
 const chromeSteps = [
  <>Scarica il file <code className="bg-[oklch(13%_.006_260)]/50 px-1.5 py-0.5 rounded text-[10px] text-[oklch(98.5%_.002_260)] border border-[oklch(98.5%_.002_260)]/6">reskill-extension.zip</code> ed estrailo in una cartella locale.</>,
  <>Apri il browser e digita <code className="bg-[oklch(13%_.006_260)]/50 px-1.5 py-0.5 rounded text-[10px] text-[oklch(98.5%_.002_260)] border border-[oklch(98.5%_.002_260)]/6">chrome://extensions</code>.</>,
- <>Attiva <strong className="text-[oklch(98.5%_.002_260)] font-semibold">ModalitÃ  sviluppatore</strong> in alto a destra.</>,
+ <>Attiva <strong className="text-[oklch(98.5%_.002_260)] font-semibold">Modalità sviluppatore</strong> in alto a destra.</>,
  <>Clicca su <strong className="text-[oklch(98.5%_.002_260)] font-semibold">Carica estensione non pacchettizzata</strong>.</>,
  <>Seleziona la cartella col file <code className="bg-[oklch(13%_.006_260)]/50 px-1.5 py-0.5 rounded text-[10px] text-[oklch(98.5%_.002_260)] border border-[oklch(98.5%_.002_260)]/6">manifest.json</code>. Pronta all'uso!</>,
 ]
@@ -23,7 +23,7 @@ const firefoxSteps = [
 const usageSteps = [
  <>Naviga su qualsiasi articolo, video YouTube o pagina web che vuoi archiviare.</>,
  <>Fai click destro su una sezione vuota della pagina.</>,
- <>Passa su <strong className="text-[oklch(98.5%_.002_260)] font-semibold">Reskill</strong> â†’ <strong className="text-[oklch(72%_0.06_240)]">Trasforma in Markdown</strong>.</>,
+ <>Passa su <strong className="text-[oklch(98.5%_.002_260)] font-semibold">Reskill</strong> → <strong className="text-[oklch(72%_0.06_240)]">Trasforma in Markdown</strong>.</>,
  <>Il download del file <code className="bg-[oklch(13%_.006_260)]/50 px-1 py-0.5 rounded text-[10px] text-[oklch(98.5%_.002_260)] border border-[oklch(98.5%_.002_260)]/6">.md</code> pulito parte automaticamente.</>,
 ]
 
@@ -52,7 +52,7 @@ export default function ExtensionSection() {
  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"/></svg>
  </div>
  <h4 className="font-semibold text-sm text-[oklch(98.5%_.002_260)] mb-2">Un Solo Click Destro</h4>
- <p className="text-xs text-[oklch(60%_0.01_260)] leading-relaxed">Non c'Ã¨ bisogno di copiare e incollare manualmente. Fai click destro in un punto qualsiasi e ottieni il Markdown.</p>
+ <p className="text-xs text-[oklch(60%_0.01_260)] leading-relaxed">Non c'è bisogno di copiare e incollare manualmente. Fai click destro in un punto qualsiasi e ottieni il Markdown.</p>
  </div>
  <div className="p-6 bg-[oklch(98.5%_.002_260)]/2 border border-[oklch(98.5%_.002_260)]/6 hover:border-[oklch(72% .06 240)]/20 transition-all text-center group">
  <div className="w-10 h-10 bg-[oklch(13% .006 260)]/50 border border-[oklch(72% .06 240)]/15 text-[oklch(72%_0.06_240)] flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">

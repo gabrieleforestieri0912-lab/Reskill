@@ -91,7 +91,7 @@ export default function ValueSection() {
  </div>
  <div className="flex gap-2">
  <span className="text-cyan">3.</span>
- <span>L'AI leggerÃ  le definizioni YAML e attiverÃ  il contesto non appena interrogherai il modello.</span>
+ <span>L'AI leggerà le definizioni YAML e attiverà il contesto non appena interrogherai il modello.</span>
  </div>
  </div>
  </>
@@ -110,7 +110,7 @@ export default function ValueSection() {
  </div>
  <div className="flex gap-2">
  <span className="text-cyan">3.</span>
- <span>Carica il file della skill compilata. L'AI userÃ  le regole per formattare gli output di sviluppo.</span>
+ <span>Carica il file della skill compilata. L'AI userà le regole per formattare gli output di sviluppo.</span>
  </div>
  </div>
  </>
