@@ -1,0 +1,71 @@
+{
+  "manifest_version": 3,
+  "name": "Reskill - Web to Skill",
+  "version": "2.0.0",
+  "description": "Cattura pagine web, video YouTube e thread social e salvali come Skill AI direttamente nei tuoi bucket Reskill.",
+  "icons": {
+    "16": "reskill.png",
+    "48": "reskill.png",
+    "128": "reskill.png"
+  },
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "downloads",
+    "storage",
+    "sidePanel",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+    "https://reskill.app/*",
+    "http://localhost:3000/*",
+    "https://www.youtube.com/*"
+  ],
+  "externally_connectable": {
+    "matches": [
+      "https://reskill.app/*",
+      "http://localhost:3000/*"
+    ]
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://reskill.app/*",
+        "http://localhost:3000/*",
+        "http://localhost:3001/*"
+      ],
+      "js": ["content-auth.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["theme.js", "content.js"],
+      "run_at": "document_idle",
+      "exclude_matches": [
+        "https://reskill.app/*",
+        "http://localhost:3000/*"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["reskill.png"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_title": "Reskill",
+    "default_icon": {
+      "16": "reskill.png",
+      "48": "reskill.png",
+      "128": "reskill.png"
+    }
+  }
+}
