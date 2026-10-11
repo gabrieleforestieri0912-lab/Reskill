@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://reskill.app";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://reskill-skill.vercel.app";
 const SITE_NAME = "Reskill";
 const SITE_DESCRIPTION = "Trasforma YouTube, Reddit, PDF e pagine web in Skill Markdown strutturate per agenti AI come Cursor, Claude e ChatGPT. Estensione browser gratuita + AI-powered.";
 

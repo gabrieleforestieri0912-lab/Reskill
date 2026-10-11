@@ -76,6 +76,7 @@ Each source type costs credits:
 
 Plans:
 - Free: 10 credits/month
+- Starter (€7.99): 250 credits/month
 - Pro (€12): 500 credits/month
 - Business (€29): 1,500 credits/month
 - Enterprise (€59): 5,000 credits/month
@@ -109,11 +110,11 @@ Chrome/Edge/Firefox extension that:
 
 ## Links
 
-- Website: https://reskill.app
-- Dashboard: https://reskill.app/dashboard
-- Login: https://reskill.app/login
-- MCP Integration: https://reskill.app/mcp
-- Changelog: https://reskill.app/changelog
-- Privacy Policy: https://reskill.app/privacy
-- Terms of Service: https://reskill.app/terms
-- API: https://reskill.app/api
+- Website: https://reskill-skill.vercel.app
+- Dashboard: https://reskill-skill.vercel.app/dashboard
+- Login: https://reskill-skill.vercel.app/login
+- MCP Integration: https://reskill-skill.vercel.app/mcp
+- Changelog: https://reskill-skill.vercel.app/changelog
+- Privacy Policy: https://reskill-skill.vercel.app/privacy
+- Terms of Service: https://reskill-skill.vercel.app/terms
+- API: https://reskill-skill.vercel.app/api

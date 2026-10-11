@@ -26,11 +26,7 @@ const demoItems = [
         title: "Agentic Workflows: Build AI Agents in 2026",
         source: "Alex Developer · 124K views",
         date: "2 giorni fa",
-        url: "https://www.youtube.com/watch?v=uhJJgc-0iTQ",
-        logo: "https://www.google.com/s2/favicons?domain=youtube.com&sz=128",
-        thumbnail: "https://i.ytimg.com/vi/uhJJgc-0iTQ/hqdefault.jpg",
-        excerpt: "Come progettare agenti AI con orchestratori, tool registry e memoria: pattern ReAct, Plan-Execute e reflection.",
-        stats: "24 min · 124K visualizzazioni",
+        url: "https://youtube.com/watch?v=agentic-workflows-demo",
         bg: "bg-[oklch(13%_.006_260)]/30",
         skill: `---
 title: "Agentic Workflows: Build AI Agents in 2026"
@@ -78,54 +74,7 @@ while task.pending:
 - Giving too many tools (context loss)
 - Missing error recovery in tool calls
 - No timeout handling for external APIs
-- Flat prompts instead of structured skill files
-
-## 5. From Video to Skill
-
-When this transcript becomes a Skill, keep one rule per bullet and attach a trigger to each pattern:
-
-\`\`\`yaml
-triggers:
-  - "user asks for agent architecture"
-  - "multi-step coding task"
-  - "tool-calling loop"
-\`\`\`
-
-> Timestamped segments (every ~30s) let the AI cite the exact moment a concept was explained.
-
-## Full Transcript Structure
-
-A 24-minute technical talk like this one typically breaks down into reusable chapters — each one a candidate sub-skill:
-
-| Timestamp | Chapter | Reusable pattern |
-|-----------|---------|------------------|
-| 00:00–03:30 | Why agents, why now | The "batch vs interactive" framing for stakeholders |
-| 03:30–09:00 | Orchestrator design | State-machine loop you can copy into any project |
-| 09:00–15:30 | Tool registry | Zod-schema pattern for typed tool definitions |
-| 15:30–20:00 | Memory strategies | Vector vs KV trade-off table for your own docs |
-| 20:00–24:00 | Live demo + Q&A | Failure cases worth turning into anti-patterns |
-
-## Turning Chapters into Triggers
-
-One video, many Skills: split by chapter instead of saving one giant file.
-
-\`\`\`yaml
-# skill: agent-orchestrator-loop
-triggers:
-  - "designing an agent loop"
-  - "LangGraph vs Semantic Kernel"
-  - "state machine for LLM tools"
-\`\`\`
-
-\`\`\`yaml
-# skill: tool-registry-patterns
-triggers:
-  - "registering tools for an agent"
-  - "typed tool schemas with Zod"
-  - "MCP tool definitions"
-\`\`\`
-
-> Rule of thumb: if a chapter answers a question you get asked twice, it deserves its own Skill file.`
+- Flat prompts instead of structured skill files`,
     },
     {
         id: "demo-ig",
@@ -135,9 +84,6 @@ triggers:
         source: "@codewithstyle · 89K likes",
         date: "3 giorni fa",
         url: "https://instagram.com/p/ai-coding-setup",
-        logo: "https://www.google.com/s2/favicons?domain=instagram.com&sz=128",
-        excerpt: "Tour del setup 2026: Cursor con Vim, Warp, MCP filesystem e la stack di estensioni per pair-programming con l'AI.",
-        stats: "Reel · 89K mi piace",
         bg: "bg-[oklch(13%_.006_260)]/30",
         skill: `---
 title: "AI Coding Setup Tour 2026"
@@ -171,107 +117,7 @@ triggers:
 1. Use .cursorrules per project (not global)
 2. Keep a "context.md" with architecture decisions
 3. Sync skills via MCP filesystem server
-4. Run local models for quick completions, cloud for complex reasoning
-
-## Replicating This Setup
-
-| Step | Action |
-|------|--------|
-| 1 | Install Cursor + MCP filesystem server pointing at your skills folder |
-| 2 | Add one \`.cursorrules\` file per project, not global |
-| 3 | Save this post as a Skill so the AI remembers the stack |
-
-> Visual posts like this one are a goldmine for tooling decisions: extract the table above, not the video frames.
-
-## Editor Configuration
-
-The core of the setup is a tuned \`settings.json\` — Vim motions everywhere, format-on-save, and AI completions that stay out of the way until summoned:
-
-\`\`\`json
-{
-  "vim.useSystemClipboard": true,
-  "editor.formatOnSave": true,
-  "editor.tabSize": 2,
-  "cursor.cpp.disabledLanguages": ["markdown"],
-  "files.associations": { ".cursorrules": "markdown" }
-}
-\`\`\`
-
-Keybindings worth stealing:
-
-| Keys | Action | Why it matters |
-|------|--------|----------------|
-| \`Cmd+K\` | Inline AI edit | Change code without leaving the line |
-| \`Cmd+L\` | Chat with codebase | Ask about the whole repo, not one file |
-| \`Cmd+Shift+L\` | Add selection to chat | Precise context, fewer wasted tokens |
-| \`gd\` (Vim) | Go to definition | Muscle memory beats the mouse |
-
-## Terminal and Shell
-
-Warp with AI suggestions plus a minimal prompt that shows git branch and last-command status. Aliases that pay for themselves in a week:
-
-\`\`\`bash
-alias gs="git status -sb"
-alias gcm="git commit -m"
-alias dev="npm run dev"
-alias sk="npx @reskill/mcp --search"
-\`\`\`
-
-## MCP Filesystem Wiring
-
-Point the MCP server at the folder where your Skills live, so every agent sees the same library:
-
-\`\`\`json
-{
-  "mcpServers": {
-    "skills": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/Users/you/.reskill/skills"]
-    }
-  }
-}
-\`\`\`
-
-## The .cursorrules Template
-
-\`\`\`markdown
-# Project conventions (auto-loaded by Cursor)
-
-- Stack: Next.js 16 App Router + Tailwind v4
-- All server state via Server Components; client components need a reason
-- Commit style: feat/fix/chore + short imperative message
-- Never invent APIs: check /docs or ask before assuming an endpoint
-\`\`\`
-
-## The context.md Habit
-
-One file per project, updated when architecture decisions are made:
-
-\`\`\`markdown
-# Context — checkout-service
-
-- Decided 2026-09: Stripe PaymentIntents, no custom card forms
-- Gotcha: webhooks must be idempotent (Stripe retries for 3 days)
-- Owner: @codewithstyle — ask before touching pricing logic
-\`\`\`
-
-## Daily Workflow with AI
-
-1. **Morning**: pull latest Skills into the agent ("what changed in my MCP skill?").
-2. **Build**: inline edits for boilerplate, chat for architecture questions.
-3. **Review**: paste the diff and ask for the three riskiest lines — then verify each one yourself.
-4. **Evening**: save anything you explained twice into a Skill so you never type it again.
-
-## Indicative Monthly Cost
-
-| Item | Plan | Cost/month |
-|------|------|------------|
-| Cursor Pro | Individual | ~20 EUR |
-| Warp | Free tier | 0 |
-| AI API overflow | Pay-as-you-go | 5–15 EUR |
-| Reskill Pro | 500 credits | 4.99 EUR |
-
-> The whole stack costs less than one hour of freelance work — and this exact setup is what the reel walks through, timestamp by timestamp.`
+4. Run local models for quick completions, cloud for complex reasoning`,
     },
     {
         id: "demo-x",
@@ -281,9 +127,6 @@ One file per project, updated when architecture decisions are made:
         source: "@techemystic · 2.4K likes",
         date: "1 settimana fa",
         url: "https://x.com/techemystic/status/prompt-engineering-thread",
-        logo: "https://www.google.com/s2/favicons?domain=x.com&sz=128",
-        excerpt: "Cinque lezioni dalla produzione: specificità, ruolo + contesto + formato, chain-of-thought e few-shot.",
-        stats: "18 post · 2.4K mi piace",
         bg: "bg-[oklch(13%_.006_260)]/30",
         skill: `---
 title: "5 Prompt Engineering Lessons from Production"
@@ -319,52 +162,7 @@ Include 2-3 examples of desired output. Format matters more than quantity.
 
 ## Lesson 5: Iterative Refinement
 
-Start broad, then narrow constraints. First pass: general architecture. Second pass: specific implementation details.
-
-## Thread Cheat-Sheet
-
-| Lesson | One-liner to remember |
-|--------|----------------------|
-| Specificity | Constraints beat adjectives |
-| Role + Context + Format | Three lines before every big task |
-| Chain of Thought | "Reason step-by-step" first |
-| Few-Shot | 2-3 examples > 10 vague ones |
-| Refinement | Broad → narrow, never the reverse |
-
-> Save threads like this as Skills: X posts disappear from memory, Markdown does not.
-
-## Full 18-Post Breakdown
-
-Long threads follow a hidden arc — hook, lessons, proof, CTA. Mapping it tells your AI which part to quote for each question:
-
-| Posts | Role | What to extract |
-|-------|------|-----------------|
-| 1–2 | Hook + credibility | The opening line that earned 2.4K likes |
-| 3–7 | Lessons 1–2 with examples | Bad-vs-good prompt pairs (copy verbatim) |
-| 8–12 | Lessons 3–4 + data | The "40% fewer hallucinations" claim + context |
-| 13–16 | Lesson 5 + war stories | Production anecdotes for stakeholder buy-in |
-| 17–18 | CTA + replies | Best follow-up questions from the comments |
-
-## Reply Goldmine
-
-The most-liked replies often beat the thread itself:
-
-- **@promptwitch**: "Role prompting fails without output format — always pair them." (412 likes)
-- **@shipit_dev**: "We cut support tickets 18% by adding 2 examples to our bot prompt." (287 likes)
-- **@techemystic (OP)**: "Biggest mistake: 500-word system prompts. Constraints > prose." (531 likes)
-
-## Prompt Templates from the Thread
-
-\`\`\`
-ROLE: You are a {seniority} {domain} expert.
-CONTEXT: {stack}, {constraints}, {audience}.
-TASK: {one verb + one deliverable}.
-FORMAT: {code only | table | max N bullets}.
-THINK: Reason step-by-step before answering.
-EXAMPLES: {2 pasted examples of great output}.
-\`\`\`
-
-> Fill the braces, paste into any model, and you have applied all five lessons at once.`
+Start broad, then narrow constraints. First pass: general architecture. Second pass: specific implementation details.`,
     },
     {
         id: "demo-reddit",
@@ -374,9 +172,6 @@ EXAMPLES: {2 pasted examples of great output}.
         source: "r/cursor · 342 upvotes",
         date: "5 giorni fa",
         url: "https://reddit.com/r/cursor/comments/mcp-server-guide",
-        logo: "https://www.google.com/s2/favicons?domain=reddit.com&sz=128",
-        excerpt: "Guida passo-passo con i commenti top della community: init, tool review_code e configurazione in Cursor.",
-        stats: "342 upvote · 89 commenti",
         bg: "bg-[oklch(13%_.006_260)]/30",
         skill: `---
 title: "I built a MCP server in 2 hours — here's how"
@@ -420,56 +215,7 @@ server.tool("review_code", {
 
 ### 3. Configure in Cursor
 
-Add to \`.cursor/mcp.json\` and restart. The tool appears automatically in AI completions.
-
-## Top Community Tips (from comments)
-
-- **u/mcp_fan**: "Pin your SDK version — protocol 1.x changed the handshake twice this year."
-- **u/dev_journey (OP)**: "Start with one read-only tool. Write tools only after the read path works."
-- **u/cursor_power**: "Name tools like functions (\`review_code\`), not like endpoints — the model picks them better."
-
-## Debugging Checklist
-
-1. Run the server with \`npx -y mcp-inspector\` before wiring it into the IDE
-2. Check stderr logs: most failures are Zod schema mismatches
-3. Restart the MCP host after every config change
-
-## Comment Highlights by Theme
-
-| Theme | Verdict from the thread |
-|-------|------------------------|
-| Host choice | Cursor just works; Claude Desktop needs manual JSON edits |
-| Transport | stdio for local, SSE the moment a teammate needs the same server |
-| Auth | Bearer tokens via env, never hardcoded in mcp.json |
-| Testing | mcp-inspector catches 90% of bugs before the IDE is involved |
-| Versioning | Pin SDK + protocol version together or face handshake errors |
-
-## Minimal Production Server
-
-\`\`\`typescript
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { z } from "zod";
-
-const server = new McpServer({ name: "docs-search", version: "1.0.0" });
-
-server.tool(
-  "search_docs",
-  "Full-text search over the team's documentation",
-  { query: z.string(), limit: z.number().default(5) },
-  async ({ query, limit }) => ({
-    content: [{ type: "text", text: JSON.stringify(await search(query, limit)) }],
-  })
-);
-
-await server.connect(new StdioServerTransport());
-\`\`\`
-
-## What the Post Deliberately Skips
-
-- **Resources vs tools**: use resources for readable context, tools for actions with side effects.
-- **Sampling**: letting the server ask the model back is powerful — and a security boundary. Treat it as untrusted input.
-- **Pagination**: cap every list tool (default 5–10) or the model drowns in JSON.`
+Add to \`.cursor/mcp.json\` and restart. The tool appears automatically in AI completions.`,
     },
     {
         id: "demo-linkedin",
@@ -479,9 +225,6 @@ await server.connect(new StdioServerTransport());
         source: "Maria Rossi · 1.2K reactions",
         date: "4 giorni fa",
         url: "https://linkedin.com/posts/ai-agents-production",
-        logo: "https://www.google.com/s2/favicons?domain=linkedin.com&sz=128",
-        excerpt: "Semantic caching, human-in-the-loop e rate limiting: le lezioni di chi ha portato gli agenti in produzione.",
-        stats: "1.2K reazioni · 214 commenti",
         bg: "bg-blue-950/30",
         skill: `---
 title: "How We Scaled AI Agents to Production"
@@ -513,44 +256,7 @@ User → API Gateway → Agent Router → Specialized Agents
 
 - **Observability first**: Without proper tracing, debugging agent chains is impossible
 - **Rate limiting**: Always enforce per-user rate limits at the gateway level
-- **Fallback models**: Have a cheaper/faster fallback for simple queries
-
-## Production Readiness Scorecard
-
-| Area | Target | How to verify |
-|------|--------|---------------|
-| Cost per task | < $0.05 | Token usage dashboard per user |
-| P95 latency | < 8s | Trace agent spans end-to-end |
-| Human approval | 100% of destructive ops | Audit log of confirmations |
-| Cache hit rate | > 40% | Semantic cache metrics |
-
-> LinkedIn posts like this compress months of production pain into minutes: extract the scorecard, then ask your AI to grade your own stack against it.
-
-## The Scaling Timeline
-
-| Phase | Team size | Architecture | What breaks next |
-|-------|-----------|--------------|------------------|
-| Prototype | 1–2 | Single agent, one model | Costs spike on first real traffic |
-| Pilot | 3–5 | Router + 3 specialists | No observability — debugging is guesswork |
-| Growth | 5–15 | Cached tools, HITL gates | Stale context causes wrong actions |
-| Scale | 15+ | Multi-region, fallbacks | Rate limits and noisy-neighbor tenants |
-
-## Comment Section Wisdom (214 comments distilled)
-
-- **On caching**: "Semantic cache paid for our entire infra team. 40% is conservative — we see 55%." (top reply, 198 likes)
-- **On HITL**: "Approve-by-default with undo beats approve-everything. Operators fatigue in week two." (143 likes)
-- **On evals**: "If you can't replay a failing trace, you don't have evals — you have vibes." (121 likes)
-- **Maria (author) reply**: "Biggest regret: building the orchestrator before the tracing. Instrument first."
-
-## Cost Model per 1K Tasks
-
-| Setup | Tokens/task | Cost/1K tasks |
-|-------|-------------|---------------|
-| GPT-class, no cache | ~12K | ~$60 |
-| Same + semantic cache | ~5K | ~$25 |
-| Small model + tools + cache | ~4K | ~$4 |
-
-> Numbers move fast, but the ordering never changes: cache first, downgrade model second, optimize prompts last.`
+- **Fallback models**: Have a cheaper/faster fallback for simple queries`,
     },
     {
         id: "demo-blog",
@@ -560,9 +266,6 @@ User → API Gateway → Agent Router → Specialized Agents
         source: "techblog.dev · 15 min read",
         date: "1 mese fa",
         url: "https://techblog.dev/mcp-protocol-guide",
-        logo: "https://www.google.com/s2/favicons?domain=techblog.dev&sz=128",
-        excerpt: "MCP spiegato bene: architettura client-server, discovery dinamica, schemi tipizzati e setup filesystem.",
-        stats: "15 min di lettura · 8 sezioni",
         bg: "bg-[oklch(13%_.006_260)]/30",
         skill: `---
 title: "The Rise of MCP: Model Context Protocol Explained"
@@ -607,57 +310,12 @@ MCP (Model Context Protocol) is an open standard that allows AI models to discov
  "mcpServers": {
  "filesystem": {
  "command": "npx",
-  "args": ["-y", "@modelcontextprotocol/server-filesystem", "./skills"]
-  }
-  }
+ "args": ["-y", "@modelcontextprotocol/server-filesystem", "./skills"]
+ }
+ }
 }
 \`\`\`
-
-## FAQ from the Article
-
-**Q: Is MCP tied to one vendor?**
-No — it is an open standard. Any client (Cursor, Claude, Windsurf) can talk to any server over stdio or SSE.
-
-**Q: Filesystem vs remote servers?**
-Filesystem for personal skills on your machine; remote (SSE/HTTP) when a team shares one knowledge base.
-
-## Try It in 5 Minutes
-
-1. Save this article as a Skill with Reskill
-2. Point an MCP filesystem server at the download folder
-3. Ask your agent: "list my skills about MCP" — it will discover the file on its own
-
-## Protocol Deep Dive
-
-MCP separates three concerns that older plugin systems tangled together:
-
-| Concern | MCP answer | Why it matters |
-|---------|-----------|----------------|
-| Discovery | Capability negotiation at connect | No hardcoded tool lists in prompts |
-| Invocation | JSON-RPC 2.0 over stdio/SSE | Same contract, local or remote |
-| Context | Resources (read) vs Tools (act) | The model knows what is safe to touch |
-
-## Server Types Compared
-
-| Type | Transport | Best for | Example |
-|------|-----------|----------|---------|
-| Filesystem | stdio | Personal skills on your machine | \`server-filesystem ./skills\` |
-| Docs search | stdio/SSE | Team knowledge bases | Reskill MCP server |
-| Browser control | SSE | E2E agents | Playwright MCP |
-| Cloud APIs | Streamable HTTP | Multi-tenant SaaS | Hosted connectors |
-
-## Security Notes Worth Saving
-
-- Treat tool descriptions as attack surface: a malicious server can prompt-inject via them.
-- Prefer read-only tools during evaluation; enable writes per-task, not per-session.
-- Sampling (server → model callbacks) must be sandboxed like any user input.
-
-## Glossary for the Team
-
-- **Host**: the AI app (Cursor, Claude Desktop) that owns the model.
-- **Client**: the MCP connection inside the host (one per server).
-- **Server**: your code, exposing tools/resources/prompts.
-- **Transport**: stdio for local processes, SSE or streamable HTTP for remote ones.`
+`,
     },
     {
         id: "demo-article",
@@ -667,9 +325,6 @@ MCP separates three concerns that older plugin systems tangled together:
         source: "stackoverflow.blog · 12 min read",
         date: "2 settimane fa",
         url: "https://stackoverflow.blog/ai-assisted-dev",
-        logo: "https://www.google.com/s2/favicons?domain=stackoverflow.blog&sz=128",
-        excerpt: "Da autocomplete ad agenti autonomi: tre trend che ridefiniscono il mestiere dello sviluppatore.",
-        stats: "12 min di lettura · 3 trend",
         bg: "bg-teal-950/30",
         skill: `---
 title: "The Future of AI-Assisted Development"
@@ -698,48 +353,7 @@ We are moving from **autocomplete** to **autonomous agents**. The next 12 months
 |------|--------|
 | Junior Dev | AI handles boilerplate, freeing time for learning |
 | Senior Dev | Focus on architecture, code review, complex logic |
-| Tech Lead | Agent orchestration, quality gates, skill authoring |
-
-## What to Do Monday Morning
-
-1. **Audit your context**: find the three prompts you paste most often — those are your first Skills.
-2. **Version them**: move one prompt into a \`.md\` file in the repo and watch onboarding time drop.
-3. **Measure**: track "time to first correct answer" before and after the Skill exists.
-
-## Signals This Trend Is Real
-
-- IDEs shipping native MCP support (tool discovery inside completions)
-- Agent benchmarks (AgentBench 2.0) scoring tool-use, not just chat
-- Teams hiring for "agent orchestration" instead of "prompt engineering"
-
-## Junior vs Senior in the Agent Era
-
-| Task | Old world | Agent-assisted |
-|------|-----------|----------------|
-| Boilerplate CRUD | Typed by hand | Generated, human reviews the edges |
-| Debugging | Print statements | Agent bisects with tool calls, human confirms |
-| Docs | Written last, rots first | Generated from the Skill, reviewed like code |
-| Onboarding | Weeks of shadowing | "Read these 3 Skills, then ask the agent" |
-
-## The Skill Flywheel
-
-\`\`\`
-Save what you read
-      ↓
-Compile Skills per topic
-      ↓
-Agents answer with YOUR context
-      ↓
-Better answers → more trust → more saving
-\`\`\`
-
-Each loop makes the next one cheaper: the first Skill takes an hour, the tenth takes ten minutes because patterns repeat.
-
-## Counter-Arguments (Steelmanned)
-
-- **"Skills go stale"**: true — which is why they live in git with owners and quarterly reviews, unlike chat history.
-- **"The model already knows this"**: models know the average; Skills encode *your* stack, *your* customers, *your* edge cases.
-- **"Too much process"**: start with one file. Process earns its keep at Skill #5, not before.`
+| Tech Lead | Agent orchestration, quality gates, skill authoring |`,
     },
     {
         id: "demo-essay",
@@ -749,9 +363,6 @@ Each loop makes the next one cheaper: the first Skill takes an hour, the tenth t
         source: "medium.com/@aiden · 8 min read",
         date: "3 settimane fa",
         url: "https://medium.com/ai-thoughts/skills-over-prompts",
-        logo: "https://www.google.com/s2/favicons?domain=medium.com&sz=128",
-        excerpt: "I prompt sono effimeri, le skill sono permanenti: versionamento, condivisione e componibilità.",
-        stats: "8 min di lettura · 4.1K claps",
         bg: "bg-[oklch(13%_.006_260)]/30",
         skill: `---
 title: "Why Skills Will Replace Prompts"
@@ -794,69 +405,7 @@ Focus on:
 \`\`\`
 
 > The prompt is the message. The skill is the memory.
-
-## Skill Starter Template
-
-\`\`\`yaml
----
-name: my-first-skill
-description: When to load this knowledge
-trigger: the exact user request that activates it
-tags: [2-4 keywords]
-version: 1.0.0
----
-
-## Principles
-## Rules (one action per bullet)
-## Anti-patterns
-## Example input → output
-\`\`\`
-
-## Migration Path: Prompts → Skills
-
-1. Collect your 5 most-reused prompts
-2. Group them by trigger (same trigger = same Skill)
-3. Add one negative condition each ("do NOT use when…")
-4. Store in git; review quarterly like code
-
-## Anatomy of a Great Trigger
-
-Triggers fail in two ways: too broad (fires everywhere) or too narrow (never fires). Aim for the middle:
-
-| Bad trigger | Why it fails | Fixed trigger |
-|-------------|--------------|---------------|
-| "react" | Half your questions mention React | "React Server Component data fetching" |
-| "code review" | Fires on any review | "Reviewing a PR that touches /payments" |
-| "API" | Meaningless alone | "Designing a paginated REST endpoint" |
-
-## Negative Triggers Are Underrated
-
-Every Skill should say when NOT to load — it saves thousands of tokens per session:
-
-\`\`\`yaml
-trigger: "Postgres query optimization"
-do_not_load_when:
-  - "the query runs on SQLite"
-  - "the table has fewer than 10k rows"
-  - "the user asked for ORM-level help, not SQL"
-\`\`\`
-
-## Skill Library Layout That Scales
-
-\`\`\`
-.skills/
-├── frontend/
-│   ├── react-server-components.md
-│   └── tailwind-theming.md
-├── backend/
-│   ├── postgres-indexing.md
-│   └── stripe-webhooks.md
-└── process/
-    ├── code-review-checklist.md
-    └── incident-postmortem.md
-\`\`\`
-
-> Folders mirror how developers already think (stack → topic), so the right Skill is one \`ls\` away even without AI search.`
+`,
     },
     {
         id: "demo-newsletter",
@@ -866,9 +415,6 @@ do_not_load_when:
         source: "aistackweekly.com · 5.6K subscribers",
         date: "6 giorni fa",
         url: "https://aistackweekly.com/issues/42",
-        logo: "https://www.google.com/s2/favicons?domain=aistackweekly.com&sz=128",
-        excerpt: "MCP su Copilot, AgentBench 2.0 e il tool della settimana: il digest essenziale in 5 minuti.",
-        stats: "#42 · 5 min di lettura",
         bg: "bg-violet-950/30",
         skill: `---
 title: "AI Digest #42 — MCP, Agents, and the New Stack"
@@ -899,292 +445,7 @@ A new benchmark (AgentBench 2.0) evaluates agents on real-world coding tasks. To
 
 - [MCP Specification v1.2 Released](https://modelcontextprotocol.io)
 - [Reskill GitHub](https://github.com/Reskill)
-- [AgentBench 2.0 Results](https://agentbench.dev)
-
-## How to Work This Digest
-
-- **Monday scan**: read only the bold one-liners (2 minutes)
-- **Deep dive**: follow exactly one link per week and save it as a source
-- **Compound**: after 4 issues, compile the saved links into one "Q3 AI landscape" Skill
-
-## Issue #42 Annotated
-
-**Story 1 — MCP goes mainstream.** GitHub's native Copilot support means MCP servers now run where developers already work. Action: if you maintain internal docs, expose them as an MCP resource this quarter — adoption cost is near zero.
-
-**Story 2 — AgentBench 2.0.** New leaderboard on real-world coding tasks: Claude 4.5 leads, GPT-5 follows, Gemini 3 trails on multi-step tool use. Action: benchmark your own agent on 5 of your tickets before trusting vendor charts.
-
-**Story 3 — Tool of the week: Reskill.** An open-source skill manager syncing prompts across Cursor, Claude Code and Windsurf via MCP filesystem. Action: try it on one bucket before building anything custom.
-
-## Newsletter-to-Skill Pipeline
-
-\`\`\`
-Inbox (5 min skim)
-  → star 1 link worth keeping
-    → Reskill extract → bucket "AI landscape"
-      → monthly: compile 4 issues → 1 evergreen Skill
-\`\`\`
-
-Twelve issues a year become three Skills that never expire — while everyone else's inbox just fills up.
-
-## Past Issues Worth Retrieving
-
-| Issue | Why it still matters |
-|-------|---------------------|
-| #38 — RAG is not dead | Chunking strategies that AgentBench later validated |
-| #35 — Eval harnesses | The replay-trace pattern Maria's post also recommends |
-| #31 — Small models win | Cost math that still holds after two model generations |`,
-    },
-    {
-        id: "demo-github",
-        type: "github",
-        platform: "GitHub",
-        title: "modelcontextprotocol / typescript-sdk",
-        source: "github.com · ⭐ 4.8K stars",
-        date: "aggiornato 1 giorno fa",
-        url: "https://github.com/modelcontextprotocol/typescript-sdk",
-        logo: "https://www.google.com/s2/favicons?domain=github.com&sz=128",
-        excerpt: "Walkthrough del repo: struttura dei package, pattern Server/Client e come registrare tool tipizzati con Zod.",
-        stats: "TypeScript · ⭐ 4.8K · MIT",
-        bg: "bg-[oklch(13%_.006_260)]/30",
-        skill: `---
-title: "MCP TypeScript SDK: repository walkthrough"
-source: github
-url: "https://github.com/modelcontextprotocol/typescript-sdk"
-author: "modelcontextprotocol"
-triggers:
- - "MCP SDK"
- - "typescript-sdk structure"
- - "register MCP tool"
----
-
-## Repository Map
-
-\`\`\`
-typescript-sdk/
-├── src/
-│   ├── server/          # McpServer, tool/resource registration
-│   ├── client/          # Client, transport negotiation
-│   └── types.ts         # Zod schemas for JSON-RPC messages
-├── examples/           # minimal server + client
-└── README.md           # protocol version matrix
-\`\`\`
-
-## Key Patterns
-
-1. **Tools are functions with schemas**: every capability declares a Zod input schema, so the model can call it safely.
-2. **Transports are pluggable**: stdio for local IDEs, SSE/streamable HTTP for remote servers.
-3. **Version negotiation first**: client and server agree on a protocol version before any tool call.
-
-## Registering a Tool
-
-\`\`\`typescript
-server.tool("search_docs", {
-  query: z.string().describe("Full-text query"),
-  limit: z.number().optional().default(5),
-}, async ({ query, limit }) => {
-  const hits = await docs.search(query, limit);
-  return { content: [{ type: "text", text: JSON.stringify(hits) }] };
-});
-\`\`\`
-
-## Review Checklist
-
-- [ ] Every tool has a description the model can read
-- [ ] Optional params carry defaults, required ones are minimal
-- [ ] Errors return text content, never throw across the transport
-- [ ] README documents the minimum protocol version
-
-## Package Tour: What Lives Where
-
-| Path | Contains | Read it when |
-|------|----------|--------------|
-| \`src/server/\` | McpServer, tool/resource/prompt registration | Adding a new capability |
-| \`src/client/\` | Client + transport negotiation | Connecting programmatically |
-| \`src/types.ts\` | Zod schemas for every message | Debugging handshake failures |
-| \`src/shared/\` | URI templates, protocol utils | Implementing custom transports |
-| \`examples/\` | Minimal server + client | First 15 minutes with the SDK |
-
-## Transport Decision Guide
-
-\`\`\`
-Local IDE or CLI?
-├── YES → StdioServerTransport (zero config, one process)
-└── NO → Is the server shared across machines?
-    ├── YES → Streamable HTTP (session-based, scales)
-    └── Legacy only → SSE (deprecated, avoid for new code)
-\`\`\`
-
-## Error Handling That Survives Production
-
-\`\`\`typescript
-async ({ query }) => {
-  try {
-    const hits = await docs.search(query);
-    if (hits.length === 0) {
-      return { content: [{ type: "text", text: "No results. Try broader terms." }] };
-    }
-    return { content: [{ type: "text", text: JSON.stringify(hits) }] };
-  } catch (err) {
-    // Never leak stack traces to the model — log server-side instead
-    console.error("search_docs failed", err);
-    return { content: [{ type: "text", text: "Search unavailable, try again shortly." }] };
-  }
-}
-\`\`\`
-
-## Contribution Signals (from repo pulse)
-
-- Most active area: client transports (HTTP streaming work)
-- Good first issues are labeled and usually docs-shaped, not protocol-shaped
-- Releases follow the spec version — check the README matrix before upgrading`,
-    },
-    {
-        id: "demo-docs",
-        type: "docs",
-        platform: "Docs",
-        title: "Next.js: Caching in the App Router",
-        source: "nextjs.org/docs · Guida ufficiale",
-        date: "aggiornata a Next.js 16",
-        url: "https://nextjs.org/docs/app/building-your-application/caching",
-        logo: "https://www.google.com/s2/favicons?domain=nextjs.org&sz=128",
-        excerpt: "Request memoization, data cache, full route cache e router cache: i quattro livelli spiegati con esempi.",
-        stats: "Guida ufficiale · 4 livelli di cache",
-        bg: "bg-[oklch(13%_.006_260)]/30",
-        skill: `---
-title: "Next.js App Router caching mental model"
-source: web
-url: "https://nextjs.org/docs/app/building-your-application/caching"
-author: "Vercel Docs"
-triggers:
- - "Next.js caching"
- - "app router revalidation"
- - "fetch cache options"
----
-
-## The Four Layers
-
-| Layer | Scope | Opt-out |
-|-------|-------|---------|
-| Request memoization | Single render pass | N/A (React primitive) |
-| Data cache | Persistent (server) | \`cache: 'no-store'\` |
-| Full route cache | Build-time prerender | Dynamic APIs |
-| Router cache | Client-side (30s) | \`router.refresh()\` |
-
-## Fetch Recipes
-
-\`\`\`typescript
-// Cached (default): reused across requests
-const data = await fetch("https://api…", { next: { revalidate: 60 } });
-
-// Always fresh: skip every cache layer
-const live = await fetch("https://api…", { cache: "no-store" });
-
-// Tagged: revalidate many fetches at once after a mutation
-const posts = await fetch("https://api…/posts", { next: { tags: ["posts"] } });
-// later, in a Server Action:
-import { revalidateTag } from "next/cache";
-revalidateTag("posts");
-\`\`\`
-
-## Revalidation Rules
-
-- **Time-based**: \`export const revalidate = 60\` per route segment.
-- **On-demand**: \`revalidatePath("/blog")\` or \`revalidateTag("posts")\` after mutations.
-- **Route handler wins**: a dynamic function (\`cookies()\`, \`headers()\`) opts the whole route out of static rendering.
-
-## Request Memoization in Depth
-
-During a single render pass, React deduplicates identical GET fetches automatically — even across components that never talk to each other:
-
-\`\`\`typescript
-// layout.tsx and page.tsx both call getUser() → ONE underlying request
-async function getUser(id: string) {
-  const res = await fetch(\`https://api…/users/\${id}\`);
-  return res.json();
-}
-\`\`\`
-
-Rules to remember:
-
-- Only GET requests are memoized; POST/PUT always hit the network.
-- Memoization lasts for one render pass, then it is gone — it is not a cache.
-- Same URL + same options = same memoized result; different options = different entries.
-
-## Data Cache Option Matrix
-
-| Option | Behavior | Use when |
-|--------|----------|----------|
-| *(default)* | \`force-cache\`, persists after build | Static content, docs, marketing |
-| \`cache: 'force-cache'\` | Explicit version of default | You want to be explicit in shared libs |
-| \`cache: 'no-store'\` | Fresh on every request | Dashboards, carts, user-specific data |
-| \`next: { revalidate: 60 }\` | Stale-while-revalidate, 60s | Feeds, listings, prices that drift slowly |
-| \`next: { tags: [...] }\` | Manual invalidation group | Content edited from a CMS or admin panel |
-
-## Static vs Dynamic Rendering
-
-A route is static when every fetch in it is cacheable and no dynamic API is used. One dynamic call anywhere in the tree makes the whole route dynamic:
-
-\`\`\`typescript
-import { cookies, headers } from "next/headers";
-
-// Any of these opts the route out of the Full Route Cache:
-const token = (await cookies()).get("session");   // dynamic
-const ua = (await headers()).get("user-agent");    // dynamic
-\`\`\`
-
-Route segment config cheat-sheet:
-
-| Export | Values | Effect |
-|--------|--------|--------|
-| \`dynamic\` | \`'auto' \\| 'force-dynamic' \\| 'force-static' \\| 'error'\` | Override the automatic behavior |
-| \`revalidate\` | \`false \\| 0 \\| number\` | Default revalidation for the segment |
-| \`fetchCache\` | \`'auto' \\| 'force-cache' \\| 'only-cache' \\| ...\` | Default fetch caching for the segment |
-| \`runtime\` | \`'nodejs' \\| 'edge'\` | Where the route executes |
-
-## Router Cache and Navigation
-
-The client-side Router Cache keeps visited route segments for ~30 seconds so back/forward feels instant:
-
-- Links with prefetch (default in production) warm the cache on hover/viewport.
-- \`router.refresh()\` re-fetches the current route and merges fresh Server Components.
-- Prefetching can be tuned per link: \`<Link prefetch={false}>\` for rarely visited pages.
-
-## Debugging Cache Issues
-
-1. Inspect the \`x-nextjs-cache\` response header: HIT, MISS or STALE tells you which layer answered.
-2. Add temporary logging inside the fetch wrapper to see how often it really runs.
-3. Suspect the Data Cache when content updates "randomly late"; suspect memoization when a mutation seems ignored in the same render.
-4. In development everything looks dynamic — always verify caching behavior in a production build.
-
-## Decision Flowchart
-
-\`\`\`
-Is the data the same for every user?
-├── YES → can it be stale for a minute?
-│   ├── YES → fetch + revalidate: 60 (or tags)
-│   └── NO  → static, default caching
-└── NO  → is it per-request only?
-    ├── YES → cache: 'no-store'
-    └── NO  → tags + on-demand revalidation
-\`\`\`
-
-## Anti-Patterns
-
-- Caching user-specific data with a shared key
-- Using \`router.refresh()\` in a loop instead of keying the mutation
-- Mixing \`force-cache\` with auth headers on the same fetch
-- Calling \`revalidatePath\` inside render instead of in a Server Action
-- Assuming dev-mode behavior matches production caching
-
-## Quick Reference Card
-
-| Goal | Do this |
-|------|---------|
-| Blog post, rarely changes | Default fetch, static route |
-| Product listing, updates hourly | \`revalidate: 3600\` |
-| User dashboard | \`cache: 'no-store'\` |
-| CMS content with "publish" button | \`tags: ["cms"]\` + \`revalidateTag\` |
-| A/B test per visitor | \`cookies()\` → route becomes dynamic |`,
+- [AgentBench 2.0 Results](https://agentbench.dev)`,
     },
 ];
 
@@ -1216,7 +477,7 @@ const faqs = [
     { q: "I miei dati sono al sicuro?", a: "Assolutamente sì. I dati vengono elaborati lato server e salvati in MongoDB. Non condividiamo né vendiamo i tuoi contenuti. Puoi eliminare bucket e fonti in qualsiasi momento." },
     { q: "Quali formati di AI supportate?", a: "Supportiamo Cursor (.cursorrules), Claude AI Projects, Custom GPTs (ChatGPT), MCP Server (Model Context Protocol), Windsurf, GitHub Copilot e qualsiasi LLM che accetti file Markdown come contesto." },
     { q: "Devo avere un account per usare Reskill?", a: "Sì, è necessario un account gratuito con Google OAuth per salvare bucket, fonti e generare Skill. La registrazione richiede meno di 30 secondi." },
-    { q: "Cosa succede se supero i limiti del piano Free?", a: "Il piano Free ti permette 1 bucket e 3 fonti totali. Se raggiungi il limite, ti invitiamo a fare upgrade al piano Pro (€4,99/mese, €49,90/anno) per 15 bucket e 100 fonti, o Business (€9,99/mese, €99,90/anno) per 50 bucket e 500 fonti." },
+    { q: "Cosa succede se supero i limiti del piano Free?", a: "Il piano Free ti permette 3 bucket e 10 fonti totali. Se raggiungi il limite, ti invitiamo a fare upgrade al piano Pro (€9/mese) per 10 bucket e 100 fonti, o Team (€29/mese) per risorse illimitate." },
     { q: "Come funziona l'estensione browser?", a: "L'estensione Chrome/Edge/Firefox aggiunge un pulsante contestuale. Cliccando 'Trasforma in Markdown' su qualsiasi pagina, il contenuto viene pulito da ads e rumore, convertito in Markdown e salvato direttamente nel tuo bucket." },
 ];
 
@@ -1250,8 +511,8 @@ export default function Home() {
         "@context": "https://schema.org",
         "@type": "Organization",
         name: "Reskill",
-        url: "https://reskill.app",
-        logo: "https://reskill.app/reskill.png",
+        url: "https://reskill-skill.vercel.app",
+        logo: "https://reskill-skill.vercel.app/reskill.png",
         description: "Piattaforma AI che trasforma contenuti web in Skill Markdown strutturate per agenti AI.",
     };
 
@@ -1261,14 +522,14 @@ export default function Home() {
         name: "Reskill",
         applicationCategory: "DeveloperApplication",
         operatingSystem: "Chrome, Firefox, Edge, Web",
-        url: "https://reskill.app",
+        url: "https://reskill-skill.vercel.app",
         description: "Trasforma YouTube, Reddit, PDF e pagine web in Skill Markdown per agenti AI.",
         offers: [
             { "@type": "Offer", price: "0", priceCurrency: "EUR", name: "Free" },
-            { "@type": "Offer", price: "4.99", priceCurrency: "EUR", name: "Pro Mensile" },
-            { "@type": "Offer", price: "49.90", priceCurrency: "EUR", name: "Pro Annuale" },
-            { "@type": "Offer", price: "9.99", priceCurrency: "EUR", name: "Business Mensile" },
-            { "@type": "Offer", price: "99.90", priceCurrency: "EUR", name: "Business Annuale" },
+            { "@type": "Offer", price: "7.99", priceCurrency: "EUR", name: "Starter" },
+            { "@type": "Offer", price: "12", priceCurrency: "EUR", name: "Pro" },
+            { "@type": "Offer", price: "29", priceCurrency: "EUR", name: "Business" },
+            { "@type": "Offer", price: "59", priceCurrency: "EUR", name: "Enterprise" },
         ],
     };
 
@@ -1398,44 +659,30 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
                                     : "bg-transparent border-white/6 hover:bg-white/2 hover:border-white/10"
                                     }`}
                             >
-                                {"thumbnail" in item && (item as { thumbnail?: string }).thumbnail && (
-                                    <div className="relative w-full aspect-video overflow-hidden border border-white/10 mb-3 bg-black/40">
-                                        <img
-                                            src={(item as { thumbnail: string }).thumbnail}
-                                            alt={item.title}
-                                            className="w-full h-full object-cover"
-                                            loading="lazy"
-                                        />
-                                        <span className="absolute bottom-1.5 left-1.5 px-2 py-0.5 bg-black/70 backdrop-blur text-[10px] font-bold uppercase text-white tracking-wider border border-white/15">{item.platform}</span>
-                                    </div>
-                                )}
                                 <div className="flex gap-3 items-start">
-                                    {/* Logo originale della fonte */}
-                                    <div className="shrink-0 w-11 h-11 overflow-hidden border border-white/10 bg-white flex items-center justify-center">
-                                        {"logo" in item && (item as { logo?: string }).logo ? (
+                                    {/* Thumbnail / Avatar */}
+                                    <div className="shrink-0 w-12 h-12 overflow-hidden border border-white/6 flex items-center justify-center text-xl">
+                                        {item.type === "youtube" && <FaYoutube className="w-5 h-5 text-red-500" />}
+                                        {item.type === "instagram" && <FaInstagram className="w-5 h-5 text-pink-500" />}
+                                        {item.type === "x" && <FaXTwitter className="w-5 h-5 text-gray" />}
+                                        {item.type === "reddit" && <FaRedditAlien className="w-5 h-5 text-orange-500" />}
+                                        {item.type === "linkedin" && <FaLinkedin className="w-5 h-5 text-blue-500" />}
+                                        {["blog", "article", "essay", "newsletter"].includes(item.type) && item.url && (
                                             <img
-                                                src={(item as { logo: string }).logo}
-                                                alt={`Logo ${item.platform}`}
-                                                className="w-7 h-7 object-contain"
+                                                src={`https://www.google.com/s2/favicons?domain=${new URL(item.url).hostname}&sz=48`}
+                                                alt=""
+                                                className="w-5 h-5"
                                                 loading="lazy"
                                             />
-                                        ) : (
-                                            <span className="text-sm font-bold text-slate-800">{item.platform.charAt(0)}</span>
                                         )}
                                     </div>
                                     {/* Meta */}
                                     <div className="flex-1 min-w-0">
-                                        <div className="text-sm font-bold text-white leading-snug">{item.title}</div>
+                                        <div className="text-sm font-bold text-white truncate">{item.title}</div>
                                         <div className="text-xs text-gray mt-1 truncate">{item.source}</div>
-                                        {"excerpt" in item && (item as { excerpt?: string }).excerpt && (
-                                            <p className="text-[11px] text-gray/80 mt-1.5 leading-relaxed line-clamp-2">{(item as { excerpt: string }).excerpt}</p>
-                                        )}
-                                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-2">
+                                        <div className="flex items-center gap-2 mt-2">
                                             <span className="px-2 py-0.5 bg-slate-800 text-[12px] font-bold uppercase text-gray tracking-wider">{item.platform}</span>
-                                            {"stats" in item && (item as { stats?: string }).stats && (
-                                                <span className="text-[11px] text-cyan/80 font-medium">{(item as { stats: string }).stats}</span>
-                                            )}
-                                            {item.date && <span className="text-[12px] text-gray">· {item.date}</span>}
+                                            {item.date && <span className="text-[12px] text-gray">{item.date}</span>}
                                         </div>
                                     </div>
                                 </div>
@@ -1490,20 +737,9 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
                         {/* Content */}
                         <div className="flex-1 overflow-y-auto overscroll-contain">
                             {/* Skill Title */}
-                            <div className="px-5 pt-4 pb-2 border-b border-white/5 flex items-center gap-3">
-                                {(() => {
-                                    const active = demoItems.find(d => d.id === activeDemo);
-                                    const logo = active && "logo" in active ? (active as { logo?: string }).logo : undefined;
-                                    return logo ? (
-                                        <span className="w-10 h-10 shrink-0 bg-white border border-white/10 flex items-center justify-center">
-                                            <img src={logo} alt={`Logo ${active?.platform}`} className="w-6 h-6 object-contain" loading="lazy" />
-                                        </span>
-                                    ) : null;
-                                })()}
-                                <div className="min-w-0">
-                                    <h3 className="text-base font-bold text-white">{demoItems.find(d => d.id === activeDemo)?.title}</h3>
-                                    <p className="text-[12px] text-gray mt-0.5">{demoItems.find(d => d.id === activeDemo)?.source}</p>
-                                </div>
+                            <div className="px-5 pt-4 pb-2 border-b border-white/5">
+                                <h3 className="text-base font-bold text-white">{demoItems.find(d => d.id === activeDemo)?.title}</h3>
+                                <p className="text-[12px] text-gray mt-0.5">{demoItems.find(d => d.id === activeDemo)?.source}</p>
                             </div>
 
                             {demoItems.find(d => d.id === activeDemo)?.type === 'youtube' && (
@@ -1567,11 +803,11 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
 
                     <div className="grid grid-cols-4 gap-4 auto-rows-auto">
                         {[
-                            { num: "1", slug: "ingestione-fonti", title: t.how.step1_title, desc: t.how.step1_desc },
-                            { num: "2", slug: "pulizia-ai", title: t.how.step2_title, desc: t.how.step2_desc },
-                            { num: "3", slug: "compilazione-skill", title: t.how.step3_title, desc: t.how.step3_desc },
-                            { num: "4", slug: "connessione-mcp", title: t.how.step4_title, desc: t.how.step4_desc },
-                            { num: "5", slug: "lavora-con-ai", title: t.how.step5_title, desc: t.how.step5_desc },
+                            { num: "1", title: t.how.step1_title, desc: t.how.step1_desc },
+                            { num: "2", title: t.how.step2_title, desc: t.how.step2_desc },
+                            { num: "3", title: t.how.step3_title, desc: t.how.step3_desc },
+                            { num: "4", title: t.how.step4_title, desc: t.how.step4_desc },
+                            { num: "5", title: t.how.step5_title, desc: t.how.step5_desc },
                         ].map((step, i) => {
                             const spans = [
                                 "col-span-2 row-span-1",   // step 1
@@ -1581,15 +817,11 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
                                 "col-span-3 row-span-1",   // step 5
                             ];
                             return (
-                                <Link key={step.num} href={`/how-it-works/${step.slug}`} className={`${spans[i]} p-5 bg-white/2 border border-white/6 relative group hover:border-cyan/30 transition-all block`}>
-                                    <span className="w-7 h-7 bg-[oklch(13% .006 260)]/60 text-cyan border border-[oklch(72% .06 240)]/20 flex items-center justify-center text-xs font-bold mb-4 group-hover:scale-105 transition-transform">{step.num}</span>
-                                    <h4 className="font-bold text-white text-sm mb-2 group-hover:text-cyan transition-colors">{step.title}</h4>
-                                    <p className="text-xs text-gray leading-relaxed line-clamp-4">{step.desc}</p>
-                                    <span className="inline-flex items-center gap-1 mt-3 text-[11px] font-bold text-cyan/80 group-hover:text-cyan group-hover:gap-2 transition-all">
-                                        Approfondisci
-                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-                                    </span>
-                                </Link>
+                                <div key={step.num} className={`${spans[i]} p-5 bg-white/2 border border-white/6 relative`}>
+                                    <span className="w-7 h-7 bg-[oklch(13% .006 260)]/60 text-cyan border border-[oklch(72% .06 240)]/20 flex items-center justify-center text-xs font-bold mb-4">{step.num}</span>
+                                    <h4 className="font-bold text-white text-sm mb-2">{step.title}</h4>
+                                    <p className="text-xs text-gray leading-relaxed">{step.desc}</p>
+                                </div>
                             );
                         })}
                     </div>
@@ -1660,7 +892,7 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
             </section>
 
             {/* Extension Section */}
-            <section id="estensione" className="py-24 px-6 relative overflow-hidden scroll-mt-20">
+            <section className="py-24 px-6 relative overflow-hidden">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,oklch(60%_0.01_260/0.04)_0%,transparent_70%)] pointer-events-none" />
                 <div className="max-w-5xl mx-auto relative z-10">
                     <div className="text-center mb-14">
@@ -1696,26 +928,17 @@ style={{backgroundImage:`radial-gradient(ellipse 70% 40% at 50% 0%,oklch(72% 0.0
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row justify-center gap-3">
+                    <div className="flex justify-center">
                         <a
                             href="https://chromewebstore.google.com/detail/Reskill"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-6 py-3 bg-cyan text-black font-bold text-sm transition-all hover:bg-[oklch(60%_0.08_240)] active:scale-95 inline-flex items-center justify-center gap-2"
+                            className="px-6 py-3 bg-cyan text-black font-bold text-sm transition-all hover:bg-[oklch(60%_0.08_240)] active:scale-95 inline-flex items-center gap-2"
                         >
                             <FaChrome className="w-4 h-4" />
                             Aggiungi a Chrome
                         </a>
-                        <Link
-                            href="/tools"
-                            className="px-6 py-3 border border-white/15 text-white/85 font-semibold text-sm transition-all inline-flex items-center justify-center gap-2 hover:border-cyan/40 hover:text-white"
-                        >
-                            Usa dal web, senza estensione
-                        </Link>
                     </div>
-                    <p className="text-center text-xs text-gray mt-4 max-w-md mx-auto">
-                        Gli Strumenti web replicano tutte le funzioni dell'estensione: Link → Markdown, YouTube → Markdown e pulizia HTML.
-                    </p>
                 </div>
             </section>
 

@@ -6,17 +6,7 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "sk_test_mock");
 
-/** Sottoinsieme dei campi Stripe.Subscription effettivamente usati dal webhook. */
-interface WebhookSubscription {
-  id: string;
-  status: string;
-  cancel_at_period_end: boolean;
-  current_period_end: number;
-  metadata?: Record<string, string | undefined> | null;
-  items: { data: Array<{ price?: { id?: string } | null }> };
-}
-
-function getPlanId(sub: WebhookSubscription): string {
+function getPlanId(sub: Stripe.Subscription): string {
   return sub?.metadata?.planId || "pro";
 }
 
@@ -64,9 +54,7 @@ export async function POST(req: Request) {
 
         if (!subscriptionId || !userId) break;
 
-          const sub = (await stripe.subscriptions.retrieve(
-            subscriptionId
-          )) as unknown as WebhookSubscription;
+          const sub = await stripe.subscriptions.retrieve(subscriptionId) as any;
         const priceId = sub.items?.data?.[0]?.price?.id || "";
 
         await upsertSubscription(
@@ -89,7 +77,7 @@ export async function POST(req: Request) {
 
       case "customer.subscription.updated":
       case "customer.subscription.created": {
-        const sub = event.data.object as unknown as WebhookSubscription;
+        const sub = event.data.object as any;
         const planId = getPlanId(sub);
         const priceId = sub.items?.data?.[0]?.price?.id || "";
 
@@ -116,12 +104,10 @@ export async function POST(req: Request) {
       }
 
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object as unknown as { subscription?: string | null };
+        const invoice = event.data.object as any;
         const subscriptionId = invoice.subscription as string;
         if (subscriptionId) {
-const sub = (await stripe.subscriptions.retrieve(
-  subscriptionId
-)) as unknown as WebhookSubscription;
+const sub = await stripe.subscriptions.retrieve(subscriptionId) as any;
 
           const { data: subRecord } = await supabase
             .from("user_subscriptions")

@@ -16,26 +16,27 @@ Reskill extracts content from any web source, cleans it, and generates structure
 
 - Browser extension (Chrome/Edge/Firefox) for one-click web-to-markdown conversion
 - AI-powered skill generation from multiple sources
-- Credit-based system with Free, Pro, Business, Enterprise plans
+- Credit-based system with Free, Starter, Pro, Business, Enterprise plans
 - MCP server integration for programmatic access
 - API keys for external integrations
 
 ## Pricing
 
 - Free: 1 bucket, 3 sources, 10 credits/month
+- Starter: €7.99/month — 5 buckets, 30 sources, 250 credits/month
 - Pro: €12/month — 15 buckets, 100 sources, 500 credits/month
 - Business: €29/month — 50 buckets, 500 sources, 1,500 credits/month
 - Enterprise: €59/month — unlimited buckets/sources, 5,000 credits/month
 
 ## Links
 
-- Website: https://reskill.app
-- Dashboard: https://reskill.app/dashboard
-- Login: https://reskill.app/login
-- MCP Integration: https://reskill.app/mcp
-- Changelog: https://reskill.app/changelog
-- Privacy Policy: https://reskill.app/privacy
-- Terms of Service: https://reskill.app/terms
+- Website: https://reskill-skill.vercel.app
+- Dashboard: https://reskill-skill.vercel.app/dashboard
+- Login: https://reskill-skill.vercel.app/login
+- MCP Integration: https://reskill-skill.vercel.app/mcp
+- Changelog: https://reskill-skill.vercel.app/changelog
+- Privacy Policy: https://reskill-skill.vercel.app/privacy
+- Terms of Service: https://reskill-skill.vercel.app/terms
 
 ## Contact
 

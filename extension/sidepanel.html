@@ -751,6 +751,48 @@
       font-size: 11px;
     }
     .convert-spinner.active { display: flex; }
+    .convert-progress {
+      display: none;
+      margin-top: 10px;
+    }
+    .convert-progress.active { display: block; }
+    .convert-progress-track {
+      height: 4px;
+      border-radius: 9999px;
+      background: oklch(72% .06 240 / 0.15);
+      overflow: hidden;
+    }
+    .convert-progress-fill {
+      height: 100%;
+      width: 33%;
+      border-radius: 9999px;
+      background: oklch(72% .06 240);
+      animation: convert-slide 1.2s ease-in-out infinite;
+    }
+    @keyframes convert-slide {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(300%); }
+    }
+    .convert-progress-label {
+      margin-top: 6px;
+      font-size: 11px;
+      color: oklch(60% .01 260);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .convert-progress-label::before {
+      content: "";
+      width: 4px;
+      height: 4px;
+      border-radius: 9999px;
+      background: oklch(72% .06 240);
+      animation: blink-dot 0.8s step-end infinite;
+    }
+    @keyframes blink-dot {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
     .convert-spinner .mini-spinner {
       width: 14px;
       height: 14px;
@@ -1400,7 +1442,7 @@
           <input type="text" class="code-digit" maxlength="1" inputmode="numeric" autocomplete="off" />
           <input type="text" class="code-digit" maxlength="1" inputmode="numeric" autocomplete="off" />
         </div>
-        <div class="code-timer" id="code-timer">Scade tra: <span id="timer-display">10:00</span></div>
+        <div class="code-timer" id="code-timer">Scade tra: <span id="timer-display">01:00</span></div>
         <button class="btn btn-primary" id="verify-btn">Verifica ✓</button>
         <button class="btn btn-ghost" id="back-btn">← Cambia email</button>
         <div class="error" id="code-error"></div>
@@ -1492,20 +1534,22 @@
           </a>
         </div>
 
-        <!-- Link to Markdown + YouTube (video / playlist / canale) -->
+        <!-- Link to Markdown -->
         <div class="convert-card">
-          <div class="section-label">Link → Markdown · YouTube video / playlist / canale</div>
+          <div class="section-label">Link → Markdown</div>
           <div class="convert-input-row">
-            <input type="url" class="input" id="convert-url-input" placeholder="https://… oppure youtube.com/watch · playlist · @canale" />
+            <input type="url" class="input" id="convert-url-input" placeholder="https://esempio.com/articolo" />
             <button class="btn" id="convert-extract-btn" style="width:auto;white-space:nowrap;flex-shrink:0;">Estrai →</button>
-          </div>
-          <div class="convert-input-row" style="margin-top:6px;">
-            <label style="font-size:11px;opacity:.75;">Max video (playlist/canali, max 100):</label>
-            <input type="number" class="input" id="convert-max-videos" min="1" max="100" value="20" style="max-width:70px;" />
           </div>
           <div class="convert-spinner" id="convert-spinner">
             <div class="mini-spinner"></div>
             <span>Estrazione in corso...</span>
+          </div>
+          <div class="convert-progress" id="convert-progress" role="progressbar" aria-label="Conversione in corso">
+            <div class="convert-progress-track">
+              <div class="convert-progress-fill"></div>
+            </div>
+            <div class="convert-progress-label" id="convert-progress-label">Estrazione contenuto...</div>
           </div>
           <div class="convert-output" id="convert-output"></div>
           <div class="convert-actions" id="convert-actions" style="display:none;">
@@ -1627,10 +1671,10 @@
           <div class="recharge-desc">Ricarica i tuoi crediti scegliendo un piano. Verrai reindirizzato alla pagina di pagamento.</div>
           <div class="recharge-row">
             <select id="recharge-plan-select">
-              <option value="pro" selected>Pro — €4,99/mese (500 crediti)</option>
-              <option value="pro-annual">Pro Annuale — €49,90/anno</option>
-              <option value="business">Business — €9,99/mese (1500 crediti)</option>
-              <option value="business-annual">Business Annuale — €99,90/anno</option>
+              <option value="starter">Starter — €7,99/mese (250 crediti)</option>
+              <option value="pro" selected>Pro — €12/mese (500 crediti)</option>
+              <option value="business">Business — €29/mese (1500 crediti)</option>
+              <option value="enterprise">Enterprise — €59/mese (5000 crediti)</option>
             </select>
             <button class="recharge-btn" id="recharge-buy-btn">Acquista</button>
           </div>
@@ -1681,22 +1725,6 @@
             <div class="conn-desc" id="conn-desc-cursor">npm @reskill/mcp</div>
           </div>
           <button class="conn-copy-btn" data-cmd="npx @reskill/mcp">Copia comando</button>
-        </div>
-
-        <div class="section-label" style="margin-top:8px;">Export Markdown</div>
-        <div class="conn-card" style="flex-direction:column;align-items:stretch;gap:8px;">
-          <div class="conn-info">
-            <div class="conn-name">Percorso di salvataggio</div>
-            <div class="conn-desc">Prefisso usato nei download, es. reskill</div>
-          </div>
-          <input class="mcp-input" id="export-path-input" type="text" placeholder="reskill" />
-          <div class="conn-info">
-            <div class="conn-name">Nome cartella</div>
-            <div class="conn-desc">Cartella degli export YouTube, es. youtube-skills</div>
-          </div>
-          <input class="mcp-input" id="export-folder-input" type="text" placeholder="youtube-skills" />
-          <button class="mcp-save-btn" id="export-settings-save-btn">Salva export</button>
-          <div class="status-text" id="export-settings-status"></div>
         </div>
 
         <div class="section-label" style="margin-top:8px;">Strumenti</div>

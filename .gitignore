@@ -16,7 +16,14 @@
 
 # next.js
 /.next/
+/mobile/.next/
 /out/
+/mobile/node_modules
+
+# flutter / dart
+build/
+.dart_tool/
+mobile/node_modules
 
 # production
 /build

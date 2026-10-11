@@ -58,14 +58,6 @@ export default function Footer() {
                   Feedback
                 </Link>
               </li>
-              <li>
-                <Link
-                  href="/tools"
-                  className="text-gray hover:text-cyan transition-colors"
-                >
-                  {t.footer.strumenti}
-                </Link>
-              </li>
             </ul>
           </div>
 
@@ -80,14 +72,6 @@ export default function Footer() {
                   className="text-gray hover:text-cyan transition-colors"
                 >
                   {t.footer.guida_mcp}
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/how-it-works"
-                  className="text-gray hover:text-cyan transition-colors"
-                >
-                  {t.footer.come_funziona}
                 </Link>
               </li>
               <li>

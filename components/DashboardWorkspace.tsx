@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import StatsPanel from "@/components/StatsPanel";
 import PlansSection from "@/components/PlansSection";
-import YouTubeConverter from "@/components/YouTubeConverter";
+import ExtractionProgressBar from "@/components/ExtractionProgressBar";
 
 interface Source {
  id: string;
@@ -52,6 +52,7 @@ export default function DashboardWorkspace() {
 
  // UI states
  const [isExtracting, setIsExtracting] = useState(false);
+ const [extractionPhase, setExtractionPhase] = useState("Estrazione contenuto...");
  const [isGeneratingSkill, setIsGeneratingSkill] = useState(false);
  const [activeTab, setActiveTab] = useState<"editor" | "preview" | "mcp">("editor");
  const [searchQuery, setSearchQuery] = useState("");
@@ -59,11 +60,9 @@ export default function DashboardWorkspace() {
  const [showCreateBucketModal, setShowCreateBucketModal] = useState(false);
  const [extractionError, setExtractionError] = useState<string | null>(null);
 
-  const [isLoading, setIsLoading] = useState(true);
-  // Provider AI unico: Xkiro (gli altri provider sono stati rimossi).
-  // Mantenuto per retro-compatibilità ma non più selezionabile.
-  const [selectedModel] = useState("xkiro-default");
-  const [showDashboard, setShowDashboard] = useState(false);
+ const [isLoading, setIsLoading] = useState(true);
+ const [selectedModel, setSelectedModel] = useState("");
+ const [showDashboard, setShowDashboard] = useState(false);
  const [skillSaveStatus, setSkillSaveStatus] = useState<"saved" | "saving" | "unsaved">("saved");
 
  // Fetch real data from MongoDB via API
@@ -122,6 +121,7 @@ export default function DashboardWorkspace() {
 
  setIsExtracting(true);
  setExtractionError(null);
+ setExtractionPhase("Estrazione contenuto...");
 
  try {
  const res = await fetch("/api/extract", {
@@ -132,6 +132,8 @@ export default function DashboardWorkspace() {
 
  const data = await res.json();
  if (!res.ok) throw new Error(data.error || "Estrazione fallita");
+
+ setExtractionPhase("Salvataggio fonte...");
 
  const saveRes = await fetch(`/api/buckets/${activeBucketId}/sources`, {
  method: "POST",
@@ -295,25 +297,14 @@ export default function DashboardWorkspace() {
  setTimeout(() => setCopyFeedback(false), 2000);
  };
 
-  const handleDownloadSkill = () => {
-  if (!activeBucket?.generatedSkill) return;
-  const blob = new Blob([activeBucket.generatedSkill], { type: "text/markdown;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  const safeName = activeBucket.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
-  // Percorso/cartella personalizzabili dalle Impostazioni (Account → Export).
-  let exportPrefix = "reskill/youtube-skills";
-  try {
-    const raw = localStorage.getItem("reskill_export_settings");
-    if (raw) {
-      const s = JSON.parse(raw);
-      const p = String(s.exportPath || "reskill").replace(/[^a-zA-Z0-9_\-/ ]/g, "").replace(/\s+/g, "-") || "reskill";
-      const f = String(s.exportFolder || "youtube-skills").replace(/[^a-zA-Z0-9_\-/ ]/g, "").replace(/\s+/g, "-") || "youtube-skills";
-      exportPrefix = `${p.replace(/^\/+|\/+$/g, "")}/${f.replace(/^\/+|\/+$/g, "")}`;
-    }
-  } catch { /* default */ }
-  a.href = url;
-  a.download = `${exportPrefix}/SKILL_${safeName}.md`;
+ const handleDownloadSkill = () => {
+ if (!activeBucket?.generatedSkill) return;
+ const blob = new Blob([activeBucket.generatedSkill], { type: "text/markdown;charset=utf-8" });
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement("a");
+ const safeName = activeBucket.name.toLowerCase().replace(/[^a-z0-9]/g, "_");
+ a.href = url;
+ a.download = `SKILL_${safeName}.md`;
  a.style.display = "none";
  document.body.appendChild(a);
  a.click();
@@ -568,19 +559,17 @@ export default function DashboardWorkspace() {
  )}
  </button>
  </form>
+ {isExtracting && <ExtractionProgressBar phase={extractionPhase} />}
  {extractionError && (
  <p className="text-xs text-[oklch(72%_.06_240)] mt-2 flex items-center gap-1"><AlertTriangle size={11} /> {extractionError}</p>
  )}
-  <div className="flex gap-4 mt-3 text-[12px] text-slate-600 font-medium">
-  <span className="flex items-center gap-1"><Video size={9} /> YouTube</span>
-  <span className="flex items-center gap-1"><MessageSquare size={9} /> X/Twitter</span>
-  <span className="flex items-center gap-1"><Globe size={9} /> Reddit</span>
-  <span className="flex items-center gap-1"><FileCode size={9} /> PDF / Web</span>
-  </div>
-  </div>
-
-  {/* Convertitore YouTube: video / playlist / interi canali → Markdown */}
-  <YouTubeConverter />
+ <div className="flex gap-4 mt-3 text-[12px] text-slate-600 font-medium">
+ <span className="flex items-center gap-1"><Video size={9} /> YouTube</span>
+ <span className="flex items-center gap-1"><MessageSquare size={9} /> X/Twitter</span>
+ <span className="flex items-center gap-1"><Globe size={9} /> Reddit</span>
+ <span className="flex items-center gap-1"><FileCode size={9} /> PDF / Web</span>
+ </div>
+ </div>
 
  {/* Source items list */}
  <div className="flex-1 flex flex-col gap-4 overflow-hidden">
@@ -588,13 +577,20 @@ export default function DashboardWorkspace() {
  <h3 className="text-[12px] font-bold text-[oklch(60%_0.01_260)] uppercase tracking-wider">
  Fonti incluse ({activeBucket.sources.length})
  </h3>
-  <div className="flex items-center gap-2">
-  <span
-  title="Provider AI unico: Xkiro"
-  className="bg-[oklch(13%_0.006_260)] border border-[oklch(72%_.06_240)]/20 px-2 py-1 text-[12px] text-[oklch(72%_.06_240)] font-semibold"
-  >
-  Xkiro
-  </span>
+ <div className="flex items-center gap-2">
+ <select
+ value={selectedModel}
+ onChange={(e) => setSelectedModel(e.target.value)}
+ className="bg-[oklch(13% 0.006 260)] border border-[oklch(72% .06 240)]/20 px-2 py-1 text-[12px] text-[oklch(60%_0.01_260)] focus:outline-none focus:border-[oklch(72% .06 240)] cursor-pointer"
+ title="Modello AI per la generazione"
+ >
+ <option value="">Modello Auto</option>
+ <option value="gpt-4o-mini">GPT-4o Mini</option>
+ <option value="gpt-4o">GPT-4o</option>
+ <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
+ <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
+ <option value="gpt-4.1">GPT-4.1</option>
+ </select>
  {activeBucket.sources.length > 0 && (
  <button
  onClick={handleGenerateSkill}

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "Dopo OGNI modifica ai file del progetto (web in root o app mobile in mobile/), salva tutto su GitHub: git add -A, git commit con messaggio descrittivo in italiano, git push origin master (repo gabrieleforestieri0912-lab/Reskill). Non lasciare mai modifiche non committate a fine task. Rispetta sempre il .gitignore: mai committare .env, node_modules, build, .next, .vercel."
+  ]
+}

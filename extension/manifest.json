@@ -18,13 +18,13 @@
     "tabs"
   ],
   "host_permissions": [
-    "https://reskill.app/*",
+    "https://reskill-skill.vercel.app/*",
     "http://localhost:3000/*",
     "https://www.youtube.com/*"
   ],
   "externally_connectable": {
     "matches": [
-      "https://reskill.app/*",
+      "https://reskill-skill.vercel.app/*",
       "http://localhost:3000/*"
     ]
   },
@@ -37,7 +37,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://reskill.app/*",
+        "https://reskill-skill.vercel.app/*",
         "http://localhost:3000/*",
         "http://localhost:3001/*"
       ],
@@ -49,7 +49,7 @@
       "js": ["theme.js", "content.js"],
       "run_at": "document_idle",
       "exclude_matches": [
-        "https://reskill.app/*",
+        "https://reskill-skill.vercel.app/*",
         "http://localhost:3000/*"
       ]
     }

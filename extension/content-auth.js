@@ -1,6 +1,6 @@
 /**
  * content-auth.js
- * Iniettato SOLO su reskill.app e localhost:3000.
+ * Iniettato SOLO sul dominio web Reskill e localhost:3000.
  * Funzione: fare da ponte tra la sessione web NextAuth (ha i cookie)
  * e il background service worker dell'estensione (non ha i cookie).
  *
@@ -20,7 +20,7 @@
     );
   }
 
-  const BASE = window.location.origin; // https://reskill.app o http://localhost:3000
+  const BASE = window.location.origin; // dominio web Reskill o http://localhost:3000
   let linkInProgress = false;
 
   /**

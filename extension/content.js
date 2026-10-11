@@ -2,7 +2,7 @@
 
 async function getServerUrl() {
   const result = await chrome.storage.local.get(["sg_server_url"]);
-  return result.sg_server_url || "http://localhost:3000";
+  return result.sg_server_url || "https://reskill-skill.vercel.app";
 }
 
 async function getAuthHeaders() {
@@ -18,6 +18,31 @@ let activePicker = false;
 let hoveredElement = null;
 let selectedContentMarkdown = "";
 let fetchedBuckets = [];
+let sgProgressTimer = null;
+
+// ─── Barra di caricamento del clipper (indeterminata, animata via JS) ───────
+function showSgProgress(label) {
+  const bar = document.getElementById("sg-progress");
+  const fill = document.getElementById("sg-progress-fill");
+  const lab = document.getElementById("sg-progress-label");
+  if (!bar || !fill) return;
+  if (lab && label) lab.textContent = label;
+  bar.style.display = "block";
+  let pos = -33;
+  clearInterval(sgProgressTimer);
+  sgProgressTimer = setInterval(() => {
+    pos += 4;
+    if (pos > 100) pos = -33;
+    fill.style.marginLeft = pos + "%";
+  }, 30);
+}
+
+function hideSgProgress() {
+  clearInterval(sgProgressTimer);
+  sgProgressTimer = null;
+  const bar = document.getElementById("sg-progress");
+  if (bar) bar.style.display = "none";
+}
 
 // Main listener for messages from background script
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -194,6 +219,12 @@ async function showClipperHub() {
       </button>
     </div>
     <div id="sg-status" style="margin-top:10px; text-align:center; font-size:10px; color:oklch(72% 0.06 240);"></div>
+    <div id="sg-progress" style="display:none; margin-top:10px;">
+      <div style="height:4px; background:oklch(72% 0.06 240 / 0.15); overflow:hidden; border-radius:9999px;">
+        <div id="sg-progress-fill" style="height:100%; width:33%; background:oklch(72% 0.06 240); border-radius:9999px;"></div>
+      </div>
+      <div id="sg-progress-label" style="margin-top:6px; font-size:10px; color:oklch(72% 0.06 240); text-align:center;"></div>
+    </div>
   `;
 
   document.body.appendChild(hub);
@@ -265,6 +296,7 @@ async function showClipperHub() {
     await chrome.storage.local.set({ sg_last_bucket_id: bucketId });
 
     if (status) status.textContent = "Salvataggio nel Cloud...";
+    showSgProgress("Conversione in Markdown...");
 
     try {
       const domain = window.location.hostname.replace("www.", "");
@@ -288,14 +320,17 @@ async function showClipperHub() {
 
       const data = await res.json();
       if (res.ok && !data.error) {
+        hideSgProgress();
         if (status) status.innerHTML = "<span style='color:oklch(72% 0.06 240); font-weight:bold;'>✓ Salvato nel Cloud!</span>";
         setTimeout(() => hub.remove(), 2000);
       } else if (res.status === 401 || res.status === 403) {
+        hideSgProgress();
         if (status) status.textContent = "Sessione scaduta: riapri il pannello e riaccedi.";
       } else {
         throw new Error(data.error || "Salvataggio fallito");
       }
     } catch (err) {
+      hideSgProgress();
       if (status) status.textContent = `Errore: ${err.message || "Accedi prima a Reskill"}`;
     }
   });
@@ -586,25 +621,37 @@ async function handleYoutubePlaylist() {
     return;
   }
 
-  const count = getPlaylistVideoCount();
-  showStatusMessage(`Estrazione trascrizioni da ${count} video...`);
+  showStatusMessage(`Estrazione trascrizioni da ${getPlaylistVideoCount()} video...`);
 
   try {
-    // Playlist o canale intero → unico file Markdown via backend dedicato.
-    const res = await fetch(`${await getServerUrl()}/api/youtube-to-markdown`, {
+    const res = await fetch(`${await getServerUrl()}/api/extract`, {
       method: "POST",
       headers: await getAuthHeaders(),
-      body: JSON.stringify({ url: window.location.href, maxVideos: Math.min(Math.max(count || 20, 1), 100) })
+      body: JSON.stringify({ url: window.location.href })
     });
 
     if (!res.ok) throw new Error("Errore API");
 
     const data = await res.json();
-    const markdown = data.markdown || data.content || data.text || "";
-    if (!markdown) throw new Error("empty");
 
-    await downloadMarkdown(markdown, data.filename || document.title);
-    showStatusMessage(`Playlist estratta con successo! (${data.videoCount || count} video)`);
+    const title = data.title || document.title || "Playlist YouTube";
+    const safeTitle = title.replace(/[^a-z0-9]/gi, "_").substring(0, 50);
+
+    const markdown = `---
+title: "${title}"
+source: youtube_playlist
+url: "${window.location.href}"
+extracted: "${new Date().toISOString()}"
+videos: ${getPlaylistVideoCount()}
+---
+
+# ${title}
+
+${data.content || data.text || ""}
+`;
+
+    downloadMarkdown(markdown);
+    showStatusMessage("Playlist estratta con successo!");
   } catch {
     showStatusMessage("Impossibile estrarre la playlist.");
   }
@@ -643,21 +690,10 @@ function showStatusMessage(msg) {
   setTimeout(() => toast.remove(), 4000);
 }
 
-async function getExportSettings() {
-  try {
-    const r = await chrome.storage.local.get(["sg_export_path", "sg_export_folder"]);
-    const clean = (s, fb) => String(s || "").replace(/\\/g, "/").replace(/\.\./g, "").replace(/\/+/g, "/").replace(/^\/+|\/+$/g, "") || fb;
-    return { exportPath: clean(r.sg_export_path || "reskill", "reskill"), exportFolder: clean(r.sg_export_folder || "youtube-skills", "youtube-skills") };
-  } catch {
-    return { exportPath: "reskill", exportFolder: "youtube-skills" };
-  }
-}
-
-async function downloadMarkdown(markdown, titleHint) {
-  const pageTitle = (titleHint || document.title || 'reskill-page').trim();
-  const safeTitle = pageTitle.replace(/\.md$/i, "").replace(/[^a-zA-Z0-9_\-\s]/g, '').trim().substring(0, 60) || 'reskill-page';
-  const settings = await getExportSettings();
-  const filename = `${settings.exportPath}/${settings.exportFolder}/${safeTitle}.md`;
+function downloadMarkdown(markdown) {
+  const pageTitle = document.title.trim() || 'reskill-page';
+  const safeTitle = pageTitle.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
+  const filename = `${safeTitle}.md`;
 
   const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
   const url = URL.createObjectURL(blob);

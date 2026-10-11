@@ -124,6 +124,7 @@ export async function getCreditStatus(userEmail: string | null): Promise<PlanGua
  */
 export const GENERATION_HOURLY_LIMIT: Record<string, number> = {
   free: 5,
+  starter: 100,
   pro: 999,
   business: 999,
   enterprise: 999,

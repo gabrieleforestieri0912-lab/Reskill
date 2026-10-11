@@ -1,4 +1,4 @@
-const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://reskill.app";
+const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://reskill-skill.vercel.app";
 
 export function OrganizationJsonLd() {
   return (
@@ -47,6 +47,13 @@ export function SoftwareAppJsonLd() {
               priceCurrency: "EUR",
               name: "Free",
               description: "1 Bucket, 3 Fonti, 10 Crediti/mese",
+            },
+            {
+              "@type": "Offer",
+              price: "7.99",
+              priceCurrency: "EUR",
+              name: "Starter",
+              description: "5 Bucket, 30 Fonti, 250 Crediti/mese",
             },
             {
               "@type": "Offer",
@@ -122,7 +129,7 @@ export function FAQJsonLd() {
     },
     {
       question: "Reskill è gratuito?",
-      answer: "Sì, il piano Free offre 1 bucket, 3 fonti e 10 crediti mensili. I piani a pagamento (Pro €12/mese, Business €29/mese, Enterprise €59/mese) offrono più risorse e funzionalità avanzate.",
+      answer: "Sì, il piano Free offre 1 bucket, 3 fonti e 10 crediti mensili. I piani a pagamento (Starter €7,99/mese, Pro €12/mese, Business €29/mese, Enterprise €59/mese) offrono più risorse e funzionalità avanzate.",
     },
     {
       question: "Come collego le Skill ai miei agenti AI?",
@@ -138,7 +145,7 @@ export function FAQJsonLd() {
     },
     {
       question: "Posso usare Reskill con modelli AI locali?",
-      answer: "Reskill genera le Skill con il provider unico Xkiro. Le Skill generate sono in Markdown universale, compatibili con qualsiasi LLM incluso modelli locali.",
+      answer: "Reskill utilizza modelli OpenAI via API (GPT-4o-mini, GPT-4.1, ecc.) per generare le Skill. Le Skill generate sono in Markdown universale, compatibili con qualsiasi LLM incluso modelli locali.",
     },
   ];
 

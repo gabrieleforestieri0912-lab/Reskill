@@ -29,11 +29,8 @@ export async function POST() {
     });
 
     return NextResponse.json({ url: portalSession.url });
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error("Portal Error:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Errore sconosciuto" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

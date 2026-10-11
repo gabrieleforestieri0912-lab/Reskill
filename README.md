@@ -12,7 +12,7 @@ Piattaforma per generare Skill AI (file Markdown strutturati) da fonti web, YouT
 | Database | Supabase (PostgreSQL) |
 | Auth | NextAuth v5 (Google OAuth + Credenziali) |
 | Pagamenti | Stripe |
-| AI | SDK AI (`ai`, `@ai-sdk/openai`, `ollama-ai-provider`) |
+| AI | SDK AI (`ai`, `@ai-sdk/openai`) |
 | Email | Resend |
 
 ## Struttura del progetto

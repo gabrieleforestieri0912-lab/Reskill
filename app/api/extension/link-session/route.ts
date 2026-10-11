@@ -17,7 +17,7 @@ export async function OPTIONS() {
 }
 
 /**
- * GET — chiamato dal content script iniettato su reskill.app.
+ * GET — chiamato dal content script iniettato sul dominio web Reskill.
  * Il content script ha accesso ai cookie di sessione, quindi può
  * recuperare la sessione Next-Auth e creare un token per l'estensione.
  */

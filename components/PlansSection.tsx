@@ -4,7 +4,7 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
-import { Loader2, Crown, Star, Briefcase, Building, Rocket } from "lucide-react";
+import { Loader2, Crown, Star, Briefcase, Building, Rocket, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface PlanDetails {
@@ -33,7 +33,7 @@ interface SubscriptionInfo {
 
 const planIcons: Record<string, ReactNode> = {
  free: <Rocket size={14} />,
-
+ starter: <Zap size={14} />,
  pro: <Star size={14} />,
  business: <Briefcase size={14} />,
  enterprise: <Building size={14} />,
@@ -44,45 +44,58 @@ const PLANS_DATA = [
  id: "free",
  name: "Free",
  price: 0,
- annualPrice: 0,
   credits: 10,
  currency: "EUR",
  interval: "mese",
  features: { maxBuckets: 1, maxSources: 3, aiGeneration: true, prioritySupport: false, teamSharing: false },
-  cta: "Inizia Gratis",
-  popular: false,
-  tagline: "Per scoprire Reskill",
-  perks: ["Export Markdown singolo", "Trigger YAML di base"],
+ cta: "Inizia Gratis",
+ popular: false,
+ },
+  {
+    id: "starter",
+    name: "Starter",
+    price: 7.99,
+    credits: 250,
+    currency: "EUR",
+    interval: "mese",
+    features: { maxBuckets: 5, maxSources: 30, aiGeneration: true, prioritySupport: false, teamSharing: false },
+    cta: "Scegli Starter",
+    popular: false,
   },
-   {
-     id: "pro",
-     name: "Pro",
-     price: 4.99,
-     annualPrice: 49.9,
-     credits: 500,
-     currency: "EUR",
-     interval: "mese",
-     features: { maxBuckets: 15, maxSources: 100, aiGeneration: true, prioritySupport: true, teamSharing: false },
-     cta: "Scegli Pro",
-     popular: true,
-     tagline: "Per chi crea Skill ogni settimana",
-     perks: ["Export YouTube playlist e canali", "MCP Server + Xkiro prioritario"],
-   },
-   {
-     id: "business",
-     name: "Business",
-     price: 9.99,
-     annualPrice: 99.9,
-     credits: 1500,
-     currency: "EUR",
-     interval: "mese",
-     features: { maxBuckets: 50, maxSources: 500, aiGeneration: true, prioritySupport: true, teamSharing: true },
-     cta: "Scegli Business",
-     popular: false,
-     tagline: "Per team e automazioni",
-     perks: ["API + team condiviso", "Batch, export massivi, SLA"],
-   },
- ];
+  {
+    id: "pro",
+    name: "Pro",
+    price: 12,
+    credits: 500,
+    currency: "EUR",
+    interval: "mese",
+    features: { maxBuckets: 15, maxSources: 100, aiGeneration: true, prioritySupport: true, teamSharing: false },
+    cta: "Scegli Pro",
+    popular: true,
+  },
+  {
+    id: "business",
+    name: "Business",
+    price: 29,
+    credits: 1500,
+    currency: "EUR",
+    interval: "mese",
+    features: { maxBuckets: 50, maxSources: 500, aiGeneration: true, prioritySupport: true, teamSharing: true },
+    cta: "Scegli Business",
+    popular: false,
+  },
+  {
+    id: "enterprise",
+    name: "Enterprise",
+    price: 59,
+    credits: 5000,
+    currency: "EUR",
+    interval: "mese",
+    features: { maxBuckets: -1, maxSources: -1, aiGeneration: true, prioritySupport: true, teamSharing: true },
+    cta: "Scegli Enterprise",
+    popular: false,
+  },
+];
 
 export default function PlansSection() {
  const router = useRouter();
@@ -90,7 +103,6 @@ export default function PlansSection() {
 	const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
 	const [actionLoading, setActionLoading] = useState<string | null>(null);
  const [message, setMessage] = useState<string | null>(null);
- const [billing, setBilling] = useState<"monthly" | "annual">("monthly");
 
  useEffect(() => {
  const fetchSubscription = async () => {
@@ -107,7 +119,7 @@ export default function PlansSection() {
  fetchSubscription();
  }, [session]);
 
-  const handlePlanAction = async (planId: string) => {
+ const handlePlanAction = async (planId: string) => {
  setActionLoading(planId);
  setMessage(null);
 
@@ -115,7 +127,7 @@ export default function PlansSection() {
  const res = await fetch("/api/stripe/checkout", {
  method: "POST",
  headers: { "Content-Type": "application/json" },
- body: JSON.stringify({ planId, billing }),
+ body: JSON.stringify({ planId }),
  });
  const data = await res.json();
 
@@ -192,25 +204,11 @@ export default function PlansSection() {
  </div>
  )}
 
-  <div className="flex items-center gap-1 p-0.5 border border-[oklch(72%_.06_240)]/20 w-fit text-[11px]">
-    {(["monthly", "annual"] as const).map((b) => (
-      <button
-        key={b}
-        onClick={() => setBilling(b)}
-        className={`px-2.5 py-1 font-bold uppercase tracking-wider transition-all ${billing === b ? "bg-[oklch(72%_.06_240)] text-black" : "text-[oklch(60%_0.01_260)] hover:text-white"}`}
-      >
-        {b === "monthly" ? "Mensile" : "Annuale"}
-      </button>
-    ))}
-  </div>
-
   <div className="space-y-2">
  {PLANS_DATA.map((plan) => {
  const isCurrent = currentPlanId === plan.id;
  const isFree = plan.id === "free";
- const shownPrice = billing === "annual" ? plan.annualPrice : plan.price;
- const subPrice = subscription?.planDetails?.price || 0;
- const isDowngrade = !isFree && currentPlanId !== "free" && shownPrice < subPrice;
+ const isDowngrade = !isFree && currentPlanId !== "free" && plan.price < (subscription?.planDetails?.price || 0);
 
  return (
  <div
@@ -237,18 +235,12 @@ export default function PlansSection() {
   <div className="flex items-baseline justify-between gap-2">
   <h3 className="text-xs font-bold text-[oklch(98.5%_.002_260)] truncate">{plan.name}</h3>
   <div className="flex items-baseline gap-0.5 shrink-0">
-  <span className="text-sm font-extrabold text-[oklch(98.5%_.002_260)]">€{billing === "annual" ? plan.annualPrice : plan.price}</span>
-  <span className="text-[12px] text-[oklch(60%_0.01_260)]">/{billing === "annual" ? "anno" : plan.interval || "mese"}</span>
+  <span className="text-sm font-extrabold text-[oklch(98.5%_.002_260)]">€{plan.price}</span>
+  <span className="text-[12px] text-[oklch(60%_0.01_260)]">/{plan.interval || "mese"}</span>
   </div>
   </div>
-   <div className="mt-0.5 text-[11px] text-[oklch(60%_0.01_260)] italic">{plan.tagline}</div>
-   <div className="mt-1 flex flex-wrap gap-1">
-     {plan.perks.map((perk) => (
-       <span key={perk} className="text-[10px] px-1.5 py-0.5 border border-[oklch(72%_.06_240)]/25 text-[oklch(72%_.06_240)]/90">{perk}</span>
-     ))}
-   </div>
-   <div className="flex items-center justify-between mt-1.5">
-   <span className="text-[12px] text-[oklch(98.5%_.002_260)]/60">{plan.credits.toLocaleString()} crediti</span>
+  <div className="flex items-center justify-between mt-0.5">
+  <span className="text-[12px] text-[oklch(98.5%_.002_260)]/60">{plan.credits.toLocaleString()} crediti</span>
   {isCurrent ? (
   <span className="text-[12px] font-semibold text-[oklch(72% .06 240)]">{currentPlanId === "free" ? "Piano Attuale" : "Attivo"}</span>
   ) : (

@@ -7,6 +7,7 @@ import {
   Search, Loader2, ExternalLink, Trash2, Plus, X, Zap,
   Rss, Link2, FolderOpen,
 } from "lucide-react"
+import ExtractionProgressBar from "@/components/ExtractionProgressBar"
 
 interface SourceItem {
   id: string
@@ -77,6 +78,7 @@ export default function FeedPage() {
 
   const [convertUrl, setConvertUrl] = useState("")
   const [isExtracting, setIsExtracting] = useState(false)
+  const [extractionPhase, setExtractionPhase] = useState("Estrazione contenuto...")
   const [extractionError, setExtractionError] = useState("")
   const [showCreateFolder, setShowCreateFolder] = useState(false)
   const [newFolderName, setNewFolderName] = useState("")
@@ -116,6 +118,7 @@ export default function FeedPage() {
   const handleExtract = async () => {
     if (!convertUrl.trim()) return
     setIsExtracting(true)
+    setExtractionPhase("Estrazione contenuto...")
     setExtractionError("")
     try {
       const res = await fetch("/api/extract", {
@@ -125,6 +128,7 @@ export default function FeedPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Errore estrazione")
+      setExtractionPhase("Salvataggio fonte...")
       const targetBucket = buckets.length > 0 ? buckets[0] : null
       if (targetBucket) {
         await fetch(`/api/buckets/${targetBucket.id}/sources`, {
@@ -140,8 +144,8 @@ export default function FeedPage() {
         if (bucketsRes.ok) setBuckets(await bucketsRes.json())
       }
       setConvertUrl("")
-    } catch (e: unknown) {
-      setExtractionError(e instanceof Error ? e.message : "Errore durante l'estrazione")
+    } catch (e: any) {
+      setExtractionError(e.message || "Errore durante l'estrazione")
     } finally {
       setIsExtracting(false)
     }
@@ -222,6 +226,7 @@ export default function FeedPage() {
                 Estrai
               </button>
             </div>
+            {isExtracting && <ExtractionProgressBar phase={extractionPhase} />}
             {extractionError && (
               <p className="text-xs text-cyan mt-2">{extractionError}</p>
             )}

@@ -58,7 +58,7 @@ bucketSelect?.addEventListener("change", async () => {
 // ─── Server URL ──────────────────────────────────────────────────────────────
 async function getServerUrl() {
   const result = await chrome.storage.local.get([SERVER_URL_KEY]);
-  return result[SERVER_URL_KEY] || "http://localhost:3000";
+  return result[SERVER_URL_KEY] || "https://reskill-skill.vercel.app";
 }
 
 // ─── Gestione UI Steps (auth) ────────────────────────────────────────────────
@@ -481,39 +481,6 @@ function showEmptyFeed(list, status) {
   }
 }
 
-// ─── Export settings: percorso + cartella (condivise con il web) ─────────────
-const EXPORT_PATH_KEY = "sg_export_path";
-const EXPORT_FOLDER_KEY = "sg_export_folder";
-const DEFAULT_EXPORT_PATH = "reskill";
-const DEFAULT_EXPORT_FOLDER = "youtube-skills";
-
-function sanitizePathSegment(s, fallback) {
-  const cleaned = String(s || "")
-    .trim()
-    .replace(/\\/g, "/")
-    .replace(/\.\./g, "")
-    .replace(/\/+/g, "/")
-    .replace(/^\/+|\/+$/g, "");
-  return cleaned || fallback;
-}
-
-async function getExportSettings() {
-  try {
-    const r = await chrome.storage.local.get([EXPORT_PATH_KEY, EXPORT_FOLDER_KEY]);
-    return {
-      exportPath: sanitizePathSegment(r[EXPORT_PATH_KEY] || DEFAULT_EXPORT_PATH, DEFAULT_EXPORT_PATH),
-      exportFolder: sanitizePathSegment(r[EXPORT_FOLDER_KEY] || DEFAULT_EXPORT_FOLDER, DEFAULT_EXPORT_FOLDER),
-    };
-  } catch {
-    return { exportPath: DEFAULT_EXPORT_PATH, exportFolder: DEFAULT_EXPORT_FOLDER };
-  }
-}
-
-function buildExportFilename(baseName, settings) {
-  const base = String(baseName || "export").replace(/[^a-zA-Z0-9_\-\s]/g, "").trim().substring(0, 60) || "export";
-  return `${settings.exportPath}/${settings.exportFolder}/${base}.md`;
-}
-
 async function downloadSource(sourceId, title) {
   try {
     const server = await getServerUrl();
@@ -526,13 +493,13 @@ async function downloadSource(sourceId, title) {
     if (!source) return;
 
     const content = source.skillMarkdown || source.content || "";
-    const settings = await getExportSettings();
+    const safeName = title.replace(/[^a-zA-Z0-9_\-\s]/g, "").substring(0, 50) || "risorsa";
     const blob = new Blob([content], { type: "text/markdown;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 
     await chrome.downloads.download({
       url: url,
-      filename: buildExportFilename(title, settings),
+      filename: `${safeName}.md`,
       saveAs: true,
     });
 
@@ -547,21 +514,18 @@ const convertUrlInput = document.getElementById("convert-url-input");
 const convertExtractBtn = document.getElementById("convert-extract-btn");
 const convertOutput = document.getElementById("convert-output");
 const convertSpinner = document.getElementById("convert-spinner");
+const convertProgress = document.getElementById("convert-progress");
+const convertProgressLabel = document.getElementById("convert-progress-label");
+
+function setConvertProgress(on, label) {
+  if (convertProgress) convertProgress.classList.toggle("active", !!on);
+  if (on && convertProgressLabel && label) convertProgressLabel.textContent = label;
+}
 const convertActions = document.getElementById("convert-actions");
 const convertError = document.getElementById("convert-error");
 const convertStatus = document.getElementById("convert-status");
 
 let lastExtractedMarkdown = "";
-let lastExtractedFilename = "estrazione.md";
-
-function isYouTubeUrl(u) {
-  try {
-    const host = new URL(u).hostname;
-    return /youtube\.com|youtu\.be/i.test(host);
-  } catch {
-    return /youtube\.com|youtu\.be/i.test(u);
-  }
-}
 
 convertExtractBtn?.addEventListener("click", async () => {
   const url = convertUrlInput?.value?.trim();
@@ -578,49 +542,31 @@ convertExtractBtn?.addEventListener("click", async () => {
   if (convertOutput) convertOutput.classList.remove("visible");
   if (convertActions) convertActions.style.display = "none";
   if (convertSpinner) convertSpinner.classList.add("active");
+  setConvertProgress(true, "Estrazione contenuto...");
   if (convertExtractBtn) convertExtractBtn.disabled = true;
 
   try {
     const server = await getServerUrl();
-    const headers = { "Content-Type": "application/json" };
-    if (currentToken) headers["x-extension-token"] = currentToken;
-
-    // YouTube (video / playlist / canale) → endpoint dedicato;
-    // qualsiasi altro URL → /api/extract classico.
-    let res;
-    if (isYouTubeUrl(url)) {
-      const maxInput = document.getElementById("convert-max-videos");
-      const maxVideos = Math.min(Math.max(parseInt(maxInput?.value || "20", 10) || 20, 1), 100);
-      res = await fetch(`${server}/api/youtube-to-markdown`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ url, maxVideos }),
-      });
-    } else {
-      res = await fetch(`${server}/api/extract`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ url }),
-      });
-    }
+    const res = await fetch(`${server}/api/extract`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(currentToken ? { "x-extension-token": currentToken } : {}),
+      },
+      body: JSON.stringify({ url }),
+    });
 
     const data = await res.json();
 
-    if (res.ok && (data.success || data.markdown)) {
-      lastExtractedMarkdown = data.markdown || data.content || "";
-      lastExtractedFilename = data.filename || data.title || "estrazione";
-      if (!/\.md$/i.test(lastExtractedFilename)) lastExtractedFilename += ".md";
+    if (res.ok && data.success) {
+      lastExtractedMarkdown = data.content || "";
       if (convertOutput) {
-        const preview = lastExtractedMarkdown.slice(0, 4000);
-        convertOutput.textContent =
-          lastExtractedMarkdown.length > 4000 ? preview + "\n\n…(anteprima troncata)" : lastExtractedMarkdown;
+        convertOutput.textContent = lastExtractedMarkdown;
         convertOutput.classList.add("visible");
       }
       if (convertActions) convertActions.style.display = "flex";
       if (convertStatus) {
-        const extra = data.videoCount ? ` · ${data.videoCount} video` : "";
-        const kind = data.kind ? ` (${data.kind})` : "";
-        convertStatus.textContent = `✓ Estratto con successo${kind}${extra}`;
+        convertStatus.textContent = "✓ Estratto con successo";
         convertStatus.className = "status-text success";
       }
     } else {
@@ -637,6 +583,7 @@ convertExtractBtn?.addEventListener("click", async () => {
   }
 
   if (convertSpinner) convertSpinner.classList.remove("active");
+  setConvertProgress(false);
   if (convertExtractBtn) convertExtractBtn.disabled = false;
 });
 
@@ -662,11 +609,9 @@ document.getElementById("convert-download-btn")?.addEventListener("click", async
   const blob = new Blob([lastExtractedMarkdown], { type: "text/markdown;charset=utf-8" });
   const url = URL.createObjectURL(blob);
   try {
-    const settings = await getExportSettings();
-    const base = lastExtractedFilename.replace(/\.md$/i, "");
     await chrome.downloads.download({
       url: url,
-      filename: buildExportFilename(base, settings),
+      filename: "estrazione.md",
       saveAs: true,
     });
   } catch {
@@ -674,35 +619,6 @@ document.getElementById("convert-download-btn")?.addEventListener("click", async
   }
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 });
-
-// ─── Export settings: save/load (percorso + cartella) ────────────────────────
-async function loadExportSettingsUI() {
-  const s = await getExportSettings();
-  const p = document.getElementById("export-path-input");
-  const f = document.getElementById("export-folder-input");
-  if (p) p.value = s.exportPath;
-  if (f) f.value = s.exportFolder;
-}
-
-document.getElementById("export-settings-save-btn")?.addEventListener("click", async () => {
-  const p = document.getElementById("export-path-input")?.value || DEFAULT_EXPORT_PATH;
-  const f = document.getElementById("export-folder-input")?.value || DEFAULT_EXPORT_FOLDER;
-  const settings = {
-    [EXPORT_PATH_KEY]: sanitizePathSegment(p, DEFAULT_EXPORT_PATH),
-    [EXPORT_FOLDER_KEY]: sanitizePathSegment(f, DEFAULT_EXPORT_FOLDER),
-  };
-  await chrome.storage.local.set(settings);
-  const status = document.getElementById("export-settings-status");
-  if (status) {
-    status.textContent = "✓ Percorso export salvato";
-    status.className = "status-text success";
-    setTimeout(() => { status.textContent = ""; }, 2000);
-  }
-  loadExportSettingsUI();
-});
-
-// Carica le impostazioni export all'avvio
-loadExportSettingsUI();
 
 // ─── Usage: carica statistiche ───────────────────────────────────────────────
 const typeIcons = {
@@ -733,10 +649,10 @@ async function loadUsage() {
     if (planDesc) {
       const planLabels = {
         free: "Piano gratuito · Aggiorna per più funzionalità",
-        starter: "Piano Starter",
-        pro: "Piano Pro · Accesso illimitato",
-        business: "Piano Business",
-        enterprise: "Piano Enterprise",
+        starter: "Piano Starter · 5 bucket, 30 fonti",
+        pro: "Piano Pro · 15 bucket, 100 fonti",
+        business: "Piano Business · 50 bucket, 500 fonti",
+        enterprise: "Piano Enterprise · Risorse illimitate",
       };
       planDesc.textContent = planLabels[stats.currentPlan] || "Piano attivo";
     }
@@ -754,7 +670,7 @@ async function loadUsage() {
 
     // Credit bar
     const used = stats.totalCreditsUsed || 0;
-    const total = stats.planCredits || 100;
+    const total = stats.planCredits || 10;
     const remaining = stats.creditsRemaining || 0;
 
     // Update account dropdown credits
@@ -775,15 +691,6 @@ async function loadUsage() {
       fill.style.width = pct + "%";
       fill.className = "credit-bar-fill" + (pct > 80 ? " low" : pct > 50 ? " medium" : " high");
     }
-
-    // Credit breakdown by type
-    const breakdown = document.getElementById("credit-breakdown");
-    if (breakdown && stats.creditsByType) {
-      breakdown.innerHTML = Object.entries(stats.creditsByType)
-        .map(([type, count]) => `<span class="credit-breakdown-item">${typeIcons[type]?.[0] || "WEB"} ${type}: <strong>${count}</strong></span>`)
-        .join("");
-    }
-
   } catch {
     // silent
   }
@@ -796,11 +703,7 @@ document.getElementById("usage-upgrade-btn")?.addEventListener("click", () => {
 // ─── Auto-Recharge ───────────────────────────────────────────────────────────
 document.getElementById("recharge-buy-btn")?.addEventListener("click", async () => {
   const select = document.getElementById("recharge-plan-select");
-  const rawValue = select?.value || "pro";
-  // Supporta valori "pro-annual" / "business-annual" → billing annuale.
-  const isAnnual = rawValue.endsWith("-annual");
-  const planId = isAnnual ? rawValue.replace(/-annual$/, "") : rawValue;
-  const billing = isAnnual ? "annual" : "monthly";
+  const planId = select?.value || "pro";
   const server = await getServerUrl();
 
   try {
@@ -810,7 +713,7 @@ document.getElementById("recharge-buy-btn")?.addEventListener("click", async () 
         "Content-Type": "application/json",
         "x-extension-token": currentToken,
       },
-      body: JSON.stringify({ planId, billing }),
+      body: JSON.stringify({ planId }),
     });
 
     const data = await res.json();
@@ -1142,7 +1045,7 @@ const tourSteps = [
   {
     selector: '.nav-btn[data-section="usage"]',
     title: "Usage",
-    desc: "Monitora il consumo dei tuoi crediti. Ogni risorsa salvata consuma crediti in base al tipo (YouTube: 10, Web: 3, PDF: 8). Puoi vedere la cronologia delle risorse e ricaricare i crediti scegliendo un piano.",
+    desc: "Monitora il consumo dei tuoi crediti. Ogni risorsa salvata consuma crediti in base al tipo (YouTube: 10, PDF: 8, X/Twitter: 5, Reddit: 5, Web: 3). Puoi vedere la cronologia delle risorse e ricaricare i crediti scegliendo un piano.",
   },
   {
     selector: '.nav-btn[data-section="connections"]',
@@ -1344,7 +1247,7 @@ function updateAccountDropdown(email, name, plan, creditsUsed, planCredits) {
   if (avatarEl) avatarEl.textContent = display.charAt(0).toUpperCase();
   if (nameEl) nameEl.textContent = display;
   if (planEl) planEl.textContent = (plan || "free").toUpperCase();
-  if (creditsEl) creditsEl.textContent = `${creditsUsed || 0} / ${planCredits || 100}`;
+  if (creditsEl) creditsEl.textContent = `${creditsUsed || 0} / ${planCredits || 10}`;
 }
 
 // ─── Apri Dashboard ──────────────────────────────────────────────────────────
@@ -1421,7 +1324,7 @@ document.getElementById("save-url-btn")?.addEventListener("click", async () => {
   try {
     new URL(url);
   } catch {
-    setStatus("URL non valido. Es: https://reskill.app", 3000);
+    setStatus("URL non valido. Es: https://reskill-skill.vercel.app", 3000);
     return;
   }
   await chrome.storage.local.set({ [SERVER_URL_KEY]: url });

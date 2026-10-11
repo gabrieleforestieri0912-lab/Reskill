@@ -36,10 +36,6 @@ export default function AccountPage() {
   const [autoRecharge, setAutoRecharge] = useState(false)
   const [rechargeSaved, setRechargeSaved] = useState(false)
 
-  const [exportPath, setExportPath] = useState("reskill")
-  const [exportFolder, setExportFolder] = useState("youtube-skills")
-  const [exportSaved, setExportSaved] = useState(false)
-
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -53,34 +49,17 @@ export default function AccountPage() {
     }
     fetchStats()
 
-    // Letture localStorage differite: evitano setState sincroni nell'effect
-    // (cascading renders) e girano solo sul client, senza mismatch di hydration.
-    const t = setTimeout(() => {
-      const savedRecharge = localStorage.getItem("sg_auto_recharge")
-      if (savedRecharge) {
-        try {
-          const cfg = JSON.parse(savedRecharge)
-          setAutoRecharge(cfg.enabled || false)
-        } catch {}
-      }
-
+    const savedRecharge = localStorage.getItem("sg_auto_recharge")
+    if (savedRecharge) {
       try {
-        const raw = localStorage.getItem("reskill_export_settings")
-        if (raw) {
-          const cfg = JSON.parse(raw)
-          if (cfg.exportPath) setExportPath(String(cfg.exportPath))
-          if (cfg.exportFolder) setExportFolder(String(cfg.exportFolder))
-        }
+        const cfg = JSON.parse(savedRecharge)
+        setAutoRecharge(cfg.enabled || false)
       } catch {}
-    }, 0)
-    return () => clearTimeout(t)
+    }
   }, [])
 
   useEffect(() => {
-    if (!session?.user?.name) return
-    const name = session.user.name
-    const t = setTimeout(() => setNameValue(name), 0)
-    return () => clearTimeout(t)
+    if (session?.user?.name) setNameValue(session.user.name)
   }, [session])
 
   const handleSaveName = async () => {
@@ -120,9 +99,11 @@ export default function AccountPage() {
     creditsPct > 80 ? "bg-red-500" : creditsPct > 50 ? "bg-yellow-500" : "bg-cyan"
 
   const allPlans = [
-    { id: "free", name: "Free", price: "0", credits: 10, features: ["1 bucket", "3 fonti", "Export Markdown singolo", "Community support"] },
-    { id: "pro", name: "Pro", price: "4.99", credits: 500, features: ["15 bucket", "100 fonti", "Export YouTube playlist e canali", "MCP Server", "Supporto prioritario"] },
-    { id: "business", name: "Business", price: "9.99", credits: 1500, features: ["50 bucket", "500 fonti", "1.500 crediti/mese", "API + team condiviso", "Supporto dedicato con SLA"] },
+    { id: "free", name: "Free", price: "0", credits: 10, features: ["1 bucket", "3 fonti", "Community support"] },
+    { id: "starter", name: "Starter", price: "7,99", credits: 250, features: ["5 bucket", "30 fonti", "250 crediti/mese"] },
+    { id: "pro", name: "Pro", price: "12", credits: 500, features: ["15 bucket", "100 fonti", "Supporto prioritario"] },
+    { id: "business", name: "Business", price: "29", credits: 1500, features: ["50 bucket", "500 fonti", "1.500 crediti/mese", "MCP Server"] },
+    { id: "enterprise", name: "Enterprise", price: "59", credits: 5000, features: ["Bucket illimitati", "Fonti illimitate", "Assistenza dedicata"] },
   ] as const
 
   const currentPlanData =
@@ -363,64 +344,6 @@ export default function AccountPage() {
             >
               {a.plans_view_details}
               <ArrowUpRight size={12} />
-            </button>
-          </section>
-
-          {/* Export Markdown: percorso + cartella personalizzabili */}
-          <section className="bg-white/2 border border-white/8 hover:border-cyan/15 transition-colors p-5 md:p-6">
-            <h2 className="text-sm font-bold mb-4 flex items-center gap-2">
-              <span className="w-7 h-7 bg-dark/80 border border-cyan/20 flex items-center justify-center text-cyan">
-                <FolderOpen size={14} />
-              </span>
-              Export Markdown
-            </h2>
-            <p className="text-xs text-gray leading-relaxed mb-4">
-              Scegli dove salvare i file Markdown generati da video, playlist e canali
-              YouTube. Il download userà <span className="text-white font-mono">percorso/cartella/nome.md</span>.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-gray block mb-1.5">
-                  Percorso di salvataggio
-                </label>
-                <input
-                  type="text"
-                  value={exportPath}
-                  onChange={(e) => setExportPath(e.target.value)}
-                  placeholder="reskill"
-                  className="w-full bg-dark/60 border border-white/10 px-3 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-cyan/50"
-                />
-              </div>
-              <div>
-                <label className="text-[11px] font-bold uppercase tracking-wider text-gray block mb-1.5">
-                  Nome cartella
-                </label>
-                <input
-                  type="text"
-                  value={exportFolder}
-                  onChange={(e) => setExportFolder(e.target.value)}
-                  placeholder="youtube-skills"
-                  className="w-full bg-dark/60 border border-white/10 px-3 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-cyan/50"
-                />
-              </div>
-            </div>
-            <p className="text-[11px] text-gray mt-2 font-mono">
-              Anteprima: {exportPath.replace(/\/+$/,"") || "reskill"}/{exportFolder.replace(/^\/+|\/+$/g,"") || "youtube-skills"}/nome-video.md
-            </p>
-            <button
-              onClick={() => {
-                const clean = (s: string, fb: string) =>
-                  s.trim().replace(/\\/g, "/").replace(/\.\./g, "").replace(/\/+/g, "/").replace(/^\/+|\/+$/g, "") || fb
-                const next = { exportPath: clean(exportPath, "reskill"), exportFolder: clean(exportFolder, "youtube-skills") }
-                setExportPath(next.exportPath)
-                setExportFolder(next.exportFolder)
-                localStorage.setItem("reskill_export_settings", JSON.stringify(next))
-                setExportSaved(true)
-                setTimeout(() => setExportSaved(false), 2000)
-              }}
-              className="mt-4 px-4 py-2.5 border border-cyan/30 text-cyan text-xs font-bold transition-all hover:bg-cyan hover:text-black hover:border-cyan active:scale-95"
-            >
-              {exportSaved ? "Salvato ✓" : "Salva impostazioni export"}
             </button>
           </section>
 

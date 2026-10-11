@@ -37,4 +37,4 @@ Allow: /
 Allow: /llms.txt
 Allow: /llms-full.txt
 
-Sitemap: https://reskill.app/sitemap.xml
+Sitemap: https://reskill-skill.vercel.app/sitemap.xml
