@@ -75,7 +75,7 @@ const faqs = [
   },
   {
     question: "Come contatto il supporto?",
-    answer: "Puoi inviare feedback direttamente dall'app dalla pagina Feedback. Per supporto tecnico, scrivi a support@reskill.app. I piani Pro e Business includono supporto prioritario.",
+    answer: "Puoi inviare feedback direttamente dall'app dalla pagina Feedback. Per supporto tecnico, scrivi a gabriele.forestieri0912@gmail.com. I piani Pro e Business includono supporto prioritario.",
   },
 ];
 

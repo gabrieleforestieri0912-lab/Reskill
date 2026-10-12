@@ -39,6 +39,6 @@ Reskill extracts content from any web source, cleans it, and generates structure
 
 ## Contact
 
-- Email: support@reskill.app
+- Email: gabriele.forestieri0912@gmail.com
 - Twitter: https://twitter.com/reskill_app
 - GitHub: https://github.com/reskill

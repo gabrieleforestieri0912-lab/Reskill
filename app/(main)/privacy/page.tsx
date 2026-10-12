@@ -34,8 +34,8 @@ export default function PrivacyPage() {
  <p className="text-sm text-[oklch(60%_0.01_260)] leading-relaxed">
  {s.text}
  {(i === sections.length - 1) && (
- <a href="mailto:support@reskill.app" className="text-[oklch(72% 0.06 240)] hover:underline ml-1">
- support@reskill.app
+ <a href="mailto:gabriele.forestieri0912@gmail.com" className="text-[oklch(72% 0.06 240)] hover:underline ml-1">
+ gabriele.forestieri0912@gmail.com
  </a>
  )}
  </p>
