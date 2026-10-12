@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: [
-    "jsdom",
     "pdf-parse",
     "bcryptjs",
     "nodemailer",

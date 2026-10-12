@@ -15,7 +15,7 @@ const apiKey = process.env.RESKILL_API_KEY;
 const apiUrl = (
   argValue("--api-url") ||
   process.env.RESKILL_API_URL ||
-  "https://reskill.app"
+  "https://reskill-skill.vercel.app"
 ).replace(/\/+$/, "");
 
 const credential = token || apiKey;
