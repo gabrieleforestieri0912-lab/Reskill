@@ -38,12 +38,23 @@ REGOLE FONDAMENTALI:
 - Non superare i 2000 token di output`;
 
 const MODEL_MAP: Record<string, string> = {
+  "gpt-4o-mini": "mistralai/mistral-medium-3.5",
+  "gpt-4o": "mistralai/mistral-large-2512",
+  "gpt-4.1-nano": "mistralai/ministral-8b",
+  "gpt-4.1-mini": "mistralai/devstral-medium",
+  "gpt-4.1": "mistralai/codestral-2508",
+};
+
+const OPENAI_MODEL_MAP: Record<string, string> = {
   "gpt-4o-mini": "gpt-4o-mini",
   "gpt-4o": "gpt-4o",
   "gpt-4.1-nano": "gpt-4.1-nano",
   "gpt-4.1-mini": "gpt-4.1-mini",
   "gpt-4.1": "gpt-4.1",
 };
+
+const DEFAULT_XKIRO_MODEL = "mistralai/mistral-medium-3.5";
+const XKIRO_BASE_URL = process.env.XKIRO_BASE_URL || "https://api.xkiro.com/v1";
 
 export async function POST(req: Request) {
   try {
@@ -78,23 +89,30 @@ export async function POST(req: Request) {
 
     const { prompt, sourcesSummary, model: requestedModel } = await req.json();
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
+    const xkiroKey = process.env.XKIRO_API_KEY;
+    const openaiKey = process.env.OPENAI_API_KEY;
+    if (!xkiroKey && !openaiKey) {
       return new Response(
         JSON.stringify({
-          error: "Chiave API OpenAI non configurata. Contatta l'amministratore.",
+          error: "Chiave API del provider AI non configurata. Contatta l'amministratore.",
           upgrade: false,
         }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const modelName = MODEL_MAP[requestedModel] || "gpt-4o-mini";
+    const useXkiro = !!xkiroKey;
+    const modelName = useXkiro
+      ? MODEL_MAP[requestedModel] || DEFAULT_XKIRO_MODEL
+      : OPENAI_MODEL_MAP[requestedModel] || "gpt-4o-mini";
 
-    const openai = createOpenAI({ apiKey });
+    const provider = createOpenAI({
+      apiKey: (useXkiro ? xkiroKey : openaiKey) as string,
+      ...(useXkiro ? { baseURL: XKIRO_BASE_URL } : {}),
+    });
 
     const result = await streamText({
-      model: openai(modelName),
+      model: provider(modelName),
       messages: [
         {
           role: "system",

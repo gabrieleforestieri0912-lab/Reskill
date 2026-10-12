@@ -586,11 +586,11 @@ const handleDeleteBucket = async (bucketId: string) => {
  title="Modello AI per la generazione"
  >
  <option value="">Modello Auto</option>
- <option value="gpt-4o-mini">GPT-4o Mini</option>
- <option value="gpt-4o">GPT-4o</option>
- <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
- <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
- <option value="gpt-4.1">GPT-4.1</option>
+ <option value="gpt-4o-mini">Mistral Medium (consigliato)</option>
+ <option value="gpt-4o">Mistral Large</option>
+ <option value="gpt-4.1-nano">Ministral 8B (veloce)</option>
+ <option value="gpt-4.1-mini">Devstral Medium</option>
+ <option value="gpt-4.1">Codestral</option>
  </select>
  {activeBucket.sources.length > 0 && (
  <button
