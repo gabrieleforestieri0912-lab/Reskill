@@ -53,18 +53,19 @@ export async function POST(req: NextRequest) {
   const keyHash = hashCredential(rawKey);
   const keyPrefix = credentialPrefix(rawKey);
 
-  const { error } = await supabase.from("api_keys").insert({
+  const { data: inserted, error } = await supabase.from("api_keys").insert({
     user_email: email,
     key_hash: keyHash,
     key_prefix: keyPrefix,
     name: name || "default",
-  });
+  }).select("id").single();
 
-  if (error) {
+  if (error || !inserted) {
     return NextResponse.json({ error: "Errore nella generazione della chiave" }, { status: 500 });
   }
 
   return NextResponse.json({
+    id: inserted.id,
     key: rawKey,
     keyPrefix,
     message: "Chiave API generata. Copiala ora — non sarà più mostrata.",
