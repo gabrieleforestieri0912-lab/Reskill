@@ -2,7 +2,7 @@ export const runtime = 'nodejs';
 import { getUserEmailOrNull } from "@/lib/auth-helper";
 import { enforceSourceLimit } from "@/lib/plan-enforcer";
 import { CREDITS_PER_TYPE } from "@/lib/plan-guards";
-import { deductCredits } from "@/models/UserSubscription";
+import { deductCredits, refundCredits } from "@/models/UserSubscription";
 import { getBucketById, updateBucket } from "@/models/Bucket";
 import { createSource, sourceToJSON } from "@/models/Source";
 import { NextResponse } from "next/server";
@@ -45,6 +45,12 @@ export async function POST(
       skill_markdown: skillMarkdown,
       bucket_id: bucketId,
     });
+
+    if (!source) {
+      // Il salvataggio è fallito: rimborsa i crediti detratti
+      await refundCredits(userEmail, creditsCost);
+      return NextResponse.json({ error: "Salvataggio fonte fallito" }, { status: 500 });
+    }
 
     await updateBucket(bucketId, { updated_at: new Date().toISOString() });
 

@@ -27,9 +27,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ verified: false });
     }
 
+    // Utenti OTP senza account web: token valido, profilo base
     const user = await getUserByEmail(email);
     if (!user) {
-      return NextResponse.json({ verified: false });
+      return NextResponse.json({
+        verified: true,
+        email,
+        name: "",
+        plan: "free",
+      });
     }
 
     let plan = "free";

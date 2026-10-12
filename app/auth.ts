@@ -66,10 +66,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (account?.provider === "google" && user.email) {
         const existing = await getUserByEmail(user.email)
         if (!existing) {
-          await createUserFromOAuth({
+          const created = await createUserFromOAuth({
             email: user.email,
             name: user.name || "",
           })
+          if (!created) return false
         }
       }
       return true

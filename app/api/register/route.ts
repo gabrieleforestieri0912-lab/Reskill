@@ -41,11 +41,15 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    await createUser({
+    const newUser = await createUser({
       email: email.toLowerCase(),
       password: hashedPassword,
       name: (typeof name === "string" ? name : "").slice(0, 100),
     });
+
+    if (!newUser) {
+      return NextResponse.json({ error: "Registrazione fallita. Riprova più tardi." }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
