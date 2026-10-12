@@ -1,5 +1,5 @@
 import { getUserByEmail } from "@/models/User";
-import { getSubscriptionByUserId, resetCreditsIfNeeded } from "@/models/UserSubscription";
+import { getSubscriptionByUserId, resetCreditsIfNeeded, ensureFreeSubscription } from "@/models/UserSubscription";
 import { getPlanById } from "@/lib/plans";
 
 export const CREDITS_PER_TYPE: Record<string, number> = {
@@ -44,7 +44,7 @@ export async function checkGenerationAllowed(userEmail: string | null): Promise<
     // Resetta crediti se il periodo è scaduto
     await resetCreditsIfNeeded(userEmail);
 
-    const sub = await getSubscriptionByUserId(user.id);
+    const sub = (await ensureFreeSubscription(user.id)) || await getSubscriptionByUserId(user.id);
     const planId = sub?.plan || "free";
     const plan = getPlanById(planId);
 
@@ -98,7 +98,7 @@ export async function getCreditStatus(userEmail: string | null): Promise<PlanGua
 
     await resetCreditsIfNeeded(userEmail);
 
-    const sub = await getSubscriptionByUserId(user.id);
+    const sub = (await ensureFreeSubscription(user.id)) || await getSubscriptionByUserId(user.id);
     const planId = sub?.plan || "free";
     const plan = getPlanById(planId);
 

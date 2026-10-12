@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase";
+import { getUserByEmail } from "@/models/User";
 import { getPlanById } from "@/lib/plans";
 
 export interface IUserSubscription {
@@ -57,6 +58,34 @@ export async function upsertSubscription(
   return sub as IUserSubscription | null;
 }
 
+/**
+ * Crea la riga subscription (piano free) se manca.
+ * Senza riga, crediti non verrebbero mai tracciati (uso illimitato).
+ */
+export async function ensureFreeSubscription(userId: string) {
+  const existing = await getSubscriptionByUserId(userId);
+  if (existing) return existing;
+
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  return upsertSubscription(
+    {
+      user_id: userId,
+      plan: "free",
+      status: "active",
+      credits_used: 0,
+      credits_period_start: `${currentMonth}-01T00:00:00Z`,
+      stripe_customer_id: null,
+      stripe_subscription_id: null,
+      stripe_price_id: null,
+      stripe_current_period_end: null,
+      cancel_at_period_end: false,
+      updated_at: now.toISOString(),
+    },
+    "user_id"
+  );
+}
+
 export async function updateSubscription(
   matchField: string,
   matchValue: string,
@@ -76,8 +105,13 @@ export async function updateSubscription(
  * Se il periodo mensile è scaduto, resetta i crediti prima di incrementare.
  */
 export async function deductCredits(userEmail: string, amount: number): Promise<{ success: boolean; creditsUsed: number; creditsRemaining: number }> {
-  const sub = await getSubscriptionByEmail(userEmail);
-  if (!sub) return { success: true, creditsUsed: amount, creditsRemaining: 999 };
+  let sub = await getSubscriptionByEmail(userEmail);
+  if (!sub) {
+    const user = await getUserByEmail(userEmail);
+    if (!user) return { success: true, creditsUsed: amount, creditsRemaining: 999 };
+    sub = await ensureFreeSubscription(user.id);
+    if (!sub) return { success: true, creditsUsed: amount, creditsRemaining: 999 };
+  }
 
   const now = new Date();
   const periodStart = sub.credits_period_start ? new Date(sub.credits_period_start) : null;

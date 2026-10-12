@@ -2,6 +2,7 @@ export const runtime = 'nodejs';
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { getUserByEmail, createUser } from "@/models/User";
+import { ensureFreeSubscription } from "@/models/UserSubscription";
 import { checkRateLimit } from "@/lib/rate-limit";
 
 function validatePassword(password: string): string | null {
@@ -50,6 +51,8 @@ export async function POST(req: Request) {
     if (!newUser) {
       return NextResponse.json({ error: "Registrazione fallita. Riprova più tardi." }, { status: 500 });
     }
+
+    await ensureFreeSubscription(newUser.id);
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

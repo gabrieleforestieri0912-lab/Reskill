@@ -69,11 +69,12 @@ export async function createSource(data: {
   skill_markdown: string;
   bucket_id: string;
 }) {
-  const { data: source } = await supabase
+  const { data: source, error } = await supabase
     .from("sources")
     .insert(data)
     .select()
     .single();
+  if (error) throw new Error(`Insert sources fallito: ${error.message}`);
   return source as ISource | null;
 }
 

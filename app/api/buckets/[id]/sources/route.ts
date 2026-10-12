@@ -35,16 +35,23 @@ export async function POST(
 
     const creditResult = await deductCredits(userEmail, creditsCost);
 
-    const source = await createSource({
-      type,
-      title,
-      url,
-      domain,
-      date: date || new Date().toISOString().split("T")[0],
-      content,
-      skill_markdown: skillMarkdown,
-      bucket_id: bucketId,
-    });
+    let source;
+    try {
+      source = await createSource({
+        type,
+        title,
+        url,
+        domain,
+        date: date || new Date().toISOString().split("T")[0],
+        content,
+        skill_markdown: skillMarkdown || "",
+        bucket_id: bucketId,
+      });
+    } catch (e) {
+      // Il salvataggio è fallito: rimborsa i crediti detratti
+      await refundCredits(userEmail, creditsCost);
+      throw e;
+    }
 
     if (!source) {
       // Il salvataggio è fallito: rimborsa i crediti detratti

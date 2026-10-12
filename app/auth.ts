@@ -3,6 +3,7 @@ import Google from "next-auth/providers/google"
 import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { getUserByEmail, createUserFromOAuth } from "@/models/User"
+import { ensureFreeSubscription } from "@/models/UserSubscription"
 import type { DefaultSession } from "next-auth"
 
 // Aggiunge `id` ai tipi Session.user e User di NextAuth.
@@ -71,6 +72,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             name: user.name || "",
           })
           if (!created) return false
+          await ensureFreeSubscription(created.id)
         }
       }
       return true

@@ -33,6 +33,10 @@ export async function POST(req: Request) {
 
     const { name, description } = await req.json();
 
+    if (!name || typeof name !== "string" || !name.trim()) {
+      return NextResponse.json({ error: "Nome bucket obbligatorio" }, { status: 400 });
+    }
+
     const bucket = await createBucket({
       name,
       description: description || "Nessuna descrizione fornita.",

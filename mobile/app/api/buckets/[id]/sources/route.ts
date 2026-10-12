@@ -2,7 +2,7 @@ export const runtime = 'nodejs';
 import { getUserEmailOrNull } from "@/lib/auth-helper";
 import { enforceSourceLimit } from "@/lib/plan-enforcer";
 import { CREDITS_PER_TYPE } from "@/lib/plan-guards";
-import { deductCredits } from "@/models/UserSubscription";
+import { deductCredits, refundCredits } from "@/models/UserSubscription";
 import { getBucketById, updateBucket } from "@/models/Bucket";
 import { createSource, sourceToJSON } from "@/models/Source";
 import { NextResponse } from "next/server";
@@ -35,16 +35,27 @@ export async function POST(
 
     const creditResult = await deductCredits(userEmail, creditsCost);
 
-    const source = await createSource({
-      type,
-      title,
-      url,
-      domain,
-      date: date || new Date().toISOString().split("T")[0],
-      content,
-      skill_markdown: skillMarkdown,
-      bucket_id: bucketId,
-    });
+    let source;
+    try {
+      source = await createSource({
+        type,
+        title,
+        url,
+        domain,
+        date: date || new Date().toISOString().split("T")[0],
+        content,
+        skill_markdown: skillMarkdown || "",
+        bucket_id: bucketId,
+      });
+    } catch (e) {
+      await refundCredits(userEmail, creditsCost);
+      throw e;
+    }
+
+    if (!source) {
+      await refundCredits(userEmail, creditsCost);
+      return NextResponse.json({ error: "Salvataggio fonte fallito" }, { status: 500 });
+    }
 
     await updateBucket(bucketId, { updated_at: new Date().toISOString() });
 

@@ -29,7 +29,12 @@ export async function GET(req: Request) {
 
     const user = await getUserByEmail(email);
     if (!user) {
-      return NextResponse.json({ verified: false });
+      return NextResponse.json({
+        verified: true,
+        email,
+        name: "",
+        plan: "free",
+      });
     }
 
     let plan = "free";

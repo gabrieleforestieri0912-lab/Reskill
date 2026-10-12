@@ -38,12 +38,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Tipo non valido" }, { status: 400 });
     }
 
-    await createFeedback({
+    const saved = await createFeedback({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       type: type || "other",
       message: message.trim(),
     });
+
+    if (!saved) {
+      return NextResponse.json({ error: "Salvataggio feedback fallito. Riprova più tardi." }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true });
   } catch {
